@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raktári kereső - Admin</title>
-<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="common.css?v=3">
 <style>
 .shell{display:grid;grid-template-columns:248px 1fr;min-height:100dvh}
 aside{background:var(--side);color:var(--side-ink);padding:var(--s4) var(--s3);position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;gap:2px;overflow:auto}
@@ -125,8 +125,8 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/cfb@1.2.2/dist/cfb.min.js" integrity="sha384-peTByNpmIz2Wq5hOZJ3dZmZP4MJ6ZXwF9dZ3R8kW7/C6bMWdHEME3on5mt9DH7d5" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
-<script src="common.js"></script>
-<script src="import.js"></script>
+<script src="common.js?v=3"></script>
+<script src="import.js?v=3"></script>
 <script>
 const SECS = [['overview', 'Áttekintés', 'chart', 'Élő kép a munkáról'], ['import', 'Importálás', 'up', 'Goodslist fájlok feltöltése'], ['cartons', 'Dobozok', 'box', 'Minden doboz állapota'],
   ['skus', 'SKU-k', 'search', 'Termékek és dobozaik'], ['diffs', 'Eltérések', 'alert', 'Ismeretlen, felesleg, hiány'], ['log', 'Napló', 'list', 'Minden szkennelés'],
@@ -247,7 +247,7 @@ function renderNav() {
   const cnt = {cartons: o.open + o.done, diffs: warn};
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><div><b>Raktári kereső</b><span>Admin felület</span></div></div>` +
     SECS.map(([k, n, i]) => `${k === 'cartons' || k === 'labels' ? '' : ''}<a href="#${k}" ${sec === k ? 'aria-current="page"' : ''}>${ic(i)}${n}${cnt[k] ? `<span class="cnt ${k === 'diffs' ? 'hot' : ''}">${cnt[k]}</span>` : ''}</a>${k === 'import' || k === 'diffs' ? '<div class="sep"></div>' : ''}`).join('') +
-    `<div class="foot">A PDA-k a főoldalról érhetők el.</div>`;
+    `<div class="foot">A PDA-k a főoldalról érhetők el.<br>Verzió: v3</div>`;
   const s = SECS.find(x => x[0] === sec);
   $('#ttl').textContent = s[1]; $('#sub').textContent = s[3];
   $('#sync').className = 'sync' + (D.online ? '' : ' off');

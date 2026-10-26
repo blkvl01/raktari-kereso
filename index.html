@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2342d6">
 <title>Raktári kereső</title>
-<link rel="stylesheet" href="common.css">
+<link rel="stylesheet" href="common.css?v=3">
 <style>
 body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
 .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
@@ -111,7 +111,7 @@ nav.tabs button:not([aria-selected=true]):hover{background:var(--accent-soft)}
 <dialog id="dlg"></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="common.js"></script>
+<script src="common.js?v=3"></script>
 <script>
 let view = ls.get('rk_view') === 'cartons' ? 'cartons' : 'scan';
 let device = ls.get('rk_device') || '';
@@ -348,7 +348,7 @@ function updateScan() {
   }
   $('#res').innerHTML = resultHtml();
   $('#st').innerHTML = kpisHtml();
-  $('#hs').innerHTML = histHtml();
+  $('#hs').innerHTML = histHtml() + '<div class="meta" style="text-align:center;margin:var(--s4) 0">Verzió: v3</div>';
   $('#scan').disabled = !D.lines.length;
 }
 function onResClick(e) {
