@@ -29,7 +29,16 @@ const ICON = {
   print: '<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
   users: '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-5-6.7"/>',
-  dl: '<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>'
+  dl: '<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>',
+  up: '<path d="M12 15V3M7 8l5-5 5 5M4 21h16"/>',
+  file: '<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8zM14 3v5h5M9 13h6M9 17h6"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  refresh: '<path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/>',
+  trash: '<path d="M3 6h18M8 6V4h8v2M6 6l1 15h10l1-15M10 11v6M14 11v6"/>',
+  layers: '<path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17.5l9 5 9-5"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>',
+  bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  moon: '<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>'
 };
 const ic = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
 const short = c => c.slice(-6);
@@ -109,7 +118,15 @@ function cartonProg(c) {
   const done = ls_.filter(isLineDone).length;
   return {n: ls_.length, done, qty: ls_.reduce((a, l) => a + l.qty, 0), qtyDone: ls_.filter(isLineDone).reduce((a, l) => a + l.qty, 0), ratio: ls_.length ? done / ls_.length : 0};
 }
-function awbTag(l) { const a = D.awbs.get(l.awb); return `<span class="tag">${esc((a && a.mark) || '')} ${esc(l.awb.slice(-4))}</span>`; }
+function awbTag(l) { return `<span class="tag mono" title="AWB">${esc(l.awb)}</span>`; }
+// kor alaku haladasjelzo (0..1)
+function ring(ratio, size, label) {
+  const w = 6, r = (size - w) / 2, c = 2 * Math.PI * r, done = ratio >= 1;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(label || Math.round(ratio * 100) + '% kész')}" style="flex:none">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/>
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${done ? 'var(--ok-strong)' : 'var(--accent)'}" stroke-width="${w}" stroke-linecap="round"
+      stroke-dasharray="${c * Math.min(1, ratio)} ${c}" transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>`;
+}
 
 // ---------- szkennelt kod ertelmezese ----------
 function classify(raw) {
