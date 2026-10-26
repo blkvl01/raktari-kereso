@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="hu">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1d4ed8">
+<title>Raktári kereső</title>
+<link rel="stylesheet" href="common.css">
+<style>
+body{padding-bottom:calc(64px + env(safe-area-inset-bottom));--t-big:44px}
+header{position:sticky;top:0;z-index:10;background:var(--surface);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;padding:var(--s2) var(--s4);padding-top:calc(var(--s2) + env(safe-area-inset-top))}
+header h1{font-size:16px;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+header{flex-wrap:nowrap;gap:6px;padding:6px var(--s3);padding-top:calc(6px + env(safe-area-inset-top))}
+header .chip{min-height:34px;padding:0 10px}
+@media (max-width:480px){header h1{display:none}header .sync{margin-right:auto}}
+main{max-width:720px;margin:0 auto;padding:var(--s3)}
+.scanbox{display:flex;gap:var(--s2);align-items:stretch}
+.scanbox input{flex:1;min-width:0;font-size:22px;padding:var(--s3) var(--s4);border:2px solid var(--accent);border-radius:var(--r);background:var(--surface);letter-spacing:.5px}
+.scanbox input:disabled{opacity:.6}
+.prod{padding:var(--s3) var(--s4);border-bottom:1px solid var(--line)}
+.prod b{display:block}
+.prod small{color:var(--mute);font-size:var(--t-small)}
+.target{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line)}
+.target:last-child{border-bottom:0}
+.target .num{font:800 var(--t-big)/1 ui-monospace,Consolas,"Roboto Mono",monospace;letter-spacing:1px}
+.target .rest{flex:1;min-width:0}
+.target .full{font-size:var(--t-small);color:var(--mute);word-break:break-all}
+@media (max-width:480px){.target{flex-wrap:wrap;row-gap:var(--s2)}.target .num{flex:1}.target .rest{order:3;flex-basis:100%}.target.dim .rest{order:0;flex-basis:auto}}
+.target.dim{opacity:.6}
+.target.dim .num{font-size:26px}
+.qty{font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2);margin:var(--s3) 0}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--s2) var(--s3);display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.stat b{font-size:20px;line-height:1.1;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--mute)}
+.contents{max-height:280px;overflow:auto}
+.lrow{display:flex;align-items:center;gap:var(--s3);width:100%;padding:var(--s3) var(--s4);border:0;border-bottom:1px solid var(--line);background:none;text-align:left;cursor:pointer;min-height:52px}
+.lrow:hover{background:var(--accent-soft)}
+.lrow .box{width:26px;height:26px;border:2px solid var(--line);border-radius:7px;display:grid;place-items:center;flex:none}
+.lrow[aria-pressed=true] .box{background:var(--ok-bg);border-color:var(--ok);color:var(--ok)}
+.lrow[aria-pressed=true] .t{text-decoration:line-through;opacity:.7}
+.lrow .t{flex:1;min-width:0}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--surface);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;min-height:60px;border:0;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:12px;font-weight:600;color:var(--mute);cursor:pointer}
+nav.tabs button[aria-selected=true]{color:var(--accent);background:var(--accent-soft)}
+nav.tabs button:hover{background:var(--accent-soft)}
+.filters{display:flex;gap:var(--s2);margin-bottom:var(--s3);flex-wrap:wrap}
+.hist{font-size:14px}
+.hist .list-row{padding:var(--s2) var(--s4);cursor:pointer}
+.hist .list-row:hover{background:var(--accent-soft)}
+@media (min-width:720px){body{--t-big:52px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Raktári kereső</h1>
+  <span class="sync" id="sync" role="status" aria-live="polite"></span>
+  <button class="chip" id="plc" aria-label="Hely"></button>
+  <button class="chip" id="dev" aria-label="Eszköz neve"></button>
+  <button class="chip" id="mut" aria-label="Hang"></button>
+</header>
+<main id="app"></main>
+<nav class="tabs" id="tabs" role="tablist" aria-label="Nézetek"></nav>
+<dialog id="dlg"></dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
+<script src="common.js"></script>
+<script>
+let view = ls.get('rk_view') === 'cartons' ? 'cartons' : 'scan';
+let device = ls.get('rk_device') || '';
+let place = ls.get('rk_place') || '';
+let muted = ls.get('rk_mute') === '1';
+let last = null, kbd = false, loading = true;
+let hist = []; try { hist = JSON.parse(ls.get('rk_hist') || '[]'); } catch (e) {}
+let cf = {st: 'open', q: ''};
+let shellView = '';
+
+// ---------- visszajelzes ----------
+let actx;
+function beep(kind) {
+  try { if (navigator.vibrate) navigator.vibrate(kind === 'ok' ? 40 : [80, 60, 80]); } catch (e) {}
+  if (muted) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.frequency.value = kind === 'ok' ? 880 : 220; o.type = 'sine';
+    g.gain.value = .08; o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime + (kind === 'ok' ? .08 : .25));
+  } catch (e) {}
+}
+
+// ---------- hivasok, kapcsolat nelkuli sor ----------
+let Q = []; try { Q = JSON.parse(ls.get('rk_q') || '[]'); } catch (e) {}
+const saveQ = () => ls.set('rk_q', JSON.stringify(Q));
+const isNet = e => /fetch|network|load failed|timeout/i.test(String(e && e.message || e));
+async function send(fn, args) {
+  try {
+    const {data, error} = await sb.rpc(fn, args);
+    if (error) return isNet(error) ? {net: true} : {err: error.message};
+    return {data};
+  } catch (e) { return {net: true}; }
+}
+// az irasok sorrendje kotott (doboz felvetele, mielott a tetel kesz lesz), ezert egy lancban futnak
+let chain = Promise.resolve();
+function call(fn, args) {
+  const p = chain.then(async () => {
+    if (Q.length) { Q.push({fn, args}); saveQ(); await flushQ(); renderChrome(); return {queued: true}; }
+    const r = await send(fn, args);
+    if (r.net) { Q.push({fn, args}); saveQ(); D.online = false; renderChrome(); }
+    else if (r.err) toast('Hiba: ' + r.err);
+    return r;
+  });
+  chain = p.catch(() => {});
+  return p;
+}
+async function flushQ() {
+  while (Q.length) { const r = await send(Q[0].fn, Q[0].args); if (r.net) return false; Q.shift(); saveQ(); }
+  return true;
+}
+function logScan(kind, raw, key, result, carton) {
+  call('rk_log_scan', {p_device: device, p_kind: kind, p_raw: raw, p_key: key || '', p_result: result, p_carton: carton || ''});
+}
+// azonnali helyi valtozas, a szerver kesobb utolerheti
+async function setLine(id, done) {
+  const l = D.byId.get(id); if (!l) return;
+  if (done) D.lineDone.set(id, {line_id: id, done_by: device}); else D.lineDone.delete(id);
+  const o = D.open.get(l.carton);
+  if (o) { const p = cartonProg(l.carton); if (done && p.done >= p.n) o.status = 'done'; else if (!done && o.status === 'done') o.status = 'open'; }
+  logScan('line', l.sku, l.key, done ? 'line_done' : 'line_undone', l.carton);
+  update();
+  await call('rk_set_line', {p_line: id, p_done: done, p_device: device});
+}
+async function openCarton(c) {
+  if (!D.open.has(c)) D.open.set(c, {carton: c, status: 'open', opened_by: device, place: place || null, opened_at: new Date().toISOString()});
+  update();
+  await call('rk_open_carton', {p_carton: c, p_device: device, p_place: place});
+}
+async function setDone(c, done) {
+  const o = D.open.get(c); if (o) o.status = done ? 'done' : 'open';
+  update();
+  await call('rk_set_done', {p_carton: c, p_done: done});
+}
+
+// ---------- szkennelt kod ----------
+function pushHist(raw, label, result) {
+  hist.unshift({t: Date.now(), raw, label, result}); hist = hist.slice(0, 12); ls.set('rk_hist', JSON.stringify(hist));
+}
+async function onScan(raw, replay) {
+  raw = raw.trim(); if (!raw) return;
+  const c = classify(raw);
+  if (c.kind === 'carton') {
+    if (!D.byCarton.has(c.carton)) {
+      last = {t: 'carton', carton: c.carton, state: 'unknown', raw};
+      if (!replay) { logScan('carton', raw, '', 'unknown', c.carton); pushHist(raw, 'Ismeretlen doboz', 'bad'); }
+      beep('bad'); return update();
+    }
+    const st = cartonStatus(c.carton);
+    const state = !st ? 'opened' : st === 'done' ? 'done' : 'already';
+    last = {t: 'carton', carton: c.carton, state, raw};
+    if (!replay) {
+      pushHist(raw, 'Doboz ' + short(c.carton), state === 'opened' ? 'ok' : 'warn');
+      if (state === 'opened') { openCarton(c.carton); } else logScan('carton', raw, '', state, c.carton);
+    }
+    beep(state === 'done' ? 'bad' : 'ok'); return update();
+  }
+  if (c.kind === 'cands') { last = {t: 'cands', c, raw}; beep('ok'); return update(); }
+  if (c.kind === 'unknown') {
+    last = {t: 'unknown', raw}; if (!replay) { logScan('sku', raw, c.key, 'unknown'); pushHist(raw, 'Nincs a goodslistben', 'bad'); }
+    beep('bad'); return update();
+  }
+  const lines = D.byKey.get(c.key);
+  const open = lines.filter(l => cartonStatus(l.carton) === 'open' && !isLineDone(l));
+  const fin = lines.filter(l => isLineDone(l) || cartonStatus(l.carton) === 'done');
+  const res = open.length === 1 ? 'open1' : open.length ? 'openN' : fin.length && lines.some(l => cartonStatus(l.carton) === 'open') ? 'surplus' : 'closed';
+  last = {t: 'sku', key: c.key, raw};
+  if (!replay) {
+    logScan('sku', raw, c.key, res, open[0] && open[0].carton);
+    pushHist(raw, lines[0].descr + (open.length === 1 ? ' > ' + short(open[0].carton) : open.length ? ' > ' + open.length + ' doboz' : ''), open.length ? 'ok' : 'warn');
+  }
+  beep(open.length ? 'ok' : 'bad'); update();
+}
+
+// ---------- megjelenites ----------
+function renderChrome() {
+  $('#dev').innerHTML = esc(device || 'Eszköz neve');
+  $('#plc').innerHTML = ic('pin') + esc(place || 'Hely');
+  $('#mut').innerHTML = muted ? ic('mute') : ic('vol');
+  $('#mut').setAttribute('aria-pressed', muted);
+  $('#sync').className = 'sync' + (D.online ? '' : ' off');
+  $('#sync').setAttribute('aria-label', D.online ? 'Online' : 'Nincs kapcsolat');
+  $('#sync').innerHTML = (D.online ? ic('wifi') : ic('off') + 'Nincs kapcsolat') + (Q.length ? ` ${Q.length} függő` : '');
+  const tabs = [['scan', 'Szkennelés', 'scan'], ['cartons', 'Dobozok', 'box']];
+  $('#tabs').innerHTML = tabs.map(([k, n, i]) => `<button role="tab" data-v="${k}" aria-selected="${view === k}">${ic(i)}${n}</button>`).join('');
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { view = b.dataset.v; ls.set('rk_view', view); shellView = ''; update(); });
+}
+function statsHtml() {
+  const o = [...D.open.values()];
+  return `<div class="stats"><div class="stat"><b>${o.filter(x => x.status === 'open').length}</b><span>nyitott doboz</span></div>
+    <div class="stat"><b>${o.filter(x => x.status === 'done').length}</b><span>kész doboz</span></div>
+    <div class="stat"><b>${[...D.lineDone.keys()].length}</b><span>kész tétel</span></div></div>`;
+}
+function update() {
+  renderChrome();
+  if (loading) { $('#app').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; shellView = ''; return; }
+  if (view === 'scan') updateScan(); else updateCartons();
+}
+
+function progBar(p) { return `<div class="bar" style="width:70px" aria-hidden="true"><i style="width:${Math.round(p.ratio * 100)}%"></i></div>`; }
+function placeTag(c) { const o = D.open.get(c); return o && o.place ? `<span class="tag">${ic('pin').replace('class="i"', 'class="i" style="width:12px;height:12px"')} ${esc(o.place)}</span>` : ''; }
+
+function skuHtml() {
+  const lines = D.byKey.get(last.key) || [];
+  const l0 = lines[0];
+  const targets = lines.filter(l => cartonStatus(l.carton) === 'open' && !isLineDone(l))
+    .sort((a, b) => cartonProg(b.carton).ratio - cartonProg(a.carton).ratio || b.qty - a.qty);
+  const fin = lines.filter(l => isLineDone(l) || cartonStatus(l.carton) === 'done');
+  const unopened = lines.filter(l => !cartonStatus(l.carton));
+  const head = `<div class="prod"><b>${esc(l0.descr)}</b><small class="mono">${esc(l0.sku.split('-')[0])}</small>${l0.mat ? '<small> · ' + esc(l0.mat) + '</small>' : ''}</div>`;
+  const trow = l => { const p = cartonProg(l.carton); return `<div class="target"><span class="num">${short(l.carton)}</span><div class="rest"><div class="full">${esc(l.carton)}</div>
+      <div class="meta"><span class="qty">${l.qty} db</span> várt · ${p.done}/${p.n} tétel kész ${awbTag(l)} ${placeTag(l.carton)}</div></div>
+      <button class="btn sm pri" data-line="${l.id}" data-v="1">Tétel kész</button></div>`; };
+  const frow = l => `<div class="target dim"><span class="num">${short(l.carton)}</span><div class="rest"><div class="meta">${l.qty} db · ${isLineDone(l) ? 'tétel kész' : 'doboz kész'} ${awbTag(l)}</div></div>
+      ${isLineDone(l) ? `<button class="btn xs" data-line="${l.id}" data-v="0">Mégsem</button>` : `<button class="btn xs" data-reopen="${esc(l.carton)}">Újranyit</button>`}</div>`;
+  const orow = l => `<div class="target"><span class="num">${short(l.carton)}</span><div class="rest"><div class="full">${esc(l.carton)}</div><div class="meta"><span class="qty">${l.qty} db</span> ${awbTag(l)}</div></div>
+      <button class="btn sm pri" data-open="${esc(l.carton)}">Felvétel</button></div>`;
+  let out = '';
+  if (targets.length) {
+    out = `<div class="card"><div class="status ok">${ic('check')}${targets.length === 1 ? 'Ide tedd' : `Ide tehető: ${targets.length} nyitott doboz`}</div>${head}${targets.map(trow).join('')}`;
+    if (targets.length > 1) out += `<div class="prod"><small>Több doboz is jó. A várt darabszám és a kész tételek száma segít választani. Ha egy tételt befejeztél, nyomd meg a "Tétel kész" gombot, és a következő szkennelésnél már nem ajánlja.</small></div>`;
+    if (fin.length) out += `<div class="prod"><small>Ezekben már kész:</small></div>${fin.map(frow).join('')}`;
+    out += '</div>';
+  } else if (fin.length && lines.some(l => cartonStatus(l.carton) === 'open')) {
+    out = `<div class="card"><div class="status warn">${ic('alert')}Felesleg lehet</div>${head}<div class="prod"><small>Minden nyitott dobozban kész ez a tétel. Ha mégis hiányzik valahonnan, nyomd meg a "Mégsem" gombot, különben tedd a felesleg helyére.</small></div>${fin.map(frow).join('')}${unopened.map(orow).join('')}</div>`;
+  } else {
+    out = `<div class="card"><div class="status warn">${ic('alert')}Egyik nyitott dobozban sincs</div>${head}
+      <div class="prod"><small>A goodslist szerint ezekbe tartozik. Lehet, hogy a doboz ép és már érkeztetve van. Ha ide kell tenni, vedd fel a dobozt.</small></div>${fin.map(frow).join('')}${unopened.map(orow).join('')}</div>`;
+  }
+  return out;
+}
+function cartonLines(c) {
+  const ls_ = D.byCarton.get(c) || [];
+  return `<div class="contents">${ls_.map(l => `<button class="lrow" data-line="${l.id}" data-v="${isLineDone(l) ? 0 : 1}" aria-pressed="${isLineDone(l)}">
+    <span class="box">${isLineDone(l) ? ic('check') : ''}</span><span class="t"><b class="mono">${esc(l.sku.split('-')[0])}</b> ${esc(l.descr)}</span><b>${l.qty} db</b></button>`).join('')}</div>`;
+}
+function cartonCard() {
+  const c = last.carton, st = last.state;
+  if (st === 'unknown') return `<div class="card"><div class="status bad">${ic('x')}Ez a doboz nincs a goodslistben</div><div class="prod"><b class="mono">${esc(c)}</b><small>Egyik betöltött AWB-ben sem szerepel. A napló rögzítette.</small></div></div>`;
+  const map = {opened: ['ok', 'check', 'Doboz felvéve'], already: ['info', 'info', 'Már fel van véve'], done: ['warn', 'alert', 'Ez a doboz kész státuszú']};
+  const [cls, icn, txt] = map[st]; const p = cartonProg(c), cur = cartonStatus(c);
+  return `<div class="card"><div class="status ${cls}">${ic(icn)}${txt}</div>
+    <div class="target"><span class="num">${short(c)}</span><div class="rest"><div class="full">${esc(c)}</div><div class="meta">${p.done}/${p.n} tétel kész, ${p.qty} db várt ${awbTag((D.byCarton.get(c) || [])[0])} ${placeTag(c)}</div></div></div>
+    ${cartonLines(c)}
+    <div class="row" style="padding:0 var(--s4) var(--s4)">
+      <button class="btn" data-place="${esc(c)}">${ic('pin')}Hely</button>
+      ${st === 'opened' ? `<button class="btn" data-unopen="${esc(c)}">${ic('undo')}Visszavon</button>` : ''}
+      ${cur === 'done' ? `<button class="btn" data-reopen="${esc(c)}">Újranyitás</button>` : `<button class="btn pri" data-cdone="${esc(c)}">Doboz kész</button>`}
+    </div></div>`;
+}
+function candsHtml() {
+  const c = last.c;
+  return `<div class="card"><div class="status info">${ic('search')}Válassz a találatok közül</div>
+    ${c.skus.map(k => { const l = D.byKey.get(k); return `<button class="lrow" data-pick="${k}"><span class="t"><b class="mono">${esc(k)}</b> ${esc(l[0].descr)}</span><span class="tag">${l.length} doboz</span></button>`; }).join('')}
+    ${c.cartons.map(x => `<button class="lrow" data-pick="${esc(x)}"><span class="t"><b class="mono">${short(x)}</b> doboz</span><span class="tag ${cartonStatus(x) === 'done' ? 'done' : ''}">${cartonStatus(x) === 'done' ? 'kész' : cartonStatus(x) ? 'nyitott' : 'nincs felvéve'}</span></button>`).join('')}</div>`;
+}
+function resultHtml() {
+  if (!D.lines.length) return '<div class="card"><div class="status warn">' + ic('alert') + 'Nincs betöltött goodslist</div><div class="empty">Az admin töltse fel a goodslistet.</div></div>';
+  if (!last) return '<div class="empty"><b>Szkenneld be a hiányos doboz címkéjét, vagy a terméket.</b><br><span class="meta">Doboz címke: doboz felvétele. Termék vonalkód: keresés. Sérült kód esetén nyomd meg a "Kézi" gombot, és írd be az utolsó 4-6 számjegyet.</span></div>';
+  if (last.t === 'unknown') return `<div class="card"><div class="status bad">${ic('x')}Nincs a goodslistben</div><div class="prod"><b class="mono">${esc(last.raw)}</b><small>Egyik betöltött AWB-ben sem szerepel. Tedd az ismeretlen termékek helyére. A napló rögzítette.</small></div></div>`;
+  if (last.t === 'carton') return cartonCard();
+  if (last.t === 'cands') return candsHtml();
+  return skuHtml();
+}
+function histHtml() {
+  if (!hist.length) return '';
+  return `<div class="card hist"><div class="hd">Utolsó szkennelések</div>${hist.map((h, i) => `<div class="list-row" data-h="${i}"><span class="meta mono">${fmtT(h.t)}</span><span class="grow">${esc(h.label)}</span><span class="tag ${h.result === 'ok' ? 'done' : h.result === 'bad' ? 'bad' : 'warn'}">${h.result === 'ok' ? 'ok' : h.result === 'bad' ? 'hiba' : 'figy.'}</span></div>`).join('')}</div>`;
+}
+
+function updateScan() {
+  if (shellView !== 'scan') {
+    shellView = 'scan';
+    $('#app').innerHTML = `<form class="scanbox" id="sf" autocomplete="off">
+        <input id="scan" inputmode="${kbd ? 'numeric' : 'none'}" enterkeyhint="done" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Szkennelt kód" placeholder="Szkenneld a kódot">
+        <button type="button" class="btn" id="kb" aria-pressed="${kbd}">Kézi</button>
+      </form>
+      <div id="res" style="margin-top:var(--s3)"></div><div id="st"></div><div id="hs"></div>`;
+    const inp = $('#scan');
+    $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
+    $('#kb').onclick = () => { kbd = !kbd; $('#kb').setAttribute('aria-pressed', kbd); inp.setAttribute('inputmode', kbd ? 'numeric' : 'none'); inp.blur(); inp.focus(); };
+    inp.onblur = () => setTimeout(() => { if (view === 'scan' && !kbd && !document.querySelector('dialog[open]') && (document.activeElement === document.body || document.activeElement === null)) inp.focus(); }, 80);
+    inp.focus();
+    $('#res').onclick = onResClick; $('#hs').onclick = e => { const r = e.target.closest('[data-h]'); if (r) onScan(hist[+r.dataset.h].raw, true); };
+  }
+  $('#st').innerHTML = statsHtml();
+  $('#res').innerHTML = resultHtml();
+  $('#hs').innerHTML = histHtml();
+  $('#scan').disabled = !D.lines.length;
+}
+function onResClick(e) {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset;
+  if (d.line) return setLine(+d.line, d.v === '1');
+  if (d.open) return openCarton(d.open).then(() => { toast('Doboz felvéve'); });
+  if (d.reopen) return setDone(d.reopen, false).then(() => toast('Újranyitva'));
+  if (d.cdone) return setDone(d.cdone, true).then(() => { toast('Doboz kész'); last = null; update(); });
+  if (d.unopen) return unopen(d.unopen);
+  if (d.place) return askPlaceFor(d.place);
+  if (d.pick) return onScan(d.pick);
+}
+async function unopen(c) {
+  const o = D.open.get(c);
+  if (o && o.opened_by !== device) return toast('Csak a felvevő eszköz vonhatja vissza');
+  D.open.delete(c); (D.byCarton.get(c) || []).forEach(l => D.lineDone.delete(l.id)); last = null; update();
+  await call('rk_unopen', {p_carton: c, p_device: device}); toast('Visszavonva');
+}
+
+// ---------- dobozok nezet ----------
+function updateCartons() {
+  if (shellView !== 'cartons') {
+    shellView = 'cartons';
+    $('#app').innerHTML = `<div id="st"></div><div class="filters" id="fl"></div>
+      <input class="inp" id="cq" inputmode="numeric" placeholder="Doboz száma (utolsó számjegyek)" aria-label="Keresés" style="margin-bottom:var(--s3)" value="${esc(cf.q)}">
+      <div class="card" id="cl"></div>`;
+    $('#cq').oninput = e => { cf.q = e.target.value.replace(/\D/g, ''); fillCartons(); };
+    $('#cl').onclick = e => { const r = e.target.closest('[data-c]'); if (r) showCarton(r.dataset.c); };
+  }
+  $('#st').innerHTML = statsHtml();
+  $('#fl').innerHTML = [['open', 'Nyitott'], ['done', 'Kész'], ['all', 'Mind']].map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${cf.st === k}">${n}</button>`).join('');
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { cf.st = b.dataset.f; updateCartons(); });
+  fillCartons();
+}
+function fillCartons() {
+  const rows = [...D.open.values()].filter(r => (cf.st === 'all' || r.status === cf.st) && (!cf.q || r.carton.endsWith(cf.q) || r.carton.includes(cf.q)))
+    .sort((a, b) => cartonProg(b.carton).ratio - cartonProg(a.carton).ratio || a.carton.localeCompare(b.carton));
+  $('#cl').innerHTML = rows.length ? rows.map(r => {
+    const p = cartonProg(r.carton);
+    return `<div class="list-row" data-c="${esc(r.carton)}" style="cursor:pointer"><span class="mono" style="font-size:24px;font-weight:800">${short(r.carton)}</span>
+      <div class="grow"><div class="meta">${p.done}/${p.n} tétel · ${p.qty} db ${placeTag(r.carton)}</div>${progBar(p)}</div>
+      <span class="tag ${r.status === 'done' ? 'done' : ''}">${r.status === 'done' ? 'kész' : 'nyitott'}</span></div>`;
+  }).join('') : `<div class="empty">${cf.q ? 'Nincs találat.' : cf.st === 'open' ? 'Nincs nyitott doboz. Szkenneld be a hiányos dobozok címkéjét.' : 'Nincs doboz ebben a szűrésben.'}</div>`;
+}
+function showCarton(c) {
+  const o = D.open.get(c); if (!o) return;
+  const p = cartonProg(c);
+  const d = dialog(`<h2><span class="mono">${short(c)}</span> <span class="tag ${o.status === 'done' ? 'done' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span></h2>
+    <div class="meta" style="margin-bottom:var(--s3)">${esc(c)}<br>${p.done}/${p.n} tétel kész, ${p.qty} db várt ${placeTag(c)}</div>
+    <div class="card">${cartonLines(c)}</div>
+    <div class="row"><button class="btn" id="cx">Bezár</button><button class="btn" id="cp">${ic('pin')}Hely</button>
+      ${o.status === 'done' ? '<button class="btn" id="cr">Újranyitás</button>' : '<button class="btn pri" id="cd">Doboz kész</button>'}</div>`);
+  d.querySelectorAll('[data-line]').forEach(b => b.onclick = async () => { await setLine(+b.dataset.line, b.dataset.v === '1'); if (D.open.has(c)) showCarton(c); });
+  d.querySelector('#cx').onclick = () => d.close();
+  d.querySelector('#cp').onclick = () => { d.close(); askPlaceFor(c); };
+  const cr = d.querySelector('#cr'), cd = d.querySelector('#cd');
+  if (cr) cr.onclick = async () => { await setDone(c, false); showCarton(c); };
+  if (cd) cd.onclick = async () => { d.close(); await setDone(c, true); toast('Doboz kész'); };
+}
+
+// ---------- hely, eszkoz ----------
+function askPlace(cb, title, cur) {
+  const d = dialog(`<h2>${esc(title)}</h2><label class="field"><span>Hely (pl. A1, 3. raklap). Üresen hagyva törlődik.</span><input id="pv" value="${esc(cur || '')}" maxlength="20" autocomplete="off"></label>
+    <div class="row"><button class="btn" id="n">Mégse</button><button class="btn pri" id="ok">Mentés</button></div>`);
+  const go = () => { const v = d.querySelector('#pv').value.trim(); d.close(); cb(v); };
+  d.querySelector('#ok').onclick = go; d.querySelector('#n').onclick = () => d.close();
+  d.querySelector('#pv').onkeydown = e => { if (e.key === 'Enter') go(); }; d.querySelector('#pv').select();
+}
+function askDevice(first) {
+  const d = dialog(`<h2>${first ? 'Hogy hívják ezt az eszközt?' : 'Eszköz neve'}</h2>
+    <label class="field"><span>Név (a naplóban ez jelenik meg)</span><input id="dn" value="${esc(device || 'PDA-1')}" maxlength="20"></label>
+    <div class="row"><button class="btn pri" id="ok">Mentés</button></div>`);
+  d.oncancel = e => { if (!device) e.preventDefault(); };
+  const go = () => { const v = d.querySelector('#dn').value.trim(); if (!v) return; device = v; ls.set('rk_device', v); d.close(); update(); };
+  d.querySelector('#ok').onclick = go;
+  d.querySelector('#dn').onkeydown = e => { if (e.key === 'Enter') go(); };
+  d.querySelector('#dn').select();
+}
+function askPlaceFor(c) {
+  const o = D.open.get(c);
+  askPlace(async v => { if (o) o.place = v || null; update(); await call('rk_set_place', {p_carton: c, p_place: v}); }, 'Doboz helye: ' + short(c), o && o.place);
+}
+$('#dev').onclick = () => askDevice(false);
+$('#plc').onclick = () => askPlace(v => { place = v; ls.set('rk_place', v); update(); toast(v ? 'Új dobozok helye: ' + v : 'Hely törölve'); }, 'Ahová az új dobozokat teszitek', place);
+$('#mut').onclick = () => { muted = !muted; ls.set('rk_mute', muted ? '1' : '0'); renderChrome(); };
+
+// ---------- inditas ----------
+async function tick(full) {
+  await chain;                       // ne irja felul a helyi valtozast, amig egy iras folyamatban van
+  await flushQ();
+  await refreshData(full);
+  loading = false; update();
+}
+window.addEventListener('online', () => tick(false));
+window.addEventListener('offline', () => { D.online = false; renderChrome(); });
+if (!device) askDevice(true);
+if (loadCache()) loading = false;
+update();
+tick(true);
+setInterval(() => tick(false), 8000);
+watch(() => update());
+</script>
+</body>
+</html>

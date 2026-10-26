@@ -1,0 +1,151 @@
+// Kozos logika: adatbazis, adatbetoltes, gyorsitotar, kod ertelmezes. PDA es admin felulet is ezt hasznalja.
+const SB_URL = 'https://pfqecgcsmswholidmadi.supabase.co';
+const SB_KEY = 'sb_publishable_msFV8PSILVAVEmnAf7A4BQ_2-kv7oZU';
+const sb = window.supabase.createClient(SB_URL, SB_KEY, {auth: {persistSession: false}});
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[m]));
+const ls = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (e) {} }
+};
+const ICON = {
+  scan: '<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/>',
+  box: '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
+  check: '<path d="M20 6L9 17l-5-5"/>',
+  x: '<path d="M18 6L6 18M6 6l12 12"/>',
+  alert: '<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/>',
+  info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  wifi: '<path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M12 20h.01"/>',
+  off: '<path d="M2 2l20 20M8.5 16a5 5 0 0 1 7 0M5 12.5a10 10 0 0 1 4-2.4M12 20h.01"/>',
+  undo: '<path d="M3 7v6h6M3 13a9 9 0 1 0 3-7"/>',
+  pin: '<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12zM12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>',
+  vol: '<path d="M11 5L6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+  mute: '<path d="M11 5L6 9H2v6h4l5 4zM22 9l-6 6M16 9l6 6"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  chart: '<path d="M3 3v18h18M7 15l4-4 3 3 5-6"/>',
+  print: '<path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>',
+  users: '<circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M17 4a4 4 0 0 1 0 8M22 21a7 7 0 0 0-5-6.7"/>',
+  dl: '<path d="M12 3v12M7 10l5 5 5-5M4 21h16"/>'
+};
+const ic = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
+const short = c => c.slice(-6);
+const fmtT = t => new Date(t).toLocaleTimeString('hu', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+const fmtDT = t => new Date(t).toLocaleString('hu', {month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'});
+
+// ---------- adat ----------
+const D = {lines: [], byKey: new Map(), byCarton: new Map(), byId: new Map(), cartonByDigits: new Map(),
+  awbs: new Map(), open: new Map(), lineDone: new Map(), sig: '', online: true, err: ''};
+
+function indexLines() {
+  D.byKey = new Map(); D.byCarton = new Map(); D.byId = new Map(); D.cartonByDigits = new Map();
+  D.lines.forEach(l => {
+    (D.byKey.get(l.key) || D.byKey.set(l.key, []).get(l.key)).push(l);
+    (D.byCarton.get(l.carton) || D.byCarton.set(l.carton, []).get(l.carton)).push(l);
+    D.byId.set(l.id, l);
+    D.cartonByDigits.set(l.carton.replace(/\D/g, ''), l.carton);
+  });
+}
+async function fetchAll(table, order) {
+  let out = [], from = 0;
+  for (;;) {
+    const {data, error} = await sb.from(table).select('*').order(order).range(from, from + 999);
+    if (error) throw error;
+    out = out.concat(data);
+    if (data.length < 1000) return out;
+    from += 1000;
+  }
+}
+function loadCache() {
+  try {
+    const c = JSON.parse(ls.get('rk_cache_v2') || 'null');
+    if (!c) return false;
+    D.awbs = new Map(c.awbs.map(a => [a.id, a]));
+    D.lines = c.lines.map(r => ({id: r[0], awb: r[1], carton: r[2], sku: r[3], key: r[4], descr: r[5], mat: r[6], qty: r[7], gw: r[8]}));
+    D.sig = c.sig; indexLines(); return true;
+  } catch (e) { return false; }
+}
+function saveCache(awbs) {
+  try { ls.set('rk_cache_v2', JSON.stringify({sig: D.sig, awbs, lines: D.lines.map(l => [l.id, l.awb, l.carton, l.sku, l.key, l.descr, l.mat, l.qty, l.gw])})); } catch (e) {}
+}
+async function loadLines() {
+  const [awbs, lines] = await Promise.all([fetchAll('rk_awb', 'id'), fetchAll('rk_lines', 'id')]);
+  D.awbs = new Map(awbs.map(a => [a.id, a]));
+  D.lines = lines; D.sig = awbs.map(a => a.id + a.loaded_at).sort().join('|'); indexLines(); saveCache(awbs);
+}
+async function loadOpen() {
+  const [o, s] = await Promise.all([sb.from('rk_open').select('*'), sb.from('rk_linestat').select('*')]);
+  if (o.error) throw o.error;
+  if (s.error) throw s.error;
+  D.open = new Map(o.data.map(r => [r.carton, r]));
+  D.lineDone = new Map(s.data.map(r => [r.line_id, r]));
+}
+// full=true: goodslist ujratoltese is; kulonben csak ha valtozott
+async function refreshData(full) {
+  try {
+    if (full) await loadLines();
+    else {
+      const {data, error} = await sb.from('rk_awb').select('id,loaded_at');
+      if (error) throw error;
+      if (data.map(a => a.id + a.loaded_at).sort().join('|') !== D.sig) await loadLines();
+    }
+    await loadOpen();
+    D.online = true; D.err = '';
+  } catch (e) { D.online = false; D.err = String(e.message || e); }
+}
+function watch(cb) {
+  sb.channel('rk_ch').on('postgres_changes', {event: '*', schema: 'public', table: 'rk_open'}, () => loadOpen().then(cb).catch(() => {}))
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'rk_linestat'}, () => loadOpen().then(cb).catch(() => {})).subscribe();
+}
+
+// ---------- szamitott ertekek ----------
+const cartonStatus = c => (D.open.get(c) || {}).status || null;       // null | 'open' | 'done'
+const isLineDone = l => D.lineDone.has(l.id);
+function cartonProg(c) {
+  const ls_ = D.byCarton.get(c) || [];
+  const done = ls_.filter(isLineDone).length;
+  return {n: ls_.length, done, qty: ls_.reduce((a, l) => a + l.qty, 0), qtyDone: ls_.filter(isLineDone).reduce((a, l) => a + l.qty, 0), ratio: ls_.length ? done / ls_.length : 0};
+}
+function awbTag(l) { const a = D.awbs.get(l.awb); return `<span class="tag">${esc((a && a.mark) || '')} ${esc(l.awb.slice(-4))}</span>`; }
+
+// ---------- szkennelt kod ertelmezese ----------
+function classify(raw) {
+  const t = raw.trim().toUpperCase();
+  if (/^RQ-?XPW\d+$/.test(t)) return {kind: 'carton', carton: 'RQ-XPW' + t.replace(/\D/g, '')};
+  const digits = t.replace(/\D/g, '');
+  const onlyNum = /^[\d\s-]+$/.test(t);
+  const key = t.split('-')[0].replace(/\D/g, '').replace(/^0+/, '');
+  if (onlyNum && key && D.byKey.has(key)) return {kind: 'sku', key};
+  if (onlyNum && D.cartonByDigits.has(digits)) return {kind: 'carton', carton: D.cartonByDigits.get(digits)};
+  if (onlyNum && digits.length >= 3 && digits.length < 10) {
+    const skus = digits.length >= 4 ? [...D.byKey.keys()].filter(k => k.endsWith(digits)).slice(0, 25) : [];
+    const cartons = [...D.byCarton.keys()].filter(c => c.endsWith(digits)).slice(0, 25);
+    if (skus.length + cartons.length === 1) return skus.length ? {kind: 'sku', key: skus[0]} : {kind: 'carton', carton: cartons[0]};
+    if (skus.length + cartons.length) return {kind: 'cands', skus, cartons};
+  }
+  return {kind: 'unknown', raw, key};
+}
+
+// ---------- kozos UI ----------
+function dialog(html) { const d = $('#dlg'); d.innerHTML = html; if (!d.open) d.showModal(); return d; }
+function confirmDlg(text, okLabel, danger) {
+  return new Promise(res => {
+    const d = dialog(`<h2>Megerősítés</h2><p>${esc(text)}</p><div class="row"><button class="btn" id="n">Mégse</button><button class="btn ${danger ? 'dng' : 'pri'}" id="y">${esc(okLabel)}</button></div>`);
+    d.querySelector('#n').onclick = () => { d.close(); res(false); };
+    d.querySelector('#y').onclick = () => { d.close(); res(true); };
+    d.oncancel = () => res(false);
+  });
+}
+function toast(t) {
+  let e = $('#toast');
+  if (!e) { e = document.createElement('div'); e.id = 'toast'; e.setAttribute('role', 'status');
+    e.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:30;font-weight:600;max-width:90vw'; document.body.append(e); }
+  e.textContent = t; e.style.display = 'block'; clearTimeout(e._t); e._t = setTimeout(() => e.style.display = 'none', 2600);
+}
+function csv(rows, name) {
+  const t = '﻿' + rows.map(r => r.map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], {type: 'text/csv'})); a.download = name; a.click();
+}
