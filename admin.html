@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raktári kereső - Admin</title>
-<link rel="stylesheet" href="common.css?v=3">
+<link rel="stylesheet" href="common.css?v=4">
 <style>
 .shell{display:grid;grid-template-columns:248px 1fr;min-height:100dvh}
 aside{background:var(--side);color:var(--side-ink);padding:var(--s4) var(--s3);position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;gap:2px;overflow:auto}
@@ -125,8 +125,8 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/cfb@1.2.2/dist/cfb.min.js" integrity="sha384-peTByNpmIz2Wq5hOZJ3dZmZP4MJ6ZXwF9dZ3R8kW7/C6bMWdHEME3on5mt9DH7d5" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
-<script src="common.js?v=3"></script>
-<script src="import.js?v=3"></script>
+<script src="common.js?v=4"></script>
+<script src="import.js?v=4"></script>
 <script>
 const SECS = [['overview', 'Áttekintés', 'chart', 'Élő kép a munkáról'], ['import', 'Importálás', 'up', 'Goodslist fájlok feltöltése'], ['cartons', 'Dobozok', 'box', 'Minden doboz állapota'],
   ['skus', 'SKU-k', 'search', 'Termékek és dobozaik'], ['diffs', 'Eltérések', 'alert', 'Ismeretlen, felesleg, hiány'], ['log', 'Napló', 'list', 'Minden szkennelés'],
@@ -159,19 +159,20 @@ async function adm(fn, args) {
 async function loadScans() { if (!adminCode) return; const r = await adm('rk_admin_scans', {p_limit: 2000}); if (r) SC = r.rows; }
 function login() {
   const d = dialog(`<h2>Admin belépés</h2><p class="meta" style="margin-top:0">Add meg az admin kódot. Ezen az eszközön megjegyezzük.</p>
-    <label class="field"><span>Admin kód</span><input id="ac" type="password" autocomplete="off"></label>
+    <label class="field"><span>Admin kód (6 számjegy)</span><input id="ac" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></label>
     <div class="err" id="ae" role="alert"></div><div class="row"><button class="btn pri" id="ok">Belépés</button></div>`);
   d.oncancel = e => e.preventDefault();
   const go = async () => {
     const b = d.querySelector('#ok'); b.setAttribute('aria-busy', 'true'); b.disabled = true;
     const code = d.querySelector('#ac').value;
+    if (!/^\d{6}$/.test(code)) { b.removeAttribute('aria-busy'); b.disabled = false; d.querySelector('#ae').textContent = 'Az admin kód 6 számjegy.'; return; }
     const {data, error} = await sb.rpc('rk_admin_login', {p_code: code});
     b.removeAttribute('aria-busy'); b.disabled = false;
     if (error) { d.querySelector('#ae').textContent = 'Hiba: ' + error.message; return; }
     if (data.ok) { adminCode = code; ls.set('rk_admin', code); d.close(); tick(); }
     else d.querySelector('#ae').textContent = data.error === 'locked' ? 'Túl sok próbálkozás, várj 1 percet.' : 'Hibás kód.';
   };
-  d.querySelector('#ok').onclick = go; d.querySelector('#ac').onkeydown = e => { if (e.key === 'Enter') go(); }; d.querySelector('#ac').focus();
+  d.querySelector('#ok').onclick = go; d.querySelector('#ac').oninput = e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); }; d.querySelector('#ac').onkeydown = e => { if (e.key === 'Enter') go(); }; d.querySelector('#ac').focus();
 }
 
 // ---------- szamitasok ----------
@@ -247,7 +248,7 @@ function renderNav() {
   const cnt = {cartons: o.open + o.done, diffs: warn};
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><div><b>Raktári kereső</b><span>Admin felület</span></div></div>` +
     SECS.map(([k, n, i]) => `${k === 'cartons' || k === 'labels' ? '' : ''}<a href="#${k}" ${sec === k ? 'aria-current="page"' : ''}>${ic(i)}${n}${cnt[k] ? `<span class="cnt ${k === 'diffs' ? 'hot' : ''}">${cnt[k]}</span>` : ''}</a>${k === 'import' || k === 'diffs' ? '<div class="sep"></div>' : ''}`).join('') +
-    `<div class="foot">A PDA-k a főoldalról érhetők el.<br>Verzió: v3</div>`;
+    `<div class="foot">A PDA-k a főoldalról érhetők el.<br>Verzió: v4</div>`;
   const s = SECS.find(x => x[0] === sec);
   $('#ttl').textContent = s[1]; $('#sub').textContent = s[3];
   $('#sync').className = 'sync' + (D.online ? '' : ' off');
@@ -288,7 +289,7 @@ function vOverview() {
       <div class="seg3" role="img" aria-label="${dn} kész, ${op} nyitott, ${no} nincs felvéve"><i style="width:${100 * dn / cs.length}%;background:var(--ok-strong)"></i><i style="width:${100 * op / cs.length}%;background:var(--accent)"></i></div>
       <div class="nums"><div><b>${dn}</b>kész</div><div><b>${op}</b>nyitott</div><div><b>${no}</b>nincs felvéve</div><div><b>${cs.length}</b>doboz</div><div><b>${q}</b>db</div></div></div>`;
   }).join('');
-  const feed = SC.filter(s => s.kind !== 'line').slice(0, 12).map(s => `<tr><td class="mono">${fmtT(s.ts)}</td><td>${esc(s.device)}</td><td class="mono">${esc(s.raw)}</td><td>${resTag(s.result)}</td><td class="mono"><b>${s.carton ? esc(short(s.carton)) : ''}</b></td></tr>`).join('');
+  const feed = SC.filter(s => s.kind !== 'line').slice(0, 12).map(s => `<tr><td class="mono">${fmtT(s.ts)}</td><td>${esc(s.device)}</td><td class="mono">${esc(s.raw)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton) : ''}</td></tr>`).join('');
   const row = (icon, tone, t, sub, n, href) => `<a href="${href}"><span class="ic ${n ? tone : 'ok'}">${ic(n ? icon : 'check')}</span><span class="t"><b>${t}</b><small>${sub}</small></span><b>${n}</b></a>`;
   $('#main').innerHTML = `<div class="grid g-hero" style="margin-bottom:var(--s4)">
     <div class="card hero"><div class="donut-c">${donut([{v: o.done, color: 'var(--ok-strong)', label: 'Kész'}, {v: o.open, color: 'var(--accent)', label: 'Nyitott'}, {v: o.none, color: 'var(--line)', label: 'Nincs felvéve'}], 190, 24)}
@@ -417,11 +418,11 @@ function cartonRows() {
 }
 function fillCartons() {
   const cs = cartonRows(), shown = cs.slice(0, 300);
-  $('#ct').innerHTML = shown.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th>Hely</th><th class="n">Tételek</th><th class="n">Db</th><th>Haladás</th><th>Felvette</th><th>Idő</th></tr></thead><tbody>${shown.map(c => {
+  $('#ct').innerHTML = shown.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th class="n">Tételek</th><th class="n">Db</th><th>Haladás</th><th>Felvette</th><th>Idő</th></tr></thead><tbody>${shown.map(c => {
     const o = D.open.get(c), p = cartonProg(c), l0 = D.byCarton.get(c)[0];
-    return `<tr class="clk" data-c="${esc(c)}"><td><b class="mono" style="font-size:18px">${short(c)}</b><br><span class="meta mono">${esc(c)}</span></td><td class="mono meta">${esc(l0.awb)}</td>
+    return `<tr class="clk" data-c="${esc(c)}"><td>${idHtml(c)}</td><td class="mono meta">${esc(l0.awb)}</td>
       <td>${o ? `<span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td>
-      <td>${esc(o && o.place || '')}</td><td class="n">${p.done}/${p.n}</td><td class="n">${p.qty}</td><td style="min-width:110px"><div class="bar"><i style="width:${Math.round(p.ratio * 100)}%"></i></div></td>
+      <td class="n">${p.done}/${p.n}</td><td class="n">${p.qty}</td><td style="min-width:110px"><div class="bar"><i style="width:${Math.round(p.ratio * 100)}%"></i></div></td>
       <td>${esc(o && o.opened_by || '')}</td><td class="meta">${o ? fmtDT(o.opened_at) : ''}</td></tr>`;
   }).join('')}</tbody></table>${cs.length > 300 ? `<div class="pg">Az első 300 doboz látszik a(z) ${cs.length}-ból. Szűkítsd a keresést.</div>` : ''}` : '<div class="empty"><b>Nincs találat</b>Más szűrést próbálj, vagy importálj goodslistet.</div>';
   $('#cc').textContent = cs.length + ' doboz';
@@ -439,13 +440,13 @@ function vCartons() {
   $('#cq').oninput = e => { F.cq = e.target.value.trim().toUpperCase(); fillCartons(); };
   document.querySelectorAll('[data-aw]').forEach(b => b.onclick = () => { F.cawb = b.dataset.aw; vCartons(); });
   $('#ct').onclick = e => { const r = e.target.closest('[data-c]'); if (r) showCarton(r.dataset.c); };
-  $('#ex').onclick = () => csv([['AWB', 'Doboz', 'Státusz', 'Hely', 'Kész tétel', 'Összes tétel', 'Várt db', 'Felvette', 'Felvétel ideje']].concat(cartonRows().map(c => {
-    const o = D.open.get(c), p = cartonProg(c); return [D.byCarton.get(c)[0].awb, c, o ? o.status : 'nincs felvéve', o && o.place, p.done, p.n, p.qty, o && o.opened_by, o && o.opened_at]; })), 'dobozok.csv');
+  $('#ex').onclick = () => csv([['AWB', 'Doboz', 'Státusz', 'Kész tétel', 'Összes tétel', 'Várt db', 'Felvette', 'Felvétel ideje']].concat(cartonRows().map(c => {
+    const o = D.open.get(c), p = cartonProg(c); return [D.byCarton.get(c)[0].awb, c, o ? o.status : 'nincs felvéve', p.done, p.n, p.qty, o && o.opened_by, o && o.opened_at]; })), 'dobozok.csv');
 }
 function showCarton(c) {
   const o = D.open.get(c), p = cartonProg(c), ls_ = D.byCarton.get(c);
-  const d = dialog(`<h2 class="mono" style="font-size:30px;letter-spacing:.02em">${short(c)} ${o ? `<span class="tag ${o.status === 'done' ? 'ok' : ''}" style="vertical-align:middle">${o.status === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute" style="vertical-align:middle">nincs felvéve</span>'}</h2>
-    <div class="meta" style="margin-bottom:var(--s3)"><span class="mono">${esc(c)}</span><br>AWB <span class="mono">${esc(ls_[0].awb)}</span> ${o ? '· felvette: ' + esc(o.opened_by || '') + ' · ' + fmtDT(o.opened_at) : ''}${o && o.place ? ' · hely: ' + esc(o.place) : ''}</div>
+  const d = dialog(`<div style="margin-bottom:var(--s2);font-size:20px">${idHtml(c)} ${o ? `<span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</div>
+    <div class="meta" style="margin-bottom:var(--s3)">AWB <span class="mono">${esc(ls_[0].awb)}</span> ${o ? '· felvette: ' + esc(o.opened_by || '') + ' · ' + fmtDT(o.opened_at) : ''}</div>
     <div class="card scroll" style="max-height:340px">${ls_.map(l => `<button class="lrow" data-line="${l.id}" data-v="${isLineDone(l) ? 0 : 1}" aria-pressed="${isLineDone(l)}" ${o ? '' : 'disabled'}>
       <span class="box">${isLineDone(l) ? ic('check') : ''}</span><span class="t"><b>${esc(l.descr)}</b><small><span class="mono">${esc(l.sku)}</span>${l.mat && l.mat !== l.descr ? ' · ' + esc(l.mat) : ''}</small></span><b>${l.qty} db</b></button>`).join('')}</div>
     <div class="meta" style="margin-top:var(--s2)">${p.done}/${p.n} tétel kész, ${p.qty} db várt, kb. ${ls_.reduce((a, l) => a + (l.gw || 0), 0).toFixed(1)} kg bruttó</div>
@@ -486,7 +487,7 @@ function showSku(k) {
   const d = dialog(`<h2>${esc(ls_[0].descr)}</h2><div class="meta" style="margin-bottom:var(--s3)"><span class="mono">${esc(k)}</span>${ls_[0].mat && ls_[0].mat !== ls_[0].descr ? ' · ' + esc(ls_[0].mat) : ''}<br>${ls_.length} dobozban, összesen ${ls_.reduce((a, l) => a + l.qty, 0)} db</div>
     <div class="card scroll" style="max-height:380px"><table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th class="n">Db</th></tr></thead><tbody>${ls_.map(l => {
       const s = cartonStatus(l.carton);
-      return `<tr class="clk" data-c="${esc(l.carton)}"><td><b class="mono">${short(l.carton)}</b></td><td class="mono meta">${esc(l.awb.slice(-8))}</td><td>${s ? `<span class="tag ${s === 'done' || isLineDone(l) ? 'ok' : ''}">${isLineDone(l) ? 'tétel kész' : s === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td><td class="n">${l.qty}</td></tr>`; }).join('')}</tbody></table></div>
+      return `<tr class="clk" data-c="${esc(l.carton)}"><td>${idHtml(l.carton)}</td><td class="mono meta">${esc(l.awb.slice(-8))}</td><td>${s ? `<span class="tag ${s === 'done' || isLineDone(l) ? 'ok' : ''}">${isLineDone(l) ? 'tétel kész' : s === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td><td class="n">${l.qty}</td></tr>`; }).join('')}</tbody></table></div>
     <div class="row"><button class="btn" id="cx">Bezár</button></div>`);
   d.querySelector('#cx').onclick = () => d.close();
   d.querySelectorAll('[data-c]').forEach(r => r.onclick = () => showCarton(r.dataset.c));
@@ -505,7 +506,7 @@ function vDiffs() {
       <div class="card"><div class="hd"><h2>Ismeretlen termékkódok</h2></div><div class="scroll">${tbl(unk, x => `<b class="mono">${esc(x.k)}</b>`)}</div></div>
       <div class="card"><div class="hd"><h2>Nincs nyitott dobozban</h2><span class="meta">felesleg vagy hiányzó doboz-felvétel</span></div><div class="scroll">${tbl(cl, x => { const l = D.byKey.get(x.k); return `<b>${l ? esc(l[0].descr) : ''}</b><br><span class="mono meta">${esc(x.k)}</span>`; })}</div></div>
       <div class="card"><div class="hd"><h2>Ismeretlen dobozok</h2></div><div class="scroll">${tbl(ucart, x => `<b class="mono">${esc(x.k)}</b>`)}</div></div>
-      <div class="card"><div class="hd"><h2>Hiányzó tételek a nyitott dobozokból</h2><button class="btn xs" id="ex">${I('dl', 'sm')}CSV</button></div><div class="scroll"><table><thead><tr><th>Doboz</th><th>Termék</th><th class="n">Db</th></tr></thead><tbody>${miss.slice(0, 300).map(l => `<tr><td class="mono"><b>${short(l.carton)}</b></td><td><b>${esc(l.descr)}</b><br><span class="mono meta">${esc(l.sku)}</span></td><td class="n">${l.qty}</td></tr>`).join('') || '<tr><td colspan="3"><div class="empty"><b>Nincs hiányzó tétel</b></div></td></tr>'}</tbody></table>${miss.length > 300 ? '<div class="pg">Az első 300 sor látszik, a teljes lista a CSV-ben van.</div>' : ''}</div></div>
+      <div class="card"><div class="hd"><h2>Hiányzó tételek a nyitott dobozokból</h2><button class="btn xs" id="ex">${I('dl', 'sm')}CSV</button></div><div class="scroll"><table><thead><tr><th>Doboz</th><th>Termék</th><th class="n">Db</th></tr></thead><tbody>${miss.slice(0, 300).map(l => `<tr><td>${idHtml(l.carton)}</td><td><b>${esc(l.descr)}</b><br><span class="mono meta">${esc(l.sku)}</span></td><td class="n">${l.qty}</td></tr>`).join('') || '<tr><td colspan="3"><div class="empty"><b>Nincs hiányzó tétel</b></div></td></tr>'}</tbody></table>${miss.length > 300 ? '<div class="pg">Az első 300 sor látszik, a teljes lista a CSV-ben van.</div>' : ''}</div></div>
     </div>`;
   $('#ex').onclick = () => csv([['AWB', 'Doboz', 'SKU', 'Termék', 'Eredeti megnevezés', 'Db']].concat(miss.map(l => [l.awb, l.carton, l.sku, l.descr, l.mat, l.qty])), 'hianyzo_tetelek.csv');
 }
@@ -519,7 +520,7 @@ function vLog() {
   const fill = () => {
     const r = flt();
     $('#lc').textContent = r.length + ' bejegyzés (az utolsó 2000-ből)';
-    $('#lt').innerHTML = r.length ? `<table><thead><tr><th>Idő</th><th>Eszköz</th><th>Típus</th><th>Kód</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${r.slice(0, 500).map(s => `<tr><td class="mono">${fmtDT(s.ts)}</td><td>${esc(s.device)}</td><td>${esc(s.kind)}</td><td class="mono">${esc(s.raw)}</td><td>${resTag(s.result)}</td><td class="mono"><b>${s.carton ? esc(short(s.carton)) : ''}</b></td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs bejegyzés</b>Még nem volt szkennelés, vagy a szűrés nem talál semmit.</div>';
+    $('#lt').innerHTML = r.length ? `<table><thead><tr><th>Idő</th><th>Eszköz</th><th>Típus</th><th>Kód</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${r.slice(0, 500).map(s => `<tr><td class="mono">${fmtDT(s.ts)}</td><td>${esc(s.device)}</td><td>${esc(s.kind)}</td><td class="mono">${esc(s.raw)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton) : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs bejegyzés</b>Még nem volt szkennelés, vagy a szűrés nem talál semmit.</div>';
   };
   fill();
   $('#lq').oninput = e => { F.lq = e.target.value.trim(); fill(); };
@@ -570,16 +571,17 @@ function vSettings() {
   $('#main').innerHTML = `<div class="grid g-2" style="align-items:start">
     <div class="card"><div class="hd"><h2>Betöltött AWB-k</h2><a class="btn xs" href="#import" style="text-decoration:none">${I('up', 'sm')}Importálás</a></div>${aw.map(a => `<div class="list-row"><div class="grow"><b class="mono">${esc(a.id)}</b><div class="meta">${new Set(D.lines.filter(l => l.awb === a.id).map(l => l.carton)).size} doboz, ${D.lines.filter(l => l.awb === a.id).length} sor · feltöltve ${fmtDT(a.loaded_at)}</div></div>
       <button class="btn sm dng" data-del="${esc(a.id)}">${I('trash', 'sm')}Törlés</button></div>`).join('') || '<div class="empty"><b>Nincs betöltött AWB</b>Az Importálás menüben tölthetsz fel goodslistet.</div>'}</div>
-    <div class="grid"><div class="card pad"><b>Admin kód módosítása</b><label class="field" style="margin-top:var(--s3)"><span>Új kód (legalább 6 karakter)</span><input id="nc" type="password" autocomplete="off"></label><button class="btn pri" id="sc">Mentés</button></div>
+    <div class="grid"><div class="card pad"><b>Admin kód módosítása</b><label class="field" style="margin-top:var(--s3)"><span>Új kód (6 számjegy)</span><input id="nc" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"></label><button class="btn pri" id="sc">Mentés</button></div>
       <div class="card pad"><b>Törlés</b><p class="help">A goodslist megmarad.</p><div class="row" style="justify-content:flex-start;margin:0"><button class="btn dng" data-rs="open">Felvett dobozok és tételek</button><button class="btn dng" data-rs="scans">Napló</button></div></div>
       <div class="card pad"><b>Megjelenés</b><div class="row" style="justify-content:flex-start"><button class="chip" data-th="">Rendszer</button><button class="chip" data-th="light">Világos</button><button class="chip" data-th="dark">Sötét</button></div></div>
       <button class="btn" id="out">Kilépés az admin módból</button></div></div>`;
+  $('#nc').oninput = e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); };
   $('#main').onclick = async e => {
     const b = e.target.closest('button'); if (!b) return; const d = b.dataset;
     if (d.del) { if (await confirmDlg(`Biztosan törlöd ezt az AWB-t (${d.del}) és a hozzá tartozó felvett dobozokat?`, 'Törlés', true) && await adm('rk_admin_delete_awb', {p_awb: d.del})) { toast('AWB törölve'); await tick(true); } }
     if (d.rs) { if (await confirmDlg(d.rs === 'open' ? 'Törlöd az összes felvett dobozt és tétel-állapotot? Nem vonható vissza.' : 'Törlöd a teljes naplót?', 'Törlés', true) && await adm('rk_admin_reset', {p_what: d.rs})) { toast('Törölve'); await tick(); } }
     if (d.th !== undefined && b.classList.contains('chip')) { if (d.th) document.documentElement.dataset.theme = d.th; else delete document.documentElement.dataset.theme; ls.set('rk_theme', d.th); }
-    if (b.id === 'sc') { const v = $('#nc').value, r = await adm('rk_admin_set_code', {p_new: v}); if (r && r.ok) { adminCode = v; ls.set('rk_admin', v); toast('Kód módosítva'); } else if (r) toast('A kód túl rövid'); }
+    if (b.id === 'sc') { const v = $('#nc').value; if (!/^\d{6}$/.test(v)) return toast('Az admin kód pontosan 6 számjegy'); const r = await adm('rk_admin_set_code', {p_new: v}); if (r && r.ok) { adminCode = v; ls.set('rk_admin', v); $('#nc').value = ''; toast('Kód módosítva'); } else if (r) toast('A kód nem fogadható el'); }
     if (b.id === 'out') { adminCode = ''; ls.del('rk_admin'); login(); }
   };
 }

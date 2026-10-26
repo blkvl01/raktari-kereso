@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2342d6">
 <title>Raktári kereső</title>
-<link rel="stylesheet" href="common.css?v=3">
+<link rel="stylesheet" href="common.css?v=4">
 <style>
 body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
 .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
@@ -15,16 +15,16 @@ body{padding-bottom:calc(68px + env(safe-area-inset-bottom))}
 .top .chip{min-height:34px;padding:0 10px}
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:var(--t-small);color:var(--mute)}
 .sync.off{color:var(--bad);font-weight:700}
-@media (max-width:480px){.brand b{display:none}}
 main{max-width:720px;margin:0 auto;padding:var(--s3)}
 
 .scan{position:relative}
-.scan input{width:100%;font-size:22px;padding:14px 100px 14px 48px;border:2px solid var(--accent);border-radius:var(--r);background:var(--surface);letter-spacing:.5px;box-shadow:var(--sh)}
-.scan input::placeholder{color:var(--mute);letter-spacing:0}
+.scan input{width:100%;font-size:21px;padding:14px 16px 14px 48px;border:2px solid var(--accent);border-radius:var(--r);background:var(--surface);letter-spacing:.3px;box-shadow:var(--sh);text-transform:uppercase}
+.scan input::placeholder{color:var(--mute);letter-spacing:0;text-transform:none;font-size:18px}
 .scan .lead{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--accent);pointer-events:none}
-.scan .kb{position:absolute;right:8px;top:8px;bottom:8px;min-height:0;padding:0 14px}
+.scan.has-btn input{padding-right:116px}
+.scan .addb{position:absolute;right:8px;top:8px;bottom:8px;min-height:0;padding:0 14px}
 
-/* eredmeny: egy fo elem, a doboz szama */
+/* eredmeny: egy fo elem, a doboz azonositoja */
 #res{margin-top:var(--s3)}
 .hero{border-radius:var(--r);padding:var(--s4);color:var(--hero-ink);background:var(--hero-bg) radial-gradient(120% 90% at 100% 0%,rgb(255 255 255 / .2),transparent 60%);box-shadow:var(--sh);animation:pop .28s var(--ease)}
 .hero.ok{--hero-bg:var(--ok-strong);--hero-ink:var(--ok-strong-ink)}
@@ -34,14 +34,14 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .hero-top{display:flex;align-items:center;gap:var(--s2);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:13px}
 .hero-ico{width:30px;height:30px;border-radius:50%;background:rgb(255 255 255 / .22);display:grid;place-items:center}
 .hero-top .aux{margin-left:auto;opacity:.9;letter-spacing:0;text-transform:none;font-weight:700}
-.hero-num{font-size:clamp(60px,21vw,92px);font-weight:800;line-height:1;letter-spacing:.02em;margin:var(--s3) 0 var(--s1)}
-.hero-id{opacity:.88;font-size:13px;word-break:break-all}
-.hero-prod{margin-top:var(--s2);font-size:18px;font-weight:700;line-height:1.25}
+.hero .idc{margin:var(--s3) 0 var(--s1)}
+.hero .idc .idp{color:inherit;opacity:.85;font-size:clamp(19px,6.2vw,28px);font-weight:700}
+.hero .idc .id4{margin:0;padding:0 14px;background:rgb(255 255 255 / .22);color:inherit;font-size:clamp(58px,20vw,92px);line-height:1.12;letter-spacing:.04em}
+.hero-prod{margin-top:var(--s3);font-size:18px;font-weight:700;line-height:1.25}
 .hchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--s3)}
 .hchip{background:rgb(255 255 255 / .2);padding:4px 11px;border-radius:999px;font-weight:700;font-size:13px;display:inline-flex;align-items:center;gap:5px}
 .hero-btn{margin-top:var(--s4);width:100%;min-height:58px;font-size:17px;border-radius:12px;border:0;background:var(--hero-ink);color:var(--hero-bg);font-weight:800;cursor:pointer;transition:transform .1s,filter .15s}
 .hero-btn:hover{filter:brightness(.95)}.hero-btn:active{transform:translateY(1px)}
-.hero-btn.alt{background:rgb(255 255 255 / .2);color:var(--hero-ink)}
 .hero-note{margin-top:var(--s2);font-size:13px;opacity:.92}
 
 .prod{margin-top:var(--s3);padding:var(--s3) var(--s4)}
@@ -49,17 +49,16 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .prod .en{color:var(--mute);font-size:var(--t-small);margin-top:2px}
 .prod .sk{margin-top:var(--s2);display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .alt-h{margin:var(--s4) var(--s1) var(--s2)}
-.alt{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line-2)}
+.alt{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line-2);flex-wrap:wrap}
 .alt:last-child{border-bottom:0}
-.alt .num{font-size:34px;font-weight:800;line-height:1;letter-spacing:.02em}
-.alt .rest{flex:1;min-width:0}
-.alt.dim{opacity:.62}.alt.dim .num{font-size:24px}
-.alt.big .num{font-size:44px}
-.qty{font-weight:800}
+.alt .rest{flex:1;min-width:0;display:grid;gap:6px;justify-items:start}
+.alt .idc{font-size:19px}
+.alt.big .idc{font-size:21px}
+.alt.dim{opacity:.62}
 
 .idle{display:grid;justify-items:center;text-align:center;gap:var(--s3);padding:var(--s6) var(--s4) var(--s4)}
 .idle .frame{width:132px;height:132px;border-radius:30px;border:2px dashed var(--accent-line);display:grid;place-items:center;color:var(--accent);position:relative;overflow:hidden;background:var(--accent-soft)}
-.idle .frame::after{content:"";position:absolute;left:12px;right:12px;height:3px;border-radius:2px;background:var(--accent);animation:scanline 2.2s ease-in-out infinite}
+.idle .frame.scanning::after{content:"";position:absolute;left:12px;right:12px;height:3px;border-radius:2px;background:var(--accent);animation:scanline 2.2s ease-in-out infinite}
 @keyframes scanline{0%,100%{top:18%}50%{top:78%}}
 .idle h2{margin:0;font-size:22px;letter-spacing:-.01em}
 .idle p{margin:0;color:var(--mute);max-width:34ch}
@@ -72,7 +71,7 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .kpi b{display:block;font-size:28px;line-height:1.05;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .kpi span{font-size:12px;color:var(--mute);font-weight:600}
 
-.hist .list-row{padding:var(--s2) var(--s4);cursor:pointer;font-size:14px}
+.hist .list-row{padding:var(--s2) var(--s4);cursor:pointer;font-size:14px;flex-wrap:wrap}
 .hist .list-row:hover{background:var(--accent-soft)}
 
 .lrow{display:flex;align-items:center;gap:var(--s3);width:100%;padding:var(--s3) var(--s4);border:0;border-bottom:1px solid var(--line-2);background:none;text-align:left;cursor:pointer;min-height:56px}
@@ -87,22 +86,31 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .crow{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line-2);cursor:pointer}
 .crow:last-child{border-bottom:0}
 .crow:hover{background:var(--accent-soft)}
-.crow .num{font-size:26px;font-weight:800;letter-spacing:.02em}
-.crow .grow{flex:1;min-width:0}
+.crow .grow{flex:1;min-width:0;display:grid;gap:4px;justify-items:start}
+.crow .idc{font-size:17px}
 .filters{display:flex;gap:var(--s2);margin:0 0 var(--s3);flex-wrap:wrap}
+
+/* kapcsolo (toggle switch) */
+.swb{display:flex;align-items:center;gap:var(--s3);width:100%;padding:var(--s3) var(--s4);border:1px solid var(--line);border-radius:var(--r);background:var(--surface);cursor:pointer;text-align:left;box-shadow:var(--sh);margin-bottom:var(--s3)}
+.swb[aria-checked=true]{border-color:var(--accent);background:var(--accent-soft)}
+.swb .track{width:52px;height:30px;border-radius:999px;background:var(--mute);position:relative;flex:none;transition:background .2s}
+.swb .track::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:var(--surface);box-shadow:0 1px 3px rgb(0 0 0 / .3);transition:transform .2s var(--ease)}
+.swb[aria-checked=true] .track{background:var(--accent)}
+.swb[aria-checked=true] .track::after{transform:translateX(22px)}
+.swb .l b{display:block}.swb .l small{color:var(--mute);font-size:var(--t-small)}
+.msg{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;padding:var(--s3) var(--s4);border-radius:var(--r-sm);margin:var(--s3) 0;font-weight:650;animation:pop .22s var(--ease)}
+.msg.ok{background:var(--ok-soft);color:var(--ok)}.msg.warn{background:var(--warn-soft);color:var(--warn)}.msg.bad{background:var(--bad-soft);color:var(--bad)}
 
 nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:10;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;gap:var(--s2);padding:var(--s2) var(--s3);padding-bottom:calc(var(--s2) + env(safe-area-inset-bottom))}
 nav.tabs button{flex:1;min-height:52px;border:0;border-radius:var(--r-sm);background:none;display:flex;align-items:center;justify-content:center;gap:var(--s2);font-size:15px;font-weight:700;color:var(--mute);cursor:pointer}
 nav.tabs button[aria-selected=true]{color:var(--accent-ink);background:var(--accent)}
 nav.tabs button:not([aria-selected=true]):hover{background:var(--accent-soft)}
-@media (min-width:720px){.hero-num{font-size:104px}}
 </style>
 </head>
 <body>
 <header class="top">
-  <div class="brand"><span class="logo" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg></span><b>Raktári kereső</b></div>
+  <div class="brand"><span class="logo" aria-hidden="true"><svg class="i" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/></svg></span></div>
   <span class="sync" id="sync" role="status" aria-live="polite"></span>
-  <button class="chip" id="plc" aria-label="Új dobozok helye"></button>
   <button class="chip" id="dev" aria-label="Eszköz neve"></button>
   <button class="chip" id="mut" aria-label="Hang be/ki"></button>
 </header>
@@ -111,15 +119,14 @@ nav.tabs button:not([aria-selected=true]):hover{background:var(--accent-soft)}
 <dialog id="dlg"></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="common.js?v=3"></script>
+<script src="common.js?v=4"></script>
 <script>
 let view = ls.get('rk_view') === 'cartons' ? 'cartons' : 'scan';
 let device = ls.get('rk_device') || '';
-let place = ls.get('rk_place') || '';
 let muted = ls.get('rk_mute') === '1';
-let last = null, kbd = false, loading = true;
+let last = null, loading = true;
 let hist = []; try { hist = JSON.parse(ls.get('rk_hist') || '[]'); } catch (e) {}
-let cf = {st: 'open', q: ''};
+let cf = {st: 'open', q: '', add: false, msg: null};
 let shellView = '';
 
 // ---------- visszajelzes ----------
@@ -177,9 +184,9 @@ async function setLine(id, done) {
   await call('rk_set_line', {p_line: id, p_done: done, p_device: device});
 }
 async function openCarton(c) {
-  if (!D.open.has(c)) D.open.set(c, {carton: c, status: 'open', opened_by: device, place: place || null, opened_at: new Date().toISOString()});
+  if (!D.open.has(c)) D.open.set(c, {carton: c, status: 'open', opened_by: device, opened_at: new Date().toISOString()});
   update();
-  await call('rk_open_carton', {p_carton: c, p_device: device, p_place: place});
+  await call('rk_open_carton', {p_carton: c, p_device: device});
 }
 async function setDone(c, done) {
   const o = D.open.get(c); if (o) o.status = done ? 'done' : 'open';
@@ -188,23 +195,28 @@ async function setDone(c, done) {
 }
 
 // ---------- szkennelt kod ----------
-function pushHist(raw, label, result) {
-  hist.unshift({t: Date.now(), raw, label, result}); hist = hist.slice(0, 12); ls.set('rk_hist', JSON.stringify(hist));
+function pushHist(raw, text, result, carton) {
+  hist.unshift({t: Date.now(), raw, text, carton: carton || '', result}); hist = hist.slice(0, 12); ls.set('rk_hist', JSON.stringify(hist));
 }
 async function onScan(raw, replay) {
   raw = raw.trim(); if (!raw) return;
   const c = classify(raw);
+  if (c.kind === 'badcarton') {
+    last = {t: 'badcarton', raw: c.raw};
+    if (!replay) { logScan('carton', c.raw, '', 'unknown', ''); pushHist(c.raw, 'Érvénytelen doboz azonosító', 'bad'); }
+    beep('bad'); return update();
+  }
   if (c.kind === 'carton') {
     if (!D.byCarton.has(c.carton)) {
       last = {t: 'carton', carton: c.carton, state: 'unknown', raw};
-      if (!replay) { logScan('carton', raw, '', 'unknown', c.carton); pushHist(raw, 'Ismeretlen doboz', 'bad'); }
+      if (!replay) { logScan('carton', raw, '', 'unknown', c.carton); pushHist(raw, 'Ismeretlen doboz', 'bad', c.carton); }
       beep('bad'); return update();
     }
     const st = cartonStatus(c.carton);
     const state = !st ? 'opened' : st === 'done' ? 'done' : 'already';
     last = {t: 'carton', carton: c.carton, state, raw};
     if (!replay) {
-      pushHist(raw, 'Doboz ' + short(c.carton), state === 'opened' ? 'ok' : 'warn');
+      pushHist(raw, state === 'opened' ? 'Doboz felvéve' : state === 'done' ? 'Kész doboz' : 'Már felvett doboz', state === 'opened' ? 'ok' : 'warn', c.carton);
       if (state === 'opened') { openCarton(c.carton); } else logScan('carton', raw, '', state, c.carton);
     }
     beep(state === 'done' ? 'bad' : 'ok'); return update();
@@ -221,7 +233,7 @@ async function onScan(raw, replay) {
   last = {t: 'sku', key: c.key, raw};
   if (!replay) {
     logScan('sku', raw, c.key, res, open[0] && open[0].carton);
-    pushHist(raw, lines[0].descr + (open.length === 1 ? ' > ' + short(open[0].carton) : open.length ? ' > ' + open.length + ' doboz' : ''), open.length ? 'ok' : 'warn');
+    pushHist(raw, lines[0].descr + (open.length > 1 ? ' (' + open.length + ' doboz)' : ''), open.length ? 'ok' : 'warn', open.length === 1 ? open[0].carton : '');
   }
   beep(open.length ? 'ok' : 'bad'); update();
 }
@@ -229,7 +241,6 @@ async function onScan(raw, replay) {
 // ---------- megjelenites ----------
 function renderChrome() {
   $('#dev').innerHTML = esc(device || 'Eszköz neve');
-  $('#plc').innerHTML = ic('pin') + esc(place || 'Hely');
   $('#mut').innerHTML = muted ? ic('mute') : ic('vol');
   $('#mut').setAttribute('aria-pressed', muted);
   $('#sync').setAttribute('aria-label', D.online ? 'Online' : 'Nincs kapcsolat');
@@ -237,7 +248,7 @@ function renderChrome() {
   $('#sync').innerHTML = (D.online ? ic('wifi') : ic('off') + 'Nincs kapcsolat') + (Q.length ? ` ${Q.length} függő` : '');
   const tabs = [['scan', 'Szkennelés', 'scan'], ['cartons', 'Dobozok', 'box']];
   $('#tabs').innerHTML = tabs.map(([k, n, i]) => `<button role="tab" data-v="${k}" aria-selected="${view === k}">${ic(i)}${n}</button>`).join('');
-  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { view = b.dataset.v; ls.set('rk_view', view); shellView = ''; update(); });
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { view = b.dataset.v; ls.set('rk_view', view); shellView = ''; cf.add = false; cf.msg = null; update(); });
 }
 function kpisHtml() {
   const o = [...D.open.values()];
@@ -250,7 +261,6 @@ function update() {
   if (loading) { $('#app').innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; shellView = ''; return; }
   if (view === 'scan') updateScan(); else updateCartons();
 }
-function placeChip(c) { const o = D.open.get(c); return o && o.place ? `<span class="hchip">${ic('pin').replace('class="i"', 'class="i sm"')}${esc(o.place)}</span>` : ''; }
 function nameBlock(l0) {
   return `<div class="card prod pop"><div class="eyebrow">Termék</div><h3>${esc(l0.descr)}</h3>${l0.mat && l0.mat !== l0.descr ? `<div class="en">Eredeti: ${esc(l0.mat)}</div>` : ''}
     <div class="sk"><span class="tag mono">${esc(l0.sku.split('-')[0])}</span></div></div>`;
@@ -258,34 +268,31 @@ function nameBlock(l0) {
 
 function idleHtml() {
   if (!D.lines.length) return `<div class="idle"><div class="frame">${ic('layers').replace('class="i"', 'class="i lg"')}</div><h2>Nincs betöltött goodslist</h2><p>Az admin felületen importáld a goodslist fájlokat, utána itt azonnal használható.</p></div>`;
-  return `<div class="idle"><div class="frame">${ic('scan').replace('class="i"', 'class="i lg" style="width:48px;height:48px"')}</div><h2>Szkenneld a kódot</h2>
-    <p>A program magától felismeri, hogy doboz címke vagy termék vonalkód.</p>
-    <div class="steps"><div class="step"><span class="ic">${ic('box')}</span><div><b>Hiányos doboz címkéje</b><div class="meta">A doboz bekerül a nyitott dobozok közé.</div></div></div>
-    <div class="step"><span class="ic">${ic('target')}</span><div><b>Termék vonalkódja</b><div class="meta">Megmondja, melyik dobozba tartozik.</div></div></div>
-    <div class="step"><span class="ic">${ic('search')}</span><div><b>Sérült kód?</b><div class="meta">Nyomd meg a "Kézi" gombot, és írd be az utolsó 4-6 számjegyet.</div></div></div></div></div>`;
+  return `<div class="idle"><div class="frame scanning">${ic('scan').replace('class="i"', 'class="i lg" style="width:48px;height:48px"')}</div><h2>Szkenneld a kódot</h2>
+    <p>A program magától felismeri, hogy doboz címke vagy termék vonalkód. Be is írhatod a mezőbe.</p>
+    <div class="steps"><div class="step"><span class="ic">${ic('box')}</span><div><b>Hiányos doboz címkéje</b><div class="meta">Formátum: RQ-XPW és 10 számjegy. A doboz bekerül a nyitott dobozok közé.</div></div></div>
+    <div class="step"><span class="ic">${ic('target')}</span><div><b>Termék vonalkódja</b><div class="meta">Megmondja, melyik dobozba tartozik.</div></div></div></div></div>`;
 }
 function skuHtml() {
   const lines = D.byKey.get(last.key) || [], l0 = lines[0];
   const targets = lines.filter(l => cartonStatus(l.carton) === 'open' && !isLineDone(l))
-    .sort((a, b) => cartonProg(b.carton).ratio - cartonProg(a.carton).ratio || b.qty - a.qty);
+    .sort((a, b) => cartonProg(b.carton).ratio - cartonProg(a.carton).ratio);
   const fin = lines.filter(l => isLineDone(l) || cartonStatus(l.carton) === 'done');
   const unopened = lines.filter(l => !cartonStatus(l.carton));
-  const frow = l => `<div class="alt dim"><span class="num mono">${short(l.carton)}</span><div class="rest"><div class="meta">${l.qty} db · ${isLineDone(l) ? 'tétel kész' : 'doboz kész'}</div></div>
+  const frow = l => `<div class="alt dim"><div class="rest">${idHtml(l.carton)}<span class="meta">${isLineDone(l) ? 'tétel kész' : 'doboz kész'}</span></div>
       ${isLineDone(l) ? `<button class="btn xs" data-line="${l.id}" data-v="0">Mégsem</button>` : `<button class="btn xs" data-reopen="${esc(l.carton)}">Újranyit</button>`}</div>`;
-  const orow = l => `<div class="alt"><span class="num mono">${short(l.carton)}</span><div class="rest"><div class="meta mono">${esc(l.carton)}</div><div class="meta"><span class="qty">${l.qty} db</span> ${awbTag(l)}</div></div>
-      <button class="btn sm pri" data-open="${esc(l.carton)}">Felvétel</button></div>`;
+  const orow = l => `<div class="alt"><div class="rest">${idHtml(l.carton)}${awbTag(l)}</div><button class="btn sm pri" data-open="${esc(l.carton)}">Felvétel</button></div>`;
   if (targets.length) {
     const t = targets[0], p = cartonProg(t.carton), n = targets.length;
     const rest = targets.slice(1);
     return `<section class="hero ok"><div class="hero-top"><span class="hero-ico">${ic('check')}</span>Ide tedd<span class="aux">${n > 1 ? n + ' nyitott doboz jó' : ''}</span></div>
-      <div class="hero-num mono">${short(t.carton)}</div><div class="hero-id mono">${esc(t.carton)}</div>
+      ${idHtml(t.carton, true)}
       <div class="hero-prod">${esc(l0.descr)}</div>
-      <div class="hchips"><span class="hchip qty">${t.qty} db várt</span><span class="hchip">${p.done}/${p.n} tétel kész</span>${placeChip(t.carton)}</div>
-      <div class="hchips"><span class="hchip mono">${esc(t.awb)}</span></div>
+      <div class="hchips"><span class="hchip">${p.done}/${p.n} tétel kész</span><span class="hchip mono">${esc(t.awb)}</span></div>
       <button class="hero-btn" data-line="${t.id}" data-v="1">Tétel kész</button>
-      ${n > 1 ? '<div class="hero-note">Több doboz is jó, a várt darabszám segít választani.</div>' : ''}</section>
+      ${n > 1 ? '<div class="hero-note">Több nyitott doboz is jó. Lent látod a többit.</div>' : ''}</section>
       ${nameBlock(l0)}
-      ${rest.length ? `<div class="eyebrow alt-h">Másik lehetőség</div><div class="card">${rest.map(l => { const pp = cartonProg(l.carton); return `<div class="alt big"><span class="num mono">${short(l.carton)}</span><div class="rest"><div class="meta mono">${esc(l.carton)}</div><div class="meta"><span class="qty">${l.qty} db</span> · ${pp.done}/${pp.n} kész ${placeChip(l.carton).replace('hchip', 'tag')}</div></div><button class="btn sm pri" data-line="${l.id}" data-v="1">Kész</button></div>`; }).join('')}</div>` : ''}
+      ${rest.length ? `<div class="eyebrow alt-h">Másik lehetőség</div><div class="card">${rest.map(l => { const pp = cartonProg(l.carton); return `<div class="alt big"><div class="rest">${idHtml(l.carton)}<span class="meta">${pp.done}/${pp.n} tétel kész</span></div><button class="btn sm pri" data-line="${l.id}" data-v="1">Kész</button></div>`; }).join('')}</div>` : ''}
       ${fin.length ? `<div class="eyebrow alt-h">Ezekben már kész</div><div class="card">${fin.map(frow).join('')}</div>` : ''}`;
   }
   const finOpen = fin.length && lines.some(l => cartonStatus(l.carton) === 'open');
@@ -297,58 +304,53 @@ function skuHtml() {
 function cartonLines(c) {
   const ls_ = D.byCarton.get(c) || [];
   return `<div class="contents">${ls_.map(l => `<button class="lrow" data-line="${l.id}" data-v="${isLineDone(l) ? 0 : 1}" aria-pressed="${isLineDone(l)}">
-    <span class="box">${isLineDone(l) ? ic('check') : ''}</span><span class="t"><b>${esc(l.descr)}</b><small class="mono">${esc(l.sku.split('-')[0])}</small></span><b>${l.qty} db</b></button>`).join('')}</div>`;
+    <span class="box">${isLineDone(l) ? ic('check') : ''}</span><span class="t"><b>${esc(l.descr)}</b><small class="mono">${esc(l.sku.split('-')[0])}</small></span></button>`).join('')}</div>`;
 }
 function cartonCard() {
   const c = last.carton, st = last.state;
-  if (st === 'unknown') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Ismeretlen doboz</div><div class="hero-id mono" style="margin-top:var(--s3)">${esc(c)}</div><div class="hero-note">Ez a doboz egyik betöltött AWB-ben sem szerepel. A napló rögzítette.</div></section>`;
+  if (st === 'unknown') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Ismeretlen doboz</div>${idHtml(c, true)}<div class="hero-note">Ez a doboz egyik betöltött AWB-ben sem szerepel. A napló rögzítette.</div></section>`;
   const map = {opened: ['ok', 'check', 'Doboz felvéve'], already: ['info', 'info', 'Már fel van véve'], done: ['warn', 'alert', 'Kész státuszú doboz']};
   const [cls, icn, txt] = map[st]; const p = cartonProg(c), cur = cartonStatus(c), l0 = (D.byCarton.get(c) || [])[0];
   return `<section class="hero ${cls}"><div class="hero-top"><span class="hero-ico">${ic(icn)}</span>${txt}</div>
-    <div class="hero-num mono">${short(c)}</div><div class="hero-id mono">${esc(c)}</div>
-    <div class="hchips"><span class="hchip">${p.done}/${p.n} tétel kész</span><span class="hchip">${p.qty} db várt</span>${placeChip(c)}</div>
-    <div class="hchips"><span class="hchip mono">${esc(l0.awb)}</span></div></section>
+    ${idHtml(c, true)}
+    <div class="hchips"><span class="hchip">${p.done}/${p.n} tétel kész</span><span class="hchip mono">${esc(l0.awb)}</span></div></section>
     <div class="card" style="margin-top:var(--s3)"><div class="hd"><h2>Tartalom</h2><span class="meta">koppints a kész tételre</span></div>${cartonLines(c)}</div>
     <div class="row" style="justify-content:stretch">
-      <button class="btn" data-place="${esc(c)}">${ic('pin')}Hely</button>
       ${st === 'opened' ? `<button class="btn" data-unopen="${esc(c)}">${ic('undo')}Visszavon</button>` : ''}
       ${cur === 'done' ? `<button class="btn pri" style="flex:1" data-reopen="${esc(c)}">Újranyitás</button>` : `<button class="btn pri" style="flex:1" data-cdone="${esc(c)}">Doboz kész</button>`}</div>`;
 }
 function candsHtml() {
   const c = last.c;
   return `<section class="hero info"><div class="hero-top"><span class="hero-ico">${ic('search')}</span>Válassz a találatok közül</div></section>
-    <div class="card" style="margin-top:var(--s3)">${c.skus.map(k => { const l = D.byKey.get(k); return `<button class="lrow" data-pick="${k}"><span class="t"><b>${esc(l[0].descr)}</b><small class="mono">${esc(k)}</small></span><span class="tag">${l.length} doboz</span></button>`; }).join('')}
-    ${c.cartons.map(x => `<button class="lrow" data-pick="${esc(x)}"><span class="t"><b class="mono" style="font-size:20px">${short(x)}</b><small>doboz</small></span><span class="tag ${cartonStatus(x) === 'done' ? 'ok' : ''}">${cartonStatus(x) === 'done' ? 'kész' : cartonStatus(x) ? 'nyitott' : 'nincs felvéve'}</span></button>`).join('')}</div>`;
+    <div class="card" style="margin-top:var(--s3)">${c.skus.map(k => { const l = D.byKey.get(k); return `<button class="lrow" data-pick="${k}"><span class="t"><b>${esc(l[0].descr)}</b><small class="mono">${esc(k)}</small></span><span class="tag">${l.length} doboz</span></button>`; }).join('')}</div>`;
 }
 function resultHtml() {
   if (!last || !D.lines.length) return idleHtml();
-  if (last.t === 'unknown') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs a goodslistben</div><div class="hero-id mono" style="margin-top:var(--s3);font-size:20px">${esc(last.raw)}</div><div class="hero-note">Egyik betöltött AWB-ben sem szerepel. Tedd az ismeretlen termékek helyére. A napló rögzítette.</div></section>`;
+  if (last.t === 'badcarton') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Érvénytelen doboz azonosító</div><div class="mono" style="margin-top:var(--s3);font-size:20px;word-break:break-all">${esc(last.raw)}</div><div class="hero-note" style="font-size:15px">A doboz azonosítója RQ-XPW és pontosan 10 számjegy, például RQ-XPW1305268664.</div></section>`;
+  if (last.t === 'unknown') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs a goodslistben</div><div class="mono" style="margin-top:var(--s3);font-size:20px;word-break:break-all">${esc(last.raw)}</div><div class="hero-note">Egyik betöltött AWB-ben sem szerepel. Tedd az ismeretlen termékek helyére. A napló rögzítette.</div></section>`;
   if (last.t === 'carton') return cartonCard();
   if (last.t === 'cands') return candsHtml();
   return skuHtml();
 }
 function histHtml() {
   if (!hist.length) return '';
-  return `<div class="card hist" style="margin-top:var(--s4)"><div class="hd"><h2>Utolsó szkennelések</h2></div>${hist.map((h, i) => `<div class="list-row" data-h="${i}"><span class="meta mono">${fmtT(h.t)}</span><span class="grow">${esc(h.label)}</span><span class="tag ${h.result === 'ok' ? 'ok' : h.result === 'bad' ? 'bad' : 'warn'}">${h.result === 'ok' ? 'ok' : h.result === 'bad' ? 'hiba' : 'figy.'}</span></div>`).join('')}</div>`;
+  return `<div class="card hist" style="margin-top:var(--s4)"><div class="hd"><h2>Utolsó szkennelések</h2></div>${hist.map((h, i) => `<div class="list-row" data-h="${i}"><span class="meta mono">${fmtT(h.t)}</span><span class="grow">${esc(h.text || h.label || '')}${h.carton ? ' ' + idHtml(h.carton) : ''}</span><span class="tag ${h.result === 'ok' ? 'ok' : h.result === 'bad' ? 'bad' : 'warn'}">${h.result === 'ok' ? 'ok' : h.result === 'bad' ? 'hiba' : 'figy.'}</span></div>`).join('')}</div>`;
 }
 
 function updateScan() {
   if (shellView !== 'scan') {
     shellView = 'scan';
     $('#app').innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
-        <input id="scan" inputmode="${kbd ? 'numeric' : 'none'}" enterkeyhint="done" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Szkennelt kód" placeholder="Szkenneld a kódot">
-        <button type="button" class="btn sm kb" id="kb" aria-pressed="${kbd}">Kézi</button></form>
+        <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Szkennelt vagy beírt kód" placeholder="Szkenneld vagy írd be a kódot"></form>
       <div id="res"></div><div id="st"></div><div id="hs"></div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
-    $('#kb').onclick = () => { kbd = !kbd; $('#kb').setAttribute('aria-pressed', kbd); inp.setAttribute('inputmode', kbd ? 'numeric' : 'none'); inp.blur(); inp.focus(); };
-    inp.onblur = () => setTimeout(() => { if (view === 'scan' && !kbd && !document.querySelector('dialog[open]') && (document.activeElement === document.body || document.activeElement === null)) inp.focus(); }, 80);
     inp.focus();
     $('#res').onclick = onResClick; $('#hs').onclick = e => { const r = e.target.closest('[data-h]'); if (r) onScan(hist[+r.dataset.h].raw, true); };
   }
   $('#res').innerHTML = resultHtml();
   $('#st').innerHTML = kpisHtml();
-  $('#hs').innerHTML = histHtml() + '<div class="meta" style="text-align:center;margin:var(--s4) 0">Verzió: v3</div>';
+  $('#hs').innerHTML = histHtml() + '<div class="meta" style="text-align:center;margin:var(--s4) 0">Verzió: v4</div>';
   $('#scan').disabled = !D.lines.length;
 }
 function onResClick(e) {
@@ -359,7 +361,6 @@ function onResClick(e) {
   if (d.reopen) return setDone(d.reopen, false).then(() => toast('Újranyitva'));
   if (d.cdone) return setDone(d.cdone, true).then(() => { toast('Doboz kész'); last = null; update(); });
   if (d.unopen) return unopen(d.unopen);
-  if (d.place) return askPlaceFor(d.place);
   if (d.pick) return onScan(d.pick);
 }
 async function unopen(c) {
@@ -370,54 +371,69 @@ async function unopen(c) {
 }
 
 // ---------- dobozok nezet ----------
+async function addCarton(raw) {
+  const c = classify(raw);
+  if (c.kind !== 'carton') { cf.msg = {tone: 'bad', html: 'Érvénytelen doboz azonosító. A formátum: RQ-XPW és 10 számjegy.'}; logScan('carton', raw, '', 'unknown', ''); beep('bad'); return updateCartons(); }
+  if (!D.byCarton.has(c.carton)) { cf.msg = {tone: 'bad', html: idHtml(c.carton) + ' nincs a goodslistben.'}; logScan('carton', raw, '', 'unknown', c.carton); beep('bad'); return updateCartons(); }
+  const st = cartonStatus(c.carton);
+  if (st) { cf.msg = {tone: 'warn', html: idHtml(c.carton) + (st === 'done' ? ' már kész.' : ' már fel van véve.')}; logScan('carton', raw, '', st === 'done' ? 'done' : 'already', c.carton); beep('bad'); return updateCartons(); }
+  cf.msg = {tone: 'ok', html: idHtml(c.carton) + ' felvéve új hiányos dobozként.'};
+  beep('ok'); pushHist(raw, 'Doboz felvéve', 'ok', c.carton);
+  await openCarton(c.carton);
+}
 function updateCartons() {
   if (shellView !== 'cartons') {
     shellView = 'cartons';
-    $('#app').innerHTML = `<div id="st"></div><div class="filters" id="fl"></div>
-      <input class="inp" id="cq" inputmode="numeric" placeholder="Doboz száma (utolsó számjegyek)" aria-label="Keresés" style="margin-bottom:var(--s3)" value="${esc(cf.q)}">
+    $('#app').innerHTML = `<div id="st"></div>
+      <button class="swb" id="sw" role="switch" aria-checked="false"><span class="track"></span><span class="l"><b>Hiányos doboz hozzáadása</b><small id="swh"></small></span></button>
+      <form class="scan" id="af" autocomplete="off"><span class="lead">${ic('search')}</span>
+        <input id="cq" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Doboz azonosító"><button class="btn pri sm addb" id="addb" type="submit" hidden>Hozzáad</button></form>
+      <div id="am" role="status" aria-live="polite"></div>
+      <div class="filters" id="fl" style="margin-top:var(--s3)"></div>
       <div class="card" id="cl"></div>`;
-    $('#cq').oninput = e => { cf.q = e.target.value.replace(/\D/g, ''); fillCartons(); };
+    $('#sw').onclick = () => { cf.add = !cf.add; cf.msg = null; cf.q = ''; $('#cq').value = ''; updateCartons(); $('#cq').focus(); };
+    $('#af').onsubmit = e => { e.preventDefault(); const v = $('#cq').value; $('#cq').value = ''; if (cf.add && v.trim()) addCarton(v); };
+    $('#cq').oninput = e => { if (!cf.add) { cf.q = e.target.value.toUpperCase().replace(/\s/g, ''); fillCartons(); } };
     $('#cl').onclick = e => { const r = e.target.closest('[data-c]'); if (r) showCarton(r.dataset.c); };
   }
+  const on = cf.add;
   $('#st').innerHTML = kpisHtml();
+  $('#sw').setAttribute('aria-checked', on);
+  $('#swh').textContent = on ? 'Be van kapcsolva: a beszkennelt vagy beírt doboz új hiányos dobozként kerül a listára.' : 'Ki van kapcsolva: a mező a listában keres.';
+  const cq = $('#cq'); cq.placeholder = on ? 'RQ-XPW...' : 'Keresés a listában (azonosító részlete)';
+  $('#af').classList.toggle('has-btn', on); $('#addb').hidden = !on;
+  $('#am').innerHTML = on && cf.msg ? `<div class="msg ${cf.msg.tone}">${cf.msg.html}</div>` : '';
   $('#fl').innerHTML = [['open', 'Nyitott'], ['done', 'Kész'], ['all', 'Mind']].map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${cf.st === k}">${n}</button>`).join('');
   document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { cf.st = b.dataset.f; updateCartons(); });
   fillCartons();
 }
 function fillCartons() {
-  const rows = [...D.open.values()].filter(r => (cf.st === 'all' || r.status === cf.st) && (!cf.q || r.carton.includes(cf.q)))
+  const q = cf.add ? '' : cf.q;
+  const rows = [...D.open.values()].filter(r => (cf.st === 'all' || r.status === cf.st) && (!q || r.carton.includes(q)))
     .sort((a, b) => cartonProg(b.carton).ratio - cartonProg(a.carton).ratio || a.carton.localeCompare(b.carton));
   $('#cl').innerHTML = rows.length ? rows.map(r => {
     const p = cartonProg(r.carton);
-    return `<div class="crow" data-c="${esc(r.carton)}">${ring(p.ratio, 44, p.done + '/' + p.n + ' tétel kész')}<span class="num mono">${short(r.carton)}</span>
-      <div class="grow"><div class="meta">${p.done}/${p.n} tétel · ${p.qty} db</div>${r.place ? `<span class="tag">${esc(r.place)}</span>` : ''}</div>
+    return `<div class="crow" data-c="${esc(r.carton)}">${ring(p.ratio, 44, p.done + '/' + p.n + ' tétel kész')}
+      <div class="grow">${idHtml(r.carton)}<span class="meta">${p.done}/${p.n} tétel kész</span></div>
       <span class="tag ${r.status === 'done' ? 'ok' : ''}">${r.status === 'done' ? 'kész' : 'nyitott'}</span></div>`;
-  }).join('') : `<div class="empty"><b>${cf.q ? 'Nincs találat' : cf.st === 'open' ? 'Nincs nyitott doboz' : 'Nincs doboz ebben a szűrésben'}</b>${cf.q ? '' : 'Szkenneld be a hiányos dobozok címkéjét a Szkennelés fülön.'}</div>`;
+  }).join('') : `<div class="empty"><b>${q ? 'Nincs találat' : cf.st === 'open' ? 'Nincs nyitott doboz' : 'Nincs doboz ebben a szűrésben'}</b>${q ? '' : 'Kapcsold be a "Hiányos doboz hozzáadása" kapcsolót, és szkenneld be a hiányos dobozok címkéjét.'}</div>`;
 }
 function showCarton(c) {
   const o = D.open.get(c); if (!o) return;
   const p = cartonProg(c);
-  const d = dialog(`<h2 class="mono" style="font-size:30px;letter-spacing:.02em">${short(c)} <span class="tag ${o.status === 'done' ? 'ok' : ''}" style="vertical-align:middle">${o.status === 'done' ? 'kész' : 'nyitott'}</span></h2>
-    <div class="meta" style="margin-bottom:var(--s3)"><span class="mono">${esc(c)}</span><br>${p.done}/${p.n} tétel kész, ${p.qty} db várt ${o.place ? '· hely: ' + esc(o.place) : ''}</div>
+  const d = dialog(`<div style="margin-bottom:var(--s2)">${idHtml(c, true).replace('class="idc stack"', 'class="idc stack" style="font-size:22px"')} <span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span></div>
+    <div class="meta" style="margin-bottom:var(--s3)">${p.done}/${p.n} tétel kész</div>
     <div class="card">${cartonLines(c)}</div>
-    <div class="row"><button class="btn" id="cx">Bezár</button><button class="btn" id="cp">${ic('pin')}Hely</button>
+    <div class="row"><button class="btn" id="cx">Bezár</button>
       ${o.status === 'done' ? '<button class="btn" id="cr">Újranyitás</button>' : '<button class="btn pri" id="cd">Doboz kész</button>'}</div>`);
   d.querySelectorAll('[data-line]').forEach(b => b.onclick = async () => { await setLine(+b.dataset.line, b.dataset.v === '1'); if (D.open.has(c)) showCarton(c); });
   d.querySelector('#cx').onclick = () => d.close();
-  d.querySelector('#cp').onclick = () => { d.close(); askPlaceFor(c); };
   const cr = d.querySelector('#cr'), cd = d.querySelector('#cd');
   if (cr) cr.onclick = async () => { await setDone(c, false); showCarton(c); };
   if (cd) cd.onclick = async () => { d.close(); await setDone(c, true); toast('Doboz kész'); };
 }
 
-// ---------- hely, eszkoz ----------
-function askPlace(cb, title, cur) {
-  const d = dialog(`<h2>${esc(title)}</h2><label class="field"><span>Hely (pl. A1, 3. raklap). Üresen hagyva törlődik.</span><input id="pv" value="${esc(cur || '')}" maxlength="20" autocomplete="off"></label>
-    <div class="row"><button class="btn" id="n">Mégse</button><button class="btn pri" id="ok">Mentés</button></div>`);
-  const go = () => { const v = d.querySelector('#pv').value.trim(); d.close(); cb(v); };
-  d.querySelector('#ok').onclick = go; d.querySelector('#n').onclick = () => d.close();
-  d.querySelector('#pv').onkeydown = e => { if (e.key === 'Enter') go(); }; d.querySelector('#pv').select();
-}
+// ---------- eszkoz ----------
 function askDevice(first) {
   const d = dialog(`<h2>${first ? 'Hogy hívják ezt az eszközt?' : 'Eszköz neve'}</h2>
     <label class="field"><span>Név (a naplóban ez jelenik meg)</span><input id="dn" value="${esc(device || 'PDA-1')}" maxlength="20"></label>
@@ -428,12 +444,7 @@ function askDevice(first) {
   d.querySelector('#dn').onkeydown = e => { if (e.key === 'Enter') go(); };
   d.querySelector('#dn').select();
 }
-function askPlaceFor(c) {
-  const o = D.open.get(c);
-  askPlace(async v => { if (o) o.place = v || null; update(); await call('rk_set_place', {p_carton: c, p_place: v}); }, 'Doboz helye: ' + short(c), o && o.place);
-}
 $('#dev').onclick = () => askDevice(false);
-$('#plc').onclick = () => askPlace(v => { place = v; ls.set('rk_place', v); update(); toast(v ? 'Új dobozok helye: ' + v : 'Hely törölve'); }, 'Ahová az új dobozokat teszitek', place);
 $('#mut').onclick = () => { muted = !muted; ls.set('rk_mute', muted ? '1' : '0'); renderChrome(); };
 
 // ---------- inditas ----------

@@ -129,21 +129,25 @@ function ring(ratio, size, label) {
 }
 
 // ---------- szkennelt kod ertelmezese ----------
+// Doboz azonosito: pontosan RQ-XPW + 10 szamjegy (mint a goodslistben). Mas formatumot nem fogadunk el dobozkent.
+const CARTON_RE = /^RQ-XPW\d{10}$/;
+function idHtml(c, stack) {
+  return `<span class="idc${stack ? ' stack' : ''}"><span class="idp">${esc(c.slice(0, -4))}</span><b class="id4">${esc(c.slice(-4))}</b></span>`;
+}
 function classify(raw) {
-  const t = raw.trim().toUpperCase();
-  if (/^RQ-?XPW\d+$/.test(t)) return {kind: 'carton', carton: 'RQ-XPW' + t.replace(/\D/g, '')};
+  const t = raw.trim().toUpperCase().replace(/\s+/g, '');
+  if (CARTON_RE.test(t)) return {kind: 'carton', carton: t};
+  if (/^RQ/.test(t) || /XPW/.test(t)) return {kind: 'badcarton', raw: raw.trim()};
   const digits = t.replace(/\D/g, '');
-  const onlyNum = /^[\d\s-]+$/.test(t);
+  const onlyNum = /^[\d-]+$/.test(t);
   const key = t.split('-')[0].replace(/\D/g, '').replace(/^0+/, '');
   if (onlyNum && key && D.byKey.has(key)) return {kind: 'sku', key};
-  if (onlyNum && D.cartonByDigits.has(digits)) return {kind: 'carton', carton: D.cartonByDigits.get(digits)};
-  if (onlyNum && digits.length >= 3 && digits.length < 10) {
-    const skus = digits.length >= 4 ? [...D.byKey.keys()].filter(k => k.endsWith(digits)).slice(0, 25) : [];
-    const cartons = [...D.byCarton.keys()].filter(c => c.endsWith(digits)).slice(0, 25);
-    if (skus.length + cartons.length === 1) return skus.length ? {kind: 'sku', key: skus[0]} : {kind: 'carton', carton: cartons[0]};
-    if (skus.length + cartons.length) return {kind: 'cands', skus, cartons};
+  if (onlyNum && digits.length >= 4 && digits.length < 10) {
+    const skus = [...D.byKey.keys()].filter(k => k.endsWith(digits)).slice(0, 25);
+    if (skus.length === 1) return {kind: 'sku', key: skus[0]};
+    if (skus.length) return {kind: 'cands', skus};
   }
-  return {kind: 'unknown', raw, key};
+  return {kind: 'unknown', raw: raw.trim(), key};
 }
 
 // ---------- kozos UI ----------
