@@ -14,7 +14,7 @@ const ICON = {
   scan: '<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/>',
   box: '<path d="M21 8l-9-5-9 5v8l9 5 9-5zM3 8l9 5 9-5M12 13v8"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/>',
-  check: '<path d="M20 6L9 17l-5-5"/>',
+  check: '<path pathLength="1" d="M20 6L9 17l-5-5"/>',
   x: '<path d="M18 6L6 18M6 6l12 12"/>',
   alert: '<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0zM12 9v4M12 17h.01"/>',
   info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
@@ -124,7 +124,7 @@ function ring(ratio, size, label) {
   const w = 6, r = (size - w) / 2, c = 2 * Math.PI * r, done = ratio >= 1;
   return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(label || Math.round(ratio * 100) + '% kész')}" style="flex:none">
     <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/>
-    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${done ? 'var(--ok-strong)' : 'var(--accent)'}" stroke-width="${w}" stroke-linecap="round"
+    <circle class="rg" style="--c:${c}" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${done ? 'var(--ok-strong)' : 'var(--accent)'}" stroke-width="${w}" stroke-linecap="round"
       stroke-dasharray="${c * Math.min(1, ratio)} ${c}" transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>`;
 }
 
@@ -151,10 +151,25 @@ function classify(raw) {
 }
 
 // ---------- kozos UI ----------
-function dialog(html) { const d = $('#dlg'); d.innerHTML = html; if (!d.open) d.showModal(); return d; }
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+// a bezaras is animalt: a close() elobb lejatssza a kifutast
+(() => {
+  const orig = HTMLDialogElement.prototype.close;
+  HTMLDialogElement.prototype.close = function (v) {
+    if (!this.open || this._closing || reduceMotion) return orig.call(this, v);
+    this._closing = true; const tok = this._tok = (this._tok || 0) + 1;
+    this.classList.add('closing');
+    setTimeout(() => { if (this._tok !== tok) return; this.classList.remove('closing'); this._closing = false; orig.call(this, v); }, 200);
+  };
+})();
+function dialog(html) {
+  const d = $('#dlg'); d._tok = (d._tok || 0) + 1; d._closing = false; d.classList.remove('closing');
+  d.innerHTML = html; if (!d.open) d.showModal(); return d;
+}
 function confirmDlg(text, okLabel, danger) {
   return new Promise(res => {
-    const d = dialog(`<h2>Megerősítés</h2><p>${esc(text)}</p><div class="row"><button class="btn" id="n">Mégse</button><button class="btn ${danger ? 'dng' : 'pri'}" id="y">${esc(okLabel)}</button></div>`);
+    const d = dialog(`<h2>${esc(text)}</h2><div class="row"><button class="btn" id="n">Mégse</button><button class="btn ${danger ? 'dng' : 'pri'}" id="y">${esc(okLabel)}</button></div>`);
     d.querySelector('#n').onclick = () => { d.close(); res(false); };
     d.querySelector('#y').onclick = () => { d.close(); res(true); };
     d.oncancel = () => res(false);
@@ -162,11 +177,18 @@ function confirmDlg(text, okLabel, danger) {
 }
 function toast(t) {
   let e = $('#toast');
-  if (!e) { e = document.createElement('div'); e.id = 'toast'; e.setAttribute('role', 'status');
-    e.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;z-index:30;font-weight:600;max-width:90vw'; document.body.append(e); }
-  e.textContent = t; e.style.display = 'block'; clearTimeout(e._t); e._t = setTimeout(() => e.style.display = 'none', 2600);
+  if (!e) { e = document.createElement('div'); e.id = 'toast'; e.className = 'toast'; e.setAttribute('role', 'status'); document.body.append(e); }
+  e.textContent = t; void e.offsetWidth; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2200);
+}
+// ugyanaz a HTML nem rajzolodik ujra: nincs villogas, nincs ismetelt animacio
+function setHtml(el, html, force) { if (!force && el._h === html) return false; el.innerHTML = html; el._h = html; return true; }
+// szamok szamlalo-animacioja
+function countUp(el, to, ms) {
+  const from = +el.dataset.from || 0; if (reduceMotion || from === to) { el.textContent = to; el.dataset.from = to; return; }
+  const t0 = performance.now(); ms = ms || 700;
+  (function f(t) { const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(from + (to - from) * e); if (k < 1) requestAnimationFrame(f); else el.dataset.from = to; })(t0);
 }
 function csv(rows, name) {
-  const t = '﻿' + rows.map(r => r.map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(';')).join('\r\n');
+  const t = '\ufeff' + rows.map(r => r.map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(';')).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], {type: 'text/csv'})); a.download = name; a.click();
 }
