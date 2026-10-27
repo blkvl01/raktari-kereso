@@ -38,7 +38,10 @@ const ICON = {
   layers: '<path d="M12 3l9 5-9 5-9-5zM3 13l9 5 9-5M3 17.5l9 5 9-5"/>',
   target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>',
   bolt: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
-  moon: '<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>'
+  moon: '<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  minus: '<path d="M5 12h14"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>'
 };
 const ic = n => `<svg class="i" viewBox="0 0 24 24" aria-hidden="true">${ICON[n]}</svg>`;
 const short = c => c.slice(-6);
@@ -47,7 +50,7 @@ const fmtDT = t => new Date(t).toLocaleString('hu', {month: '2-digit', day: '2-d
 
 // ---------- adat ----------
 const D = {lines: [], byKey: new Map(), byCarton: new Map(), byId: new Map(), cartonByDigits: new Map(),
-  awbs: new Map(), open: new Map(), lineDone: new Map(), sig: '', online: true, err: ''};
+  awbs: new Map(), open: new Map(), lineDone: new Map(), claims: new Map(), sig: '', online: true, err: ''};
 
 function indexLines() {
   D.byKey = new Map(); D.byCarton = new Map(); D.byId = new Map(); D.cartonByDigits = new Map();
@@ -86,11 +89,13 @@ async function loadLines() {
   D.lines = lines; D.sig = awbs.map(a => a.id + a.loaded_at).sort().join('|'); indexLines(); saveCache(awbs);
 }
 async function loadOpen() {
-  const [o, s] = await Promise.all([sb.from('rk_open').select('*'), sb.from('rk_linestat').select('*')]);
+  const [o, s, k] = await Promise.all([sb.from('rk_open').select('*'), sb.from('rk_linestat').select('*'), sb.from('rk_claims').select('*')]);
   if (o.error) throw o.error;
   if (s.error) throw s.error;
+  if (k.error) throw k.error;
   D.open = new Map(o.data.map(r => [r.carton, r]));
   D.lineDone = new Map(s.data.map(r => [r.line_id, r]));
+  D.claims = new Map(k.data.map(r => [r.carton, r]));
 }
 // full=true: goodslist ujratoltese is; kulonben csak ha valtozott
 async function refreshData(full) {
@@ -107,16 +112,22 @@ async function refreshData(full) {
 }
 function watch(cb) {
   sb.channel('rk_ch').on('postgres_changes', {event: '*', schema: 'public', table: 'rk_open'}, () => loadOpen().then(cb).catch(() => {}))
-    .on('postgres_changes', {event: '*', schema: 'public', table: 'rk_linestat'}, () => loadOpen().then(cb).catch(() => {})).subscribe();
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'rk_linestat'}, () => loadOpen().then(cb).catch(() => {}))
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'rk_claims'}, () => loadOpen().then(cb).catch(() => {})).subscribe();
 }
 
 // ---------- szamitott ertekek ----------
 const cartonStatus = c => (D.open.get(c) || {}).status || null;       // null | 'open' | 'done'
-const isLineDone = l => D.lineDone.has(l.id);
+// tetel allapot: nincs sor = 0 db, got=null (regi "kesz" jeloles) = teljes, kulonben a darabszam
+function lineGot(l) { const r = D.lineDone.get(l.id); return r ? (r.got == null ? l.qty : Math.min(r.got, l.qty)) : 0; }
+const isLineDone = l => { const r = D.lineDone.get(l.id); return !!r && (r.got == null || r.got >= l.qty); };
+const CLAIM_TTL = 3 * 3600e3;                 // 3 ora utan a foglalas lejar
+const claimOf = c => { const r = D.claims.get(c); return r && Date.now() - new Date(r.ts) < CLAIM_TTL ? r.device : null; };
 function cartonProg(c) {
   const ls_ = D.byCarton.get(c) || [];
-  const done = ls_.filter(isLineDone).length;
-  return {n: ls_.length, done, qty: ls_.reduce((a, l) => a + l.qty, 0), qtyDone: ls_.filter(isLineDone).reduce((a, l) => a + l.qty, 0), ratio: ls_.length ? done / ls_.length : 0};
+  let done = 0, got = 0, qty = 0;
+  ls_.forEach(l => { qty += l.qty; const g = lineGot(l); got += g; if (g >= l.qty) done++; });
+  return {n: ls_.length, done, qty, got, qtyDone: got, ratio: qty ? got / qty : 0};
 }
 function awbTag(l) { return `<span class="tag mono" title="AWB">${esc(l.awb)}</span>`; }
 // kor alaku haladasjelzo (0..1)

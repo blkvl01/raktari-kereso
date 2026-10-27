@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2342d6">
 <title>Raktári kereső</title>
-<link rel="stylesheet" href="common.css?v=13">
+<link rel="stylesheet" href="common.css?v=20">
 <style>
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
 .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
@@ -48,6 +48,12 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .hero .idc .idp{color:inherit;opacity:.85;font-size:clamp(19px,6.2vw,28px);font-weight:700}
 .hero .idc .id4{margin:0;padding:0 14px;background:rgb(255 255 255 / .22);color:inherit;font-size:clamp(58px,20vw,92px);line-height:1.12;letter-spacing:.04em}
 .anim .hero .idc .id4{animation:flashId .9s var(--ease-out)}
+.hero.compact{padding:var(--s3) var(--s4)}
+.hero.compact .idc{margin:var(--s2) 0 0}
+.hero.compact .idc .idp{font-size:15px}
+.hero.compact .idc .id4{font-size:clamp(36px,11vw,48px);padding:0 10px}
+.hero.compact .pbar{margin-top:var(--s2)}
+.hero.compact .hchips{margin-top:var(--s2)}
 .hero-prod{margin-top:var(--s3);font-size:18px;font-weight:700;line-height:1.25}
 .hero-sub{margin-top:2px;font-size:13px;opacity:.85}
 .hchips{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--s3)}
@@ -101,7 +107,7 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .msg{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;padding:10px var(--s4);border-radius:var(--r-sm);font-weight:650;animation:springIn .35s var(--ease-out)}
 .msg.ok{background:var(--ok-soft);color:var(--ok)}.msg.warn{background:var(--warn-soft);color:var(--warn)}.msg.bad{background:var(--bad-soft);color:var(--bad)}
 .seg{display:flex;gap:6px;margin:var(--s3) 0 var(--s2)}
-.seg .chip{flex:1;justify-content:center;gap:8px}
+.seg .chip{flex:1;justify-content:center;gap:6px;padding:0 8px}
 .seg .n{font-variant-numeric:tabular-nums;opacity:.8}
 .crow{display:flex;align-items:center;gap:var(--s3);padding:8px var(--s3) 8px var(--s3);border-bottom:1px solid var(--line-2);cursor:pointer;transition:background .15s}
 .crow:last-child{border-bottom:0}
@@ -118,6 +124,32 @@ nav.tabs button:active{transform:scale(.93)}
 nav.tabs button[aria-selected=true]{color:var(--accent-ink)}
 nav.tabs button svg{transition:transform .4s var(--spring)}
 nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
+.pbar{height:10px;border-radius:5px;background:rgb(255 255 255 / .25);overflow:hidden;margin-top:var(--s3)}
+.pbar i{display:block;height:100%;background:var(--hero-ink);border-radius:5px;transition:width .6s var(--ease-out)}
+.pl{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line-2);flex-wrap:wrap;transition:background .3s,opacity .3s}
+.pl:last-child{border-bottom:0}
+.pl .pn{flex:1;min-width:150px;display:grid;gap:2px}
+.pl.full{opacity:.55}
+.pl.hl{animation:lineHl 1.2s var(--ease-out)}
+@keyframes lineHl{0%{background:var(--ok-soft);transform:scale(1.015)}100%{background:transparent;transform:none}}
+.stp{display:flex;align-items:center;gap:6px}
+.stp .btn.xs{min-width:36px;min-height:36px;padding:0 8px}
+.stp .qv{min-width:58px;text-align:center;font-variant-numeric:tabular-nums;font-size:15px}
+.stp .qv b{font-size:20px}
+.cdc{margin-bottom:var(--s3)}
+.cdc.own{border-color:var(--accent)}
+.cdh{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4)}
+.cdh .rest{flex:1;min-width:0;display:grid;gap:4px;justify-items:start}
+.cdh .idc{font-size:19px}
+.cdt{display:flex;align-items:center;justify-content:space-between;width:100%;border:0;border-top:1px solid var(--line-2);background:var(--surface-2);padding:8px var(--s4);font-size:13px;font-weight:700;color:var(--mute);cursor:pointer}
+.cdt .chev{transition:transform .35s var(--spring)}
+.cdt[aria-expanded=true] .chev{transform:rotate(180deg)}
+.needs{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s var(--ease-out)}
+.needs.on{grid-template-rows:1fr}
+.needs>.ni{overflow:hidden;min-height:0}
+.need{display:flex;justify-content:space-between;gap:var(--s3);padding:8px var(--s4);border-top:1px solid var(--line-2);font-size:14px}
+.need.is{background:var(--accent-soft);font-weight:700}
+.need b{white-space:nowrap}
 .badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--bad-strong);color:var(--bad-strong-ink);font-size:11px;font-weight:800;display:grid;place-items:center;line-height:1}
 .badge.pop{animation:badgePop .45s var(--spring)}
 </style>
@@ -134,7 +166,7 @@ nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
 <dialog id="dlg"></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="common.js?v=13"></script>
+<script src="common.js?v=20"></script>
 <script>
 const ORDER = ['scan', 'ident', 'cartons'];
 let view = ORDER.includes(ls.get('rk_view')) ? ls.get('rk_view') : 'scan';
@@ -367,7 +399,7 @@ function updateScan() {
     shellView = 'scan';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
         <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Szkenneld vagy írd be"></form>
-      <div id="res"></div><div id="hs"></div><div class="ver">v1.3</div>`;
+      <div id="res"></div><div id="hs"></div><div class="ver">v2.0</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();
@@ -396,10 +428,16 @@ async function unopen(c) {
   await call('rk_unopen', {p_carton: c, p_device: device}); toast('Visszavonva');
 }
 
-// ---------- azonositas: nem olvashato cimke, a dobozban levo termekekbol ----------
-let IDENT = {keys: [], msg: null};
-try { IDENT.keys = JSON.parse(ls.get('rk_ident') || '[]') || []; } catch (e) {}
-const saveIdent = () => ls.set('rk_ident', JSON.stringify(IDENT.keys));
+// ---------- azonositas: doboz osszeallitasa a kalodakbol ----------
+// Mindenki a sajat dobozat epiti: a foglalt dobozt mas nem latja es nem szkennelhet bele.
+let WK = {keys: [], msg: null, active: ls.get('rk_active') || '', hl: 0, finished: '', exp: {}, view: 'work'};
+const myBoxes = () => [...D.claims.keys()].filter(c => claimOf(c) === device && cartonStatus(c) !== 'done');
+function activeBox() {
+  const mine = myBoxes(); if (!mine.length) return '';
+  if (!mine.includes(WK.active)) WK.active = mine[0];
+  return WK.active;
+}
+const remPieces = c => (D.byCarton.get(c) || []).reduce((a, l) => a + (l.qty - lineGot(l)), 0);
 function identCands(keys) {
   if (!keys.length) return [];
   let set = null;
@@ -407,66 +445,149 @@ function identCands(keys) {
     const cs = new Set((D.byKey.get(k) || []).map(l => l.carton));
     set = set ? new Set([...set].filter(c => cs.has(c))) : cs;
   }
-  const ks = new Set(keys);
-  return [...set].map(c => {
-    const ls_ = D.byCarton.get(c), matched = ls_.filter(l => ks.has(l.key)).length, st = cartonStatus(c);
-    return {c, n: ls_.length, matched, extra: ls_.length - matched, st, rank: st === null ? 0 : st === 'open' ? 1 : 2};
-  }).sort((a, b) => (a.extra === 0) !== (b.extra === 0) ? (a.extra === 0 ? -1 : 1) : a.rank - b.rank || a.extra - b.extra || a.c.localeCompare(b.c));
+  const ks = new Set(keys); let hidden = 0;
+  const out = [...set].map(c => {
+    const ls_ = D.byCarton.get(c), matched = ls_.filter(l => ks.has(l.key)).length, st = cartonStatus(c), cl = claimOf(c);
+    return {c, n: ls_.length, matched, extra: ls_.length - matched, st, own: cl === device, other: cl && cl !== device, rem: remPieces(c)};
+  }).filter(x => { if (x.st === 'done') return false; if (x.other) { hidden++; return false; } return true; })
+    .sort((a, b) => a.own !== b.own ? (a.own ? -1 : 1) : (a.extra === 0) !== (b.extra === 0) ? (a.extra === 0 ? -1 : 1) : a.n - b.n || a.c.localeCompare(b.c));
+  out.hidden = hidden; return out;
 }
-function onIdentScan(raw) {
+async function setGot(id, n) {
+  const l = D.byId.get(id); if (!l) return;
+  n = Math.max(0, Math.min(l.qty, n));
+  D.lineDone.set(id, {line_id: id, got: n, done_by: device});
+  const o = D.open.get(l.carton), p = cartonProg(l.carton);
+  if (o) {
+    if (p.done >= p.n) { o.status = 'done'; D.claims.delete(l.carton); WK.finished = l.carton; beep('ok'); }
+    else if (o.status === 'done') o.status = 'open';
+  }
+  animNext = true; update();
+  await call('rk_set_got', {p_line: id, p_got: n, p_device: device});
+}
+async function claimBox(c) {
+  const keys = [...WK.keys];
+  const had = D.open.has(c);
+  D.claims.set(c, {carton: c, device, ts: new Date().toISOString()});
+  if (!had) D.open.set(c, {carton: c, status: 'open', opened_by: device, opened_at: new Date().toISOString()});
+  WK.active = c; ls.set('rk_active', c); WK.view = 'work'; WK.keys = []; WK.msg = null; WK.finished = ''; animNext = true; update();
+  const r = await call('rk_claim', {p_carton: c, p_device: device});
+  if (r.data && !r.data.ok) {
+    D.claims.delete(c); if (!had) D.open.delete(c);
+    toast(r.data.error === 'taken' ? 'Foglalt: ' + r.data.by : 'Nem foglalható');
+    beep('bad'); await refreshData(false); WK.view = 'find'; WK.keys = keys; update(); return;
+  }
+  for (const k of keys) { const l = (D.byCarton.get(c) || []).find(x => x.key === k); if (l && lineGot(l) < 1) await setGot(l.id, 1); }
+}
+async function releaseBox(c) {
+  D.claims.delete(c); if (WK.active === c) WK.active = '';
+  animNext = true; update();
+  await call('rk_release', {p_carton: c, p_device: device}); toast('Elengedve');
+}
+async function closeShort(c) {
+  if (!await confirmDlg('Lezárod a dobozt hiánnyal?', 'Lezárás', false)) return;
+  for (const l of D.byCarton.get(c) || []) if (!D.lineDone.has(l.id)) { D.lineDone.set(l.id, {line_id: l.id, got: 0, done_by: device}); call('rk_set_got', {p_line: l.id, p_got: 0, p_device: device}); }
+  D.claims.delete(c); const o = D.open.get(c); if (o) o.status = 'done';
+  WK.finished = c; animNext = true; update();
+  await call('rk_set_done', {p_carton: c, p_done: true});
+}
+async function onIdentScan(raw) {
   raw = raw.trim(); if (!raw) return;
-  const c = classify(raw); animNext = true;
-  if (c.kind === 'carton' || c.kind === 'badcarton') { IDENT.msg = {tone: 'warn', text: 'Ez doboz azonosító. Termék vonalkódot szkenneld.'}; beep('bad'); return updateIdent(); }
-  if (c.kind === 'cands') { IDENT.msg = {tone: 'warn', text: 'Írd be a teljes termékkódot.'}; beep('bad'); return updateIdent(); }
-  if (c.kind === 'unknown') { IDENT.msg = {tone: 'bad', text: 'Nincs a goodslistben: ' + raw}; logScan('ident', raw, c.key, 'unknown', ''); beep('bad'); return updateIdent(); }
-  if (IDENT.keys.includes(c.key)) { IDENT.msg = {tone: 'warn', text: 'Már hozzáadva.'}; beep('bad'); return updateIdent(); }
-  IDENT.keys.push(c.key); IDENT.msg = null; saveIdent();
-  logScan('ident', raw, c.key, 'ident', ''); beep('ok'); updateIdent();
+  const c = classify(raw); animNext = true; WK.finished = '';
+  if (c.kind === 'carton' || c.kind === 'badcarton') { WK.msg = {tone: 'warn', text: 'Ez doboz azonosító. Termék vonalkódot szkenneld.'}; beep('bad'); return updateIdent(); }
+  if (c.kind === 'cands') { WK.msg = {tone: 'warn', text: 'Írd be a teljes termékkódot.'}; beep('bad'); return updateIdent(); }
+  if (c.kind === 'unknown') { WK.msg = {tone: 'bad', text: 'Nincs a goodslistben: ' + raw}; logScan('ident', raw, c.key, 'unknown', ''); beep('bad'); return updateIdent(); }
+  const key = c.key, act = activeBox();
+  if (act && WK.view === 'work') {
+    const ln = (D.byCarton.get(act) || []).filter(l => l.key === key);
+    if (ln.length) {
+      const l = ln.find(x => lineGot(x) < x.qty);
+      if (!l) { WK.msg = {tone: 'warn', text: 'Ebből már minden megvan.'}; beep('bad'); return updateIdent(); }
+      WK.msg = null; WK.hl = l.id; beep('ok'); logScan('pack', raw, key, 'pack', act);
+      return setGot(l.id, lineGot(l) + 1);
+    }
+    WK.view = 'find'; WK.keys = [key]; WK.msg = {tone: 'warn', text: 'Nem az aktív dobozba tartozik.'}; beep('bad');
+    logScan('ident', raw, key, 'ident', ''); return updateIdent();
+  }
+  if (WK.keys.includes(key)) { WK.msg = {tone: 'warn', text: 'Már hozzáadva.'}; beep('bad'); return updateIdent(); }
+  WK.keys.push(key); WK.msg = null; WK.view = 'find';
+  logScan('ident', raw, key, 'ident', ''); beep('ok'); updateIdent();
+}
+const needRows = (c, hlKeys) => (D.byCarton.get(c) || []).filter(l => lineGot(l) < l.qty).map(l =>
+  `<div class="need ${hlKeys.includes(l.key) ? 'is' : ''}"><span>${esc(l.descr)}</span><b>${l.qty - lineGot(l)} db</b></div>`).join('');
+function minePanel(act) {
+  const mine = myBoxes().filter(c => c !== act);
+  if (!mine.length) return '';
+  return `<div class="eyebrow alt-h">Saját dobozaim</div><div class="card">${mine.map((c, i) => { const p = cartonProg(c); return `<div class="row-i ${stI(i)}"><div class="rest">${idHtml(c)}<span class="meta">${p.got}/${p.qty} db</span></div><button class="btn sm pri" data-go="${esc(c)}">Folytatom</button></div>`; }).join('')}</div>`;
+}
+function workHtml(act) {
+  const p = cartonProg(act), ls_ = (D.byCarton.get(act) || []).slice().sort((a, b) => (lineGot(a) >= a.qty) - (lineGot(b) >= b.qty) || a.descr.localeCompare(b.descr));
+  const pct = Math.round(p.ratio * 100);
+  return `<section class="hero info compact"><div class="hero-top"><span class="hero-ico">${ic('box')}</span>Építés<span class="aux">${p.done}/${p.n} tétel</span></div>
+      ${idHtml(act, true)}
+      <div class="pbar" role="img" aria-label="${pct}% kész"><i style="width:${pct}%"></i></div>
+      <div class="hchips"><span class="hchip">${p.got}/${p.qty} db</span><span class="hchip mono">${esc((D.byCarton.get(act)[0] || {}).awb || '')}</span></div></section>
+    <div class="card" style="margin-top:var(--s3)">${ls_.map((l, i) => { const g = lineGot(l), full = g >= l.qty;
+      return `<div class="pl ${full ? 'full' : ''} ${WK.hl === l.id ? 'hl' : ''}"><div class="pn"><b>${esc(l.descr)}</b><span class="meta mono">${esc(l.sku.split('-')[0])}</span></div>
+        <div class="stp"><button class="btn xs" data-gm="${l.id}" aria-label="Kevesebb" ${g ? '' : 'disabled'}>${ic('minus')}</button><span class="qv"><b>${g}</b>/${l.qty}</span><button class="btn xs" data-gp="${l.id}" aria-label="Több" ${full ? 'disabled' : ''}>${ic('plus')}</button>
+        <button class="btn xs ${full ? '' : 'pri'}" data-ga="${l.id}" ${full ? 'disabled' : ''}>Mind</button></div></div>`; }).join('')}</div>
+    <div class="row" style="justify-content:stretch;margin-top:var(--s3)"><button class="btn" data-rel="${esc(act)}">Elengedem</button><button class="btn" style="flex:1" data-short="${esc(act)}">Lezárás hiánnyal</button></div>
+    ${minePanel(act)}`;
+}
+function candCard(x, i, keys) {
+  const open = WK.exp[x.c] !== undefined ? WK.exp[x.c] : i === 0;
+  return `<div class="card cdc ${x.own ? 'own' : ''} ${stI(i)}"><div class="cdh"><div class="rest">${idHtml(x.c)}<span class="meta">${x.n} tétel · ${x.rem} db hátra${x.own ? ' · saját' : ''}</span></div>
+      <button class="btn sm pri" data-build="${esc(x.c)}">Építem</button></div>
+    <button class="cdt" data-exp="${esc(x.c)}" aria-expanded="${open}">${open ? 'Mi kell még' : 'Mi kell még'}<span class="chev">${ic('chev').replace('class="i"', 'class="i sm"')}</span></button>
+    <div class="needs ${open ? 'on' : ''}"><div class="ni">${needRows(x.c, keys)}</div></div></div>`;
 }
 function identHtml() {
-  const keys = IDENT.keys.filter(k => D.byKey.has(k)), cands = identCands(keys);
-  const msg = IDENT.msg ? `<div class="msg ${IDENT.msg.tone}" role="alert" style="margin-bottom:var(--s3)">${esc(IDENT.msg.text)}</div>` : '';
-  if (!keys.length) return msg + `<div class="idle"><div class="frame scanning">${ic('target').replace('class="i"', 'class="i lg" style="width:48px;height:48px"')}</div><h2>Azonosítás</h2><p>Szkenneld a dobozban lévő termékeket</p></div>`;
-  const chips = `<div class="eyebrow alt-h">Termékek (${keys.length})</div><div class="card">${keys.map((k, i) => `<div class="row-i ${stI(i)}" style="padding:var(--s2) var(--s4)"><div class="rest"><b>${esc(D.byKey.get(k)[0].descr)}</b></div><button class="btn xs" data-rmk="${k}">${ic('x').replace('class="i"', 'class="i sm"')}</button></div>`).join('')}</div>
+  const act = activeBox(), msg = WK.msg ? `<div class="msg ${WK.msg.tone}" role="alert" style="margin-bottom:var(--s3)">${esc(WK.msg.text)}</div>` : '';
+  if (WK.finished) {
+    const f = WK.finished, p = cartonProg(f);
+    return `<section class="hero ok"><div class="hero-top"><span class="hero-ico">${ic('check')}</span>Doboz kész</div>${idHtml(f, true)}
+      <div class="hchips"><span class="hchip">${p.got}/${p.qty} db</span></div><button class="hero-btn" data-next>Következő doboz</button></section>${minePanel(act)}`;
+  }
+  if (act && WK.view === 'work') return msg + workHtml(act);
+  const keys = WK.keys.filter(k => D.byKey.has(k));
+  const back = act ? `<button class="btn" style="margin-bottom:var(--s3);width:100%" data-back>${ic('undo')}Vissza az aktív dobozhoz</button>` : '';
+  if (!keys.length) return msg + `<div class="idle"><div class="frame scanning">${ic('target').replace('class="i"', 'class="i lg" style="width:48px;height:48px"')}</div><h2>Doboz építése</h2><p>Szkenneld a terméket</p></div>${minePanel(act)}`;
+  const cands = identCands(keys);
+  const chips = `<div class="eyebrow alt-h">Termékek (${keys.length})</div><div class="card">${keys.map((k, i) => `<div class="row-i ${stI(i)}" style="padding:var(--s2) var(--s4)"><div class="rest"><b>${esc(D.byKey.get(k)[0].descr)}</b></div><button class="btn xs" data-rmk="${k}" aria-label="Törlés">${ic('x').replace('class="i"', 'class="i sm"')}</button></div>`).join('')}</div>
     <div class="row" style="margin:var(--s3) 0 0;justify-content:flex-start"><button class="btn sm" data-iclear>${ic('trash').replace('class="i"', 'class="i sm"')}Újrakezdés</button></div>`;
   let body;
   if (!cands.length) {
     const alts = keys.length > 1 ? keys.map(k => ({k, n: identCands(keys.filter(x => x !== k)).length})).filter(a => a.n > 0).sort((a, b) => a.n - b.n).slice(0, 3) : [];
-    body = `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs ilyen doboz</div></section>
+    body = `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs szabad doboz</div>${cands.hidden ? `<div class="hero-note">${cands.hidden} foglalt</div>` : ''}</section>
       ${alts.length ? `<div class="eyebrow alt-h">Ha kihagyod</div><div class="card">${alts.map((a, i) => `<div class="row-i ${stI(i)}"><div class="rest"><b>${esc(D.byKey.get(a.k)[0].descr)}</b><span class="meta">${a.n} doboz marad</span></div><button class="btn sm" data-rmk="${a.k}">Kihagyom</button></div>`).join('')}</div>` : ''}`;
-  } else if (cands.length === 1) {
-    const b = cands[0];
-    body = `<section class="hero ok"><div class="hero-top"><span class="hero-ico">${ic('check')}</span>Ez lehet</div>
-        ${idHtml(b.c, true)}
-        <div class="hchips"><span class="hchip">${b.matched}/${b.n} egyezik</span><span class="hchip mono">${esc(D.byCarton.get(b.c)[0].awb)}</span></div>
-        <button class="hero-btn" data-pickc="${esc(b.c)}">Felvétel</button></section>
-        <div class="card" style="margin-top:var(--s3)">${(D.byCarton.get(b.c) || []).map((l, i) => `<div class="row-i ${stI(i)}"><div class="rest"><b>${esc(l.descr)}</b></div>${keys.includes(l.key) ? '<span class="tag ok">megvan</span>' : '<span class="tag mute">még nincs</span>'}</div>`).join('')}</div>`;
   } else {
-    const shown = cands.slice(0, 12);
-    body = `<section class="hero info"><div class="hero-top"><span class="hero-ico">${ic('search')}</span>${cands.length} lehetséges doboz</div></section>
-      <div class="card" style="margin-top:var(--s3)">${shown.map((x, i) => `<div class="row-i ${i === 0 && x.extra === 0 ? 'best' : ''} ${stI(i)}"><div class="rest">${idHtml(x.c)}<span class="meta">${x.matched}/${x.n} egyezik${x.st === 'done' ? ' · kész' : x.st === 'open' ? ' · felvéve' : ''}</span></div><button class="btn sm pri" data-pickc="${esc(x.c)}">Ez az</button></div>`).join('')}</div>
-      ${cands.length > shown.length ? `<div class="meta" style="margin:var(--s2)">${shown.length} a ${cands.length}-ból</div>` : ''}`;
+    body = `<div class="eyebrow alt-h" style="margin-top:0">${cands.length} doboz${cands.hidden ? ` · ${cands.hidden} foglalt rejtve` : ''}</div>${cands.slice(0, 10).map((x, i) => candCard(x, i, keys)).join('')}${cands.length > 10 ? `<div class="meta" style="margin:var(--s2)">10 a ${cands.length}-ból. Szkennelj további terméket.</div>` : ''}`;
   }
-  return msg + body + chips;
+  return msg + back + body + chips;
 }
 function updateIdent() {
   if (shellView !== 'ident') {
     shellView = 'ident';
     app.innerHTML = `<form class="scan" id="xf" autocomplete="off"><span class="lead">${ic('target')}</span>
-        <input id="xin" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Termék kódja" placeholder="Szkenneld a termékeket"></form>
+        <input id="xin" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Termék kódja" placeholder="Szkenneld a terméket"></form>
       <div id="xr" style="margin-top:var(--s3)"></div>`;
     const inp = $('#xin');
     $('#xf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onIdentScan(v); };
     inp.focus();
     $('#xr').onclick = async e => {
-      const b = e.target.closest('button'); if (!b) return; const d = b.dataset;
-      if (d.rmk) { IDENT.keys = IDENT.keys.filter(k => k !== d.rmk); IDENT.msg = null; saveIdent(); animNext = true; return updateIdent(); }
-      if (d.iclear !== undefined) { IDENT.keys = []; IDENT.msg = null; saveIdent(); animNext = true; return updateIdent(); }
-      if (d.pickc) {
-        const c = d.pickc; logScan('ident', IDENT.keys.join(','), '', 'ident_pick', c);
-        IDENT.keys = []; IDENT.msg = null; saveIdent();
-        await goView('scan'); await onScan(c);
-      }
+      const b = e.target.closest('button'); if (!b || b.disabled) return; const d = b.dataset;
+      if (d.gp) { const l = D.byId.get(+d.gp); WK.hl = l.id; return setGot(l.id, lineGot(l) + 1); }
+      if (d.gm) { const l = D.byId.get(+d.gm); WK.hl = l.id; return setGot(l.id, lineGot(l) - 1); }
+      if (d.ga) { const l = D.byId.get(+d.ga); WK.hl = l.id; return setGot(l.id, l.qty); }
+      if (d.build) return claimBox(d.build);
+      if (d.go) { WK.active = d.go; ls.set('rk_active', d.go); WK.view = 'work'; WK.finished = ''; animNext = true; return updateIdent(); }
+      if (d.rel) return releaseBox(d.rel);
+      if (d.short) return closeShort(d.short);
+      if (d.next !== undefined) { WK.finished = ''; WK.view = activeBox() ? 'work' : 'find'; WK.keys = []; animNext = true; return updateIdent(); }
+      if (d.back !== undefined) { WK.view = 'work'; WK.keys = []; WK.msg = null; animNext = true; return updateIdent(); }
+      if (d.exp) { const c = d.exp, cur = WK.exp[c] !== undefined ? WK.exp[c] : (identCands(WK.keys)[0] || {}).c === c; WK.exp[c] = !cur; return updateIdent(); }
+      if (d.rmk) { WK.keys = WK.keys.filter(k => k !== d.rmk); WK.msg = null; animNext = true; return updateIdent(); }
+      if (d.iclear !== undefined) { WK.keys = []; WK.msg = null; animNext = true; return updateIdent(); }
     };
     animNext = true;
   }
@@ -505,18 +626,18 @@ function updateCartons() {
   cq.placeholder = on ? 'RQ-XPW...' : 'Keresés';
   $('#af').classList.toggle('has-btn', on); $('#addb').hidden = !on;
   setHtml($('#am'), on && cf.msg ? `<div class="msg ${cf.msg.tone}">${cf.msg.html}</div>` : '', true);
-  const all = [...D.open.values()], cnt = {open: all.filter(x => x.status === 'open').length, done: all.filter(x => x.status === 'done').length, all: all.length};
-  setHtml($('#fl'), [['open', 'Nyitott'], ['done', 'Kész'], ['all', 'Mind']].map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${cf.st === k}">${n}<span class="n">${cnt[k]}</span></button>`).join(''));
+  const all = [...D.open.values()], cnt = {own: all.filter(x => x.status === 'open' && claimOf(x.carton) === device).length, open: all.filter(x => x.status === 'open').length, done: all.filter(x => x.status === 'done').length, all: all.length};
+  setHtml($('#fl'), [['own', 'Saját'], ['open', 'Nyitott'], ['done', 'Kész'], ['all', 'Mind']].map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${cf.st === k}">${n}<span class="n">${cnt[k]}</span></button>`).join(''));
   document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { cf.st = b.dataset.f; animNext = true; updateCartons(); });
   fillCartons();
 }
 function fillCartons() {
   const q = cf.add ? '' : cf.q, el = $('#cl'); flashAnim(el);
-  const rows = [...D.open.values()].filter(r => (cf.st === 'all' || r.status === cf.st) && (!q || r.carton.includes(q)))
+  const rows = [...D.open.values()].filter(r => (cf.st === 'all' || (cf.st === 'own' ? r.status === 'open' && claimOf(r.carton) === device : r.status === cf.st)) && (!q || r.carton.includes(q)))
     .sort((a, b) => cartonProg(b.carton).ratio - cartonProg(a.carton).ratio || a.carton.localeCompare(b.carton));
   setHtml(el, rows.length ? rows.map((r, i) => {
     const p = cartonProg(r.carton), dn = r.status === 'done';
-    return `<div class="crow ${stI(i)}" data-c="${esc(r.carton)}">${ring(p.ratio, 34, p.done + '/' + p.n)}${idHtml(r.carton)}<span class="frac ${dn ? 'ok' : ''}">${dn ? ic('check').replace('class="i"', 'class="i sm"') : p.done + '/' + p.n}</span></div>`;
+    return `<div class="crow ${stI(i)}" data-c="${esc(r.carton)}">${ring(p.ratio, 34, p.done + '/' + p.n)}${idHtml(r.carton)}${claimOf(r.carton) ? `<span class="tag ${claimOf(r.carton) === device ? '' : 'mute'}">${claimOf(r.carton) === device ? 'saját' : esc(claimOf(r.carton))}</span>` : ''}<span class="frac ${dn ? 'ok' : ''}">${dn ? ic('check').replace('class="i"', 'class="i sm"') : p.done + '/' + p.n}</span></div>`;
   }).join('') : `<div class="empty"><b>${q ? 'Nincs találat' : 'Nincs doboz'}</b></div>`);
 }
 function showCarton(c) {
