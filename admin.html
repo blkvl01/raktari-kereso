@@ -720,6 +720,8 @@ function drawBarcodes(root) {
 }
 function printLabels(list, w, h, copies) {
   if (!list.length) return toast('Nincs doboz');
+  // nyomtatas elott az utolso 4 szamjegy szerint novekvo sorrend (egyenlo vegnel a teljes azonosito)
+  list = [...list].sort((a, b) => a.slice(-4).localeCompare(b.slice(-4)) || a.localeCompare(b));
   const out = []; list.forEach(c => { for (let i = 0; i < copies; i++) out.push(labelHtml(c, w, h)); });
   $('#labels').innerHTML = `<style>@page{size:${w}mm ${h}mm;margin:0}</style>` + out.join('');
   drawBarcodes($('#labels')); window.print();
