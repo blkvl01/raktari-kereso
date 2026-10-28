@@ -21,6 +21,15 @@ Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
    Az admin Félretett oldalán kód + darabszám megadásával is lehet polcra tenni. Ugyanitt a napló alapján azok a termékek is látszanak, amelyeket nyitott doboz nélkül szkenneltek, de nincsenek a polcon; egy gombbal felvehetők.
 3. **Dobozok fül**: a dobozok az utolsó 4 számjegy szerint sorban, ahogy a polcon állnak. Mindegyik mellett %-os töltöttség jelzés: 90% felett zöld pipával, 75% felett zöld (nagyjából zárható), 65–75% sárga, 65% alatt piros. Itt van a nem olvasható címkéjű doboz azonosítása is.
 
+## Áttekintés (admin)
+
+Operációs KPI-ok két csoportban:
+
+- **Tempó** (választható időablak: 1 óra / ma / 7 nap): bepakolt darab (és db / aktív óra), lezárt doboz, felvett doboz (a nyitottak számának változásával), átfutási idő (medián, felvételtől lezárásig; a polcról egyben összerakott dobozok nélkül). Alatta a bepakolt darab és a lezárt dobozok időbeli bontása.
+- **Folyamatban** (jelenlegi állapot): nyitott dobozok, ami hiányzik belőlük, polcról összerakható dobozok, félretett polc, aktív eszközök. Alatta a nyitott dobozok listája töltöttség szerint és az élő napló.
+
+A „ma” és „7 nap” nézet percenként egyszer hosszabb naplót tölt le; ha a szerver ennél kevesebbet ad vissza, a fül jelzi, hogy a darabszám részleges (a dobozszámok mindig teljesek).
+
 ## Kereső (admin)
 
 Az admin **Kereső** oldalán (és a fejléc gyorskeresőjében) dobozra, SKU-ra (kód, kódrészlet vagy terméknév) és AWB-re (szám, vége vagy jelölés) lehet keresni.
