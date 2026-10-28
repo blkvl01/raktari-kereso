@@ -12,7 +12,7 @@ Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
    - **Ide tedd**: egy már nyitott dobozba kell. A doboz utolsó 4 számjegye nagyban látszik, a darab be is számolódik.
    - **Nincs nyitott doboza**: a program rákérdez, **Félreteszem** vagy **Új doboz**. Magától nem nyit új dobozt.
      Új doboznál a legjobb jelöltet ajánlja (amelyiket a polc + ez a darab a legjobban lefedi), és a polcról is behúzza, ami belekell.
-     Ha döntés nélkül szkennelnek tovább, az előző termék a polcra kerül.
+     Ha döntés nélkül szkennelnek tovább, az csak rákeresés volt: a termék **nem** kerül a polcra (a naplóban „csak keresés”). Polcra csak a **Félreteszem** gomb tesz.
    - **Felesleg**: egyik dobozba sem kell több belőle.
    - Doboz címkét is lehet szkennelni: megnyitja vagy megmutatja a dobozt.
 2. **Félretett fül**: az **összegyűlt** doboz (minden darabja a polcon van) a következő doboz.

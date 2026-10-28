@@ -173,8 +173,8 @@ nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
 <script>
 // Folyamat: a kalodabol kivett termeket a Valogatas fulon szkenneled.
 //  - ha egy nyitott dobozba kell: "Ide tedd" + a doboz utolso 4 szamjegye, a darab be is szamolodik
-//  - ha egyikbe sem: "Tedd felre" a kozos polcra; uj dobozt csak a Felretett ful javaslata alapjan nyitunk,
-//    elsokent azt, amelyiknek minden darabja osszegyult a polcon
+//  - ha egyikbe sem: a dolgozo dont (Felreteszem / Uj doboz). Csak a gombnyomas tesz a kozos polcra,
+//    a sima rakereses (dontes nelkuli tovabbszkennelés) semmit nem ment.
 const ORDER = ['sort', 'park', 'cartons'];
 let view = ORDER.includes(ls.get('rk_view')) ? ls.get('rk_view') : 'sort';
 let device = ls.get('rk_device') || '';
@@ -308,10 +308,9 @@ const openCount = () => [...D.open.values()].filter(x => x.status === 'open').le
 
 // ---------- valogatas: szkennelt kod ----------
 // a nyitott doboz nelkuli termeknel a dolgozo dont: felreteszi vagy uj dobozt nyit.
-// Ha dontes nelkul szkennel tovabb, az elozo termek a polcra kerul.
-function askPark(r, note) {
+// Ha dontes nelkul szkennel tovabb, az csak rakereses volt: nem kerul a polcra (kulonben visszamenoleg bekerulne egy uj dobozba).
+function askPark(r) {
   park(r.key, 1); logScan('sku', r.raw, r.key, 'aside'); beep('park');
-  if (note) toast('Előző termék félretéve');
 }
 async function newBox(c, r) {
   const l = (D.byCarton.get(c) || []).find(x => x.key === r.key && lineGot(x) < x.qty); if (!l) return;
@@ -324,7 +323,7 @@ async function newBox(c, r) {
 }
 async function onScan(raw) {
   raw = raw.trim(); if (!raw) return;
-  if (SV.res && (SV.res.t === 'ask' || SV.res.t === 'new')) { askPark(SV.res, true); SV.res = null; }
+  if (SV.res && (SV.res.t === 'ask' || SV.res.t === 'new')) { logScan('sku', SV.res.raw, SV.res.key, 'lookup'); SV.res = null; }
   const c = classify(raw); animNext = true; HL = 0; window.scrollTo(0, 0);
   if (c.kind === 'badcarton') { SV.res = {t: 'err', title: 'Érvénytelen azonosító', raw: c.raw, note: 'RQ-XPW + 10 számjegy'}; logScan('carton', c.raw, '', 'unknown', ''); beep('bad'); return update(); }
   if (c.kind === 'carton') return scanCarton(c.carton, raw);
@@ -493,7 +492,7 @@ function updateSort() {
     shellView = 'sort';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
         <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Termék vagy doboz kódja"></form>
-      <div id="res"></div><div class="ver">v2.6</div>`;
+      <div id="res"></div><div class="ver">v2.7</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();
