@@ -144,17 +144,26 @@ const remPieces = c => (D.byCarton.get(c) || []).reduce((a, l) => a + (l.qty - l
 const keyName = k => ((D.byKey.get(k) || [])[0] || {}).descr || k;
 // meg nem nyitott dobozok a felretett polc alapjan: mennyi van meg belole, mi hianyzik.
 // full: minden darabja a polcon van, ez legyen a kovetkezo doboz.
+// egy meg nem nyitott doboz lefedettsege a polc (pk: termek kulcs -> darab) alapjan
+function coverage(c, pk) {
+  const need = new Map();
+  D.byCarton.get(c).forEach(l => need.set(l.key, (need.get(l.key) || 0) + l.qty - lineGot(l)));
+  let have = 0, total = 0; const miss = [];
+  need.forEach((q, k) => { const h = Math.min(q, pk.get(k) || 0); have += h; total += q; if (h < q) miss.push({k, n: q - h}); });
+  return {c, have, total, miss, full: total > 0 && have >= total, ratio: total ? have / total : 0};
+}
 function collected() {
   const cs = new Set();
   D.parked.forEach((n, k) => (D.byKey.get(k) || []).forEach(l => { if (!cartonStatus(l.carton)) cs.add(l.carton); }));
-  return [...cs].map(c => {
-    const need = new Map();
-    D.byCarton.get(c).forEach(l => need.set(l.key, (need.get(l.key) || 0) + l.qty - lineGot(l)));
-    let have = 0, total = 0; const miss = [];
-    need.forEach((q, k) => { const h = Math.min(q, D.parked.get(k) || 0); have += h; total += q; if (h < q) miss.push({k, n: q - h}); });
-    return {c, have, total, miss, full: total > 0 && have >= total, ratio: total ? have / total : 0};
-  }).filter(x => x.have > 0)
+  return [...cs].map(c => coverage(c, D.parked)).filter(x => x.have > 0)
     .sort((a, b) => b.full - a.full || (a.full ? b.total - a.total : b.ratio - a.ratio || b.have - a.have) || a.c.localeCompare(b.c));
+}
+// uj doboz valasztasa egy termekhez: a polc + ez a darab alapjan a legjobban lefedett doboz elol
+function newBoxCands(key) {
+  const pk = new Map(D.parked); pk.set(key, (pk.get(key) || 0) + 1);
+  const cs = new Set((D.byKey.get(key) || []).filter(l => !cartonStatus(l.carton) && lineGot(l) < l.qty).map(l => l.carton));
+  return [...cs].map(c => coverage(c, pk))
+    .sort((a, b) => b.full - a.full || b.ratio - a.ratio || a.total - b.total || a.c.localeCompare(b.c));
 }
 function awbTag(l) { return `<span class="tag mono" title="AWB">${esc(l.awb)}</span>`; }
 // kor alaku haladasjelzo (0..1)
