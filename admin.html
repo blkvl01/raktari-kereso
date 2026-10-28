@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raktári kereső - Admin</title>
-<link rel="stylesheet" href="common.css?v=21">
+<link rel="stylesheet" href="common.css?v=22">
 <style>
 .shell{display:grid;grid-template-columns:240px 1fr;min-height:100dvh}
 aside{background:var(--side);color:var(--side-ink);padding:var(--s4) var(--s3);position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;overflow:auto}
@@ -89,6 +89,7 @@ main.enter{animation:secIn .45s var(--ease-out)}
 tbody tr{transition:background .15s}
 .lblform{display:flex;gap:var(--s3);flex-wrap:wrap;align-items:end;margin-bottom:var(--s3)}
 .lblform .field{margin:0}.lblform .field input{width:110px}
+.g-lbl{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
 textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 .onb{display:grid;justify-items:center;text-align:center;gap:var(--s3);padding:var(--s6) var(--s4)}
 .onb .big{width:84px;height:84px;border-radius:24px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;animation:springIn .6s var(--ease-out)}
@@ -111,15 +112,19 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 .stp.on .n{background:var(--accent);color:var(--accent-ink);transform:scale(1.15)}
 .stp.done .n{background:var(--ok-strong);color:var(--ok-strong-ink)}
 #labels{display:none}
-@media (max-width:1100px){.g-hero{grid-template-columns:1fr}}
+/* cimke: teljes azonosito, az utolso 4 szamjegy nagyobb, alatta vonalkod. Elonezetben es nyomtatasban ugyanaz. */
+.lbl{box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5mm;padding:2mm;overflow:hidden;color:#000;background:#fff}
+.lbl .lid{font-family:ui-monospace,Consolas,"Roboto Mono",monospace;font-weight:700;line-height:1.1;white-space:nowrap}
+.lbl .lid b{font-size:1.45em;font-weight:900;margin-left:.06em}
+.lbl svg{display:block;width:100%;flex:none}
+.lblprev{display:grid;place-items:center;padding:var(--s5) var(--s4);background:var(--surface-2);overflow:auto;min-height:220px}
+.lblprev .lbl{box-shadow:0 2px 12px rgb(0 0 0 / .22);border-radius:1.5mm}
+@media (max-width:1100px){.g-hero,.g-lbl{grid-template-columns:1fr}}
 @media (max-width:900px){.shell{grid-template-columns:1fr}aside{position:static;height:auto;overflow:visible}.links{flex-direction:row;flex-wrap:wrap}.navind{display:none}aside a[aria-current=page]{background:var(--accent)}aside .foot{display:none}main{padding:var(--s3)}.top{padding:var(--s3)}.gsearch{display:none}.hero{flex-direction:column;align-items:flex-start}.g-2{grid-template-columns:1fr}}
 @media print{
   body{background:#fff;color:#000}.shell,dialog,#toast{display:none!important}
   #labels{display:block}
-  .lbl{page-break-after:always;break-after:page;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1mm;overflow:hidden;color:#000;background:#fff;font-family:system-ui,Arial,sans-serif}
-  .lbl .big{font:800 var(--lbl-big,22mm)/1 ui-monospace,Consolas,monospace;letter-spacing:1mm}
-  .lbl svg{max-width:92%;height:auto}
-  .lbl .sm{font-size:3.2mm}
+  #labels .lbl{page-break-after:always;break-after:page}
 }
 </style>
 </head>
@@ -142,10 +147,10 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/cfb@1.2.2/dist/cfb.min.js" integrity="sha384-peTByNpmIz2Wq5hOZJ3dZmZP4MJ6ZXwF9dZ3R8kW7/C6bMWdHEME3on5mt9DH7d5" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
-<script src="common.js?v=21"></script>
-<script src="import.js?v=21"></script>
+<script src="common.js?v=22"></script>
+<script src="import.js?v=22"></script>
 <script>
-const SECS = [['overview', 'Áttekintés', 'chart'], ['import', 'Importálás', 'up'], ['cartons', 'Dobozok', 'box'], ['skus', 'SKU-k', 'search'], ['diffs', 'Eltérések', 'alert'],
+const SECS = [['overview', 'Áttekintés', 'chart'], ['import', 'Importálás', 'up'], ['cartons', 'Dobozok', 'box'], ['parked', 'Félretett', 'layers'], ['skus', 'SKU-k', 'search'], ['diffs', 'Eltérések', 'alert'],
   ['log', 'Napló', 'list'], ['devices', 'Eszközök', 'users'], ['labels', 'Címkék', 'print'], ['settings', 'Beállítások', 'gear']];
 let adminCode = ls.get('rk_admin') || '';
 let sec = (location.hash || '#overview').slice(1);
@@ -164,7 +169,7 @@ const M = $('#main');
 
 const RES = {open1: ['találat, 1 doboz', 'ok'], openN: ['találat, több doboz', 'ok'], closed: ['nincs nyitott dobozban', 'warn'], surplus: ['felesleg', 'warn'],
   unknown: ['ismeretlen', 'bad'], opened: ['felvéve', 'ok'], already: ['már felvéve', 'mute'], done: ['kész doboz', 'warn'],
-  line_done: ['tétel kész', 'ok'], line_undone: ['tétel visszavonva', 'mute'], ident: ['azonosításhoz', 'mute'], ident_pick: ['azonosítva', 'ok'], pack: ['csomagolva', 'ok']};
+  line_done: ['tétel kész', 'ok'], line_undone: ['tétel visszavonva', 'mute'], ident: ['azonosításhoz', 'mute'], ident_pick: ['azonosítva', 'ok'], pack: ['csomagolva', 'ok'], aside: ['félretéve', 'warn'], move: ['áttéve', 'mute'], built: ['összerakva a polcról', 'ok']};
 const resTag = r => { const x = RES[r] || [r, 'mute']; return `<span class="tag ${x[1]}">${esc(x[0])}</span>`; };
 const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '0%';
 const I = (n, c) => ic(n).replace('class="i"', `class="i ${c || ''}"`);
@@ -271,13 +276,13 @@ function areaChart(vals, labels) {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.1</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.2</div>`;
 }
 function renderNav() {
-  const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, diffs: a.unk + a.closed + a.ucart + a.amb};
+  const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length, diffs: a.unk + a.closed + a.ucart + a.amb};
   document.querySelectorAll('#nav a').forEach(l => {
     const k = l.dataset.s; l.toggleAttribute('aria-current', false); if (k === sec) l.setAttribute('aria-current', 'page'); else l.removeAttribute('aria-current');
-    const c = l.querySelector('.cnt'); c.hidden = !cnt[k]; c.textContent = cnt[k] || ''; c.classList.toggle('hot', k === 'diffs');
+    const c = l.querySelector('.cnt'); c.hidden = !cnt[k]; c.textContent = cnt[k] || ''; c.classList.toggle('hot', k === 'diffs' || k === 'parked');
   });
   const cur = document.querySelector('#nav a[aria-current]'), ind = $('.navind');
   if (cur && ind) { ind.style.height = cur.offsetHeight + 'px'; ind.style.transform = `translateY(${cur.offsetTop}px)`; }
@@ -297,7 +302,7 @@ function render(force) {
     M.classList.remove('enter'); void M.offsetWidth; M.classList.add('enter'); clearTimeout(M._et); M._et = setTimeout(() => M.classList.remove('enter'), 1500);
   }
   M.onclick = null;
-  ({overview: vOverview, import: vImport, cartons: vCartons, skus: vSkus, diffs: vDiffs, log: vLog, devices: vDevices, labels: vLabels, settings: vSettings})[sec]();
+  ({overview: vOverview, import: vImport, cartons: vCartons, parked: vParked, skus: vSkus, diffs: vDiffs, log: vLog, devices: vDevices, labels: vLabels, settings: vSettings})[sec]();
   if (M.classList.contains('enter')) M.querySelectorAll('[data-n]').forEach(el => { el.dataset.from = 0; countUp(el, +el.dataset.n, 900); });
 }
 window.addEventListener('hashchange', () => { sec = (location.hash || '#overview').slice(1); if (!SECS.some(s => s[0] === sec)) sec = 'overview'; render(true); window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'}); });
@@ -343,6 +348,7 @@ function vOverview() {
         ${row('alert', 'warn', 'Nincs nyitott dobozban', at.closed, '#diffs')}
         ${row('layers', 'warn', 'Többértelmű SKU', at.amb, '#skus')}
         ${row('box', 'warn', 'Hiányzó tétel', at.miss, '#diffs')}
+        ${row('layers', 'warn', 'Összegyűlt doboz a polcon', collected().filter(x => x.full).length, '#parked')}
         ${row('x', 'bad', 'Ismeretlen doboz', at.ucart, '#diffs')}</div></div>
     <div class="eyebrow" style="margin:0 var(--s1) var(--s2)">AWB</div>
     <div class="grid g-awb" style="margin-bottom:var(--s4)">${awbCards}</div>
@@ -486,12 +492,36 @@ function showCarton(c) {
       <span class="box">${isLineDone(l) ? ic('check') : ''}</span><span class="t"><b>${esc(l.descr)}</b><small><span class="mono">${esc(l.sku)}</span>${l.mat && l.mat !== l.descr ? ' · ' + esc(l.mat) : ''}</small></span><b>${lineGot(l)}/${l.qty} db</b></button>`).join('')}</div>
     <div class="meta" style="margin-top:var(--s2)">${p.done}/${p.n} tétel · ${p.got}/${p.qty} db · ${ls_.reduce((a, l) => a + (l.gw || 0), 0).toFixed(1)} kg</div>
     <div class="row"><button class="btn" id="cx">Bezár</button>
-      ${o ? `${o.status === 'done' ? '<button class="btn" id="cr">Újranyitás</button>' : '<button class="btn pri" id="cd">Kész</button>'}<button class="btn dng" id="cz">Eltávolítás</button>${claimOf(c) ? '<button class="btn" id="cl">Foglalás elengedése</button>' : ''}` : '<button class="btn pri" id="co">Felvétel</button>'}</div>`);
+      ${o ? `${o.status === 'done' ? '<button class="btn" id="cr">Újranyitás</button>' : '<button class="btn pri" id="cd">Kész</button>'}<button class="btn dng" id="cz">Eltávolítás</button>${claimOf(c) ? '<button class="btn" id="cl">Foglalás elengedése</button>' : ''}` : '<button class="btn pri" id="co">Felvétel</button>'}<button class="btn" id="cp">${I('print', 'sm')}Címke</button></div>`);
   const act = async a => { if (await adm('rk_admin_carton', {p_carton: c, p_action: a})) { await loadOpen(); render(true); showCarton(c); } };
   d.querySelectorAll('[data-line]').forEach(b => b.onclick = async () => { const r = await sb.rpc('rk_set_line', {p_line: +b.dataset.line, p_done: b.dataset.v === '1', p_device: 'admin'}); if (!r.error) { await loadOpen(); render(true); showCarton(c); } });
   d.querySelector('#cx').onclick = () => d.close();
   [['cr', 'reopen'], ['cd', 'done'], ['co', 'open'], ['cl', 'release']].forEach(([id, a]) => { const b = d.querySelector('#' + id); if (b) b.onclick = () => act(a); });
+  d.querySelector('#cp').onclick = () => { const [w, h] = lblSize(); printLabels([c], w, h, 1); };
   const cz = d.querySelector('#cz'); if (cz) cz.onclick = async () => { if (await confirmDlg('Eltávolítod a dobozt a listáról?', 'Eltávolítás', true)) act('remove'); else showCarton(c); };
+}
+
+// ---------- felretett polc ----------
+// Amit a PDA "Tedd felre"-vel a polcra kuldott; az osszegyult doboz (minden darabja a polcon) a kovetkezo doboz.
+function vParked() {
+  const items = [...D.parked].filter(([k]) => D.byKey.has(k)).sort((a, b) => keyName(a[0]).localeCompare(keyName(b[0]), 'hu'));
+  const cs = collected(), full = cs.filter(x => x.full), near = cs.filter(x => !x.full).slice(0, 20), total = items.reduce((a, x) => a + x[1], 0);
+  const local = D.parkShared ? '' : `<div class="card pad" style="margin-bottom:var(--s4);border-color:var(--warn-strong)"><b>${I('alert', 'sm')} A közös polc nincs bekapcsolva.</b><div class="meta">Futtasd le a <span class="mono">sql/v2.2_felretett_polc.sql</span> fájlt a Supabase SQL Editorban. Addig minden PDA csak a saját félretett termékeit látja, itt semmi nem jelenik meg.</div></div>`;
+  const free = k => new Set((D.byKey.get(k) || []).filter(l => !cartonStatus(l.carton)).map(l => l.carton)).size;
+  M.innerHTML = local + `<div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:var(--s4)">${kpi('layers', 'Darab a polcon', total, 0, total)}${kpi('list', 'Termék a polcon', items.length, 1, items.length)}${kpi('check', 'Összegyűlt doboz', full.length, 2, full.length)}${kpi('box', 'Nyitott doboz', overall().open, 3, overall().open)}</div>
+    <div class="grid g-2" style="margin-bottom:var(--s4)">
+      <div class="card ${stI(2)}"><div class="hd"><h2>Összegyűlt, ezek a következő dobozok</h2>${full.length ? `<button class="btn xs" id="pl">${I('print', 'sm')}Címkék</button>` : ''}</div><div class="scroll">${full.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th class="n">Tétel</th><th class="n">Db</th></tr></thead><tbody>${full.map(x => `<tr class="clk" data-c="${esc(x.c)}"><td>${idHtml(x.c)}</td><td class="mono meta">${esc(D.byCarton.get(x.c)[0].awb)}</td><td class="n">${D.byCarton.get(x.c).length}</td><td class="n">${x.total}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Még egy doboz sem gyűlt össze</b></div>'}</div></div>
+      <div class="card ${stI(3)}"><div class="hd"><h2>Legközelebb álló dobozok</h2></div><div class="scroll">${near.length ? `<table><thead><tr><th>Doboz</th><th>Megvan</th><th>Hiányzik</th></tr></thead><tbody>${near.map(x => `<tr class="clk" data-c="${esc(x.c)}"><td>${idHtml(x.c)}</td><td style="min-width:120px"><b>${x.have}/${x.total} db</b><div class="bar"><i class="o" style="width:${Math.round(x.ratio * 100)}%"></i></div></td><td class="meta">${x.miss.slice(0, 4).map(m => esc(keyName(m.k)) + (m.n > 1 ? ' ×' + m.n : '')).join(', ')}${x.miss.length > 4 ? ` +${x.miss.length - 4}` : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs</b></div>'}</div></div></div>
+    <div class="card ${stI(4)}"><div class="hd"><h2>A polcon</h2><span class="meta">${total} db, ${items.length} termék</span><button class="btn xs" id="ex">${I('dl', 'sm')}CSV</button></div><div class="scroll">${items.length ? `<table><thead><tr><th>Termék</th><th class="n">Db</th><th class="n">Lehetséges doboz</th><th>Utoljára</th><th></th></tr></thead><tbody>${items.map(([k, n]) => { const r = D.parkInfo.get(k) || {};
+      return `<tr class="clk" data-k="${k}"><td><b>${esc(keyName(k))}</b><br><span class="mono meta">${esc(k)}</span></td><td class="n"><b>${n}</b></td><td class="n">${free(k) || '<span class="tag warn">0, felesleg</span>'}</td><td class="meta">${r.ts ? fmtDT(r.ts) + ' · ' + esc(r.device || '') : ''}</td><td class="n"><button class="btn xs" data-pm="${k}" aria-label="Levesz egyet">${I('minus', 'sm')}</button></td></tr>`; }).join('')}</tbody></table>` : '<div class="empty"><b>Üres a polc</b></div>'}</div></div>`;
+  M.onclick = async e => {
+    const pm = e.target.closest('[data-pm]');
+    if (pm) { if (!await confirmDlg(`Leveszel egyet a polcról: ${keyName(pm.dataset.pm)}?`, 'Levesz', true)) return; const r = await sb.rpc('rk_park', {p_key: pm.dataset.pm, p_delta: -1, p_device: 'admin'}); if (r.error) return toast('Hiba: ' + r.error.message); await loadParked(); return render(true); }
+    const c = e.target.closest('[data-c]'); if (c) return showCarton(c.dataset.c);
+    const k = e.target.closest('[data-k]'); if (k) return showSku(k.dataset.k);
+  };
+  const pl = $('#pl'); if (pl) pl.onclick = () => { const [w, h] = lblSize(); printLabels(full.map(x => x.c), w, h, 1); };
+  $('#ex').onclick = () => csv([['Termék kód', 'Termék', 'Db', 'Utoljára', 'Eszköz']].concat(items.map(([k, n]) => { const r = D.parkInfo.get(k) || {}; return [k, keyName(k), n, r.ts || '', r.device || '']; })), 'felretett_polc.csv');
 }
 
 // ---------- SKU-k ----------
@@ -546,10 +576,10 @@ function vDiffs() {
   $('#ex').onclick = () => csv([['AWB', 'Doboz', 'SKU', 'Termék', 'Eredeti megnevezés', 'Db']].concat(miss.map(l => [l.awb, l.carton, l.sku, l.descr, l.mat, l.qty])), 'hianyzo_tetelek.csv');
 }
 function vLog() {
-  const LG = {hit: s => s.result === 'open1' || s.result === 'openN', miss: s => s.result === 'closed' || s.result === 'surplus', unknown: s => s.result === 'unknown', carton: s => s.kind === 'carton', line: s => s.kind === 'line', ident: s => s.kind === 'ident'};
+  const LG = {hit: s => s.result === 'open1' || s.result === 'openN', miss: s => s.result === 'closed' || s.result === 'surplus', unknown: s => s.result === 'unknown', carton: s => s.kind === 'carton', line: s => s.kind === 'line', park: s => s.kind === 'park' || s.result === 'aside', ident: s => s.kind === 'ident'};
   const flt = () => SC.filter(s => (!F.lres || LG[F.lres](s)) && (!F.lq || (s.raw || '').includes(F.lq) || (s.device || '').toLowerCase().includes(F.lq.toLowerCase()) || (s.carton || '').includes(F.lq)));
   M.innerHTML = `<div class="tools"><input class="inp" id="lq" placeholder="Kód, eszköz, doboz" value="${esc(F.lq)}" aria-label="Szűrés">
-    ${[['', 'Mind'], ['hit', 'Találat'], ['miss', 'Nincs nyitott'], ['unknown', 'Ismeretlen'], ['carton', 'Dobozok'], ['line', 'Tételek'], ['ident', 'Azonosítás']].map(([k, n]) => `<button class="chip" data-lr="${k}" aria-pressed="${F.lres === k}">${n}</button>`).join('')}
+    ${[['', 'Mind'], ['hit', 'Találat'], ['miss', 'Nincs nyitott'], ['unknown', 'Ismeretlen'], ['carton', 'Dobozok'], ['line', 'Tételek'], ['park', 'Polc'], ['ident', 'Azonosítás']].map(([k, n]) => `<button class="chip" data-lr="${k}" aria-pressed="${F.lres === k}">${n}</button>`).join('')}
     <span class="meta" id="lc"></span><button class="btn sm" id="ex" style="margin-left:auto">${I('dl')}CSV</button></div>
     <div class="card"><div class="scroll" style="max-height:none" id="lt"></div></div>`;
   const fill = () => {
@@ -570,34 +600,81 @@ function vDevices() {
 }
 
 // ---------- cimkek, beallitasok ----------
+// Barmilyen doboz azonositohoz: teljes azonosito (utolso 4 szamjegy nagyobb) + CODE128 vonalkod
+const LBL_SIZES = [[100, 50], [100, 70], [100, 150], [60, 40]];
+const lblSize = () => [+ls.get('rk_lw') || 100, +ls.get('rk_lh') || 50];
+// soronkent vagy vesszovel: teljes azonosito (goodslistben nem levo is), 10 szamjegy, vagy egyertelmu vegzodes (min. 4 szamjegy)
+function parseLabelText(t) {
+  const ok = [], unknown = [], bad = [];
+  t.split(/[\s,;]+/).filter(Boolean).forEach(x => {
+    const u = x.toUpperCase(), d = u.replace(/\D/g, '');
+    let c = CARTON_RE.test(u) ? u : d.length === 10 ? D.cartonByDigits.get(d) || 'RQ-XPW' + d : null;
+    if (!c && d.length >= 4 && d.length < 10) {
+      const m = [...D.byCarton.keys()].filter(k => k.endsWith(d));
+      if (m.length !== 1) { bad.push(x + (m.length ? ` (${m.length} doboz)` : '')); return; }
+      c = m[0];
+    }
+    if (!c) { bad.push(x); return; }
+    if (ok.includes(c)) return;
+    ok.push(c); if (!D.byCarton.has(c)) unknown.push(c);
+  });
+  return {ok, unknown, bad};
+}
+function labelList() {
+  if (F.lmode === 'lista') return parseLabelText(F.ltxt || '');
+  const o = [...D.open.values()];
+  const cs = F.lmode === 'nyitott' ? o.filter(x => x.status === 'open').map(x => x.carton) : F.lmode === 'kesz' ? o.filter(x => x.status === 'done').map(x => x.carton)
+    : [...D.byCarton.keys()].filter(c => D.byCarton.get(c)[0].awb === F.lawb);
+  return {ok: cs.sort(), unknown: [], bad: []};
+}
+// a betumeret a szelessegbol jon: a teljes azonosito egy sorban elferjen (monospace ~0,6em/karakter)
+function labelHtml(c, w, h) {
+  const fs = Math.min((w - 4) * .97 / 10.8, h * .2), bh = Math.max(8, Math.min(h - 6.5 - fs * 1.6, w * .45));
+  return `<div class="lbl" style="width:${w}mm;height:${h}mm"><div class="lid" style="font-size:${fs.toFixed(2)}mm">${esc(c.slice(0, -4))}<b>${esc(c.slice(-4))}</b></div><svg class="bc" data-v="${esc(c)}" data-h="${bh.toFixed(1)}"></svg></div>`;
+}
+// a JsBarcode felulirja az svg style-t, ezert a magassag utana kerul vissza
+function drawBarcodes(root) {
+  root.querySelectorAll('svg.bc').forEach(s => { try { JsBarcode(s, s.dataset.v, {format: 'CODE128', displayValue: false, height: 100, width: 2, margin: 20}); s.setAttribute('preserveAspectRatio', 'none'); s.style.height = s.dataset.h + 'mm'; } catch (e) {} });
+}
+function printLabels(list, w, h, copies) {
+  if (!list.length) return toast('Nincs doboz');
+  const out = []; list.forEach(c => { for (let i = 0; i < copies; i++) out.push(labelHtml(c, w, h)); });
+  $('#labels').innerHTML = `<style>@page{size:${w}mm ${h}mm;margin:0}</style>` + out.join('');
+  drawBarcodes($('#labels')); window.print();
+}
 function vLabels() {
-  const base = F.lmode === 'felvett' ? [...D.open.keys()] : F.lmode === 'nyitott' ? [...D.open.values()].filter(o => o.status === 'open').map(o => o.carton) : [];
-  M.innerHTML = `<div class="card pad"><div class="lblform">
-    <div class="field"><span>Dobozok</span><div style="display:flex;gap:var(--s2)">${[['felvett', 'Felvett'], ['nyitott', 'Nyitott'], ['lista', 'Lista']].map(([k, n]) => `<button class="chip" data-lm="${k}" aria-pressed="${F.lmode === k}">${n}</button>`).join('')}</div></div>
-    <label class="field"><span>Szélesség (mm)</span><input id="lw" type="number" value="${ls.get('rk_lw') || 100}" min="30"></label>
-    <label class="field"><span>Magasság (mm)</span><input id="lh" type="number" value="${ls.get('rk_lh') || 50}" min="20"></label>
-    <button class="btn pri" id="pr">${I('print')}Nyomtatás</button></div>
-    ${F.lmode === 'lista' ? `<label class="field"><textarea class="inp" id="ll" placeholder="Soronként egy doboz" aria-label="Dobozok">${esc(F.ltxt || '')}</textarea></label>` : ''}
-    <div class="meta" id="lcnt"></div></div>`;
-  const items = () => {
-    if (F.lmode !== 'lista') return base.sort();
-    const t = (F.ltxt || '').split(/[\s,;]+/).filter(Boolean), out = [];
-    t.forEach(x => { const d = x.replace(/\D/g, ''); const m = D.cartonByDigits.get(d) || [...D.byCarton.keys()].find(c => d.length >= 4 && c.endsWith(d)); if (m && !out.includes(m)) out.push(m); });
-    return out;
+  const [w, h] = lblSize(), cp = +ls.get('rk_lcp') || 1, aw = [...D.awbs.values()];
+  if (F.lmode === 'felvett') F.lmode = 'lista';
+  if (F.lmode === 'awb' && !aw.some(a => a.id === F.lawb)) F.lawb = aw[0] ? aw[0].id : '';
+  M.innerHTML = `<div class="grid g-lbl">
+    <div class="card"><div class="pad" style="display:grid;gap:var(--s4)">
+      <div class="field" style="margin:0"><span>Mely dobozok</span><div class="chips">${[['lista', 'Megadott azonosítók'], ['nyitott', 'Nyitott'], ['kesz', 'Kész'], ['awb', 'Egy AWB összes doboza']].map(([k, n]) => `<button class="chip" data-lm="${k}" aria-pressed="${F.lmode === k}">${n}</button>`).join('')}</div></div>
+      ${F.lmode === 'awb' ? `<div class="chips">${aw.map(a => `<button class="chip mono" data-law="${esc(a.id)}" aria-pressed="${F.lawb === a.id}">${esc(a.id)}</button>`).join('') || '<span class="meta">Nincs AWB</span>'}</div>` : ''}
+      ${F.lmode === 'lista' ? `<label class="field" style="margin:0"><span>Doboz azonosítók, soronként: teljes, 10 számjegy, vagy a vége (min. 4 számjegy). Goodslistben nem szereplő is nyomtatható.</span><textarea class="inp" id="ll" placeholder="RQ-XPW0123456789&#10;4821" aria-label="Doboz azonosítók">${esc(F.ltxt || '')}</textarea></label>` : ''}
+      <div class="field" style="margin:0"><span>Címke mérete (mm)</span><div class="chips">${LBL_SIZES.map(([a, b]) => `<button class="chip" data-sz="${a}x${b}" aria-pressed="${a === w && b === h}">${a} × ${b}</button>`).join('')}</div></div>
+      <div class="lblform" style="margin:0"><label class="field"><span>Szélesség</span><input id="lw" type="number" value="${w}" min="30" max="200"></label>
+        <label class="field"><span>Magasság</span><input id="lh" type="number" value="${h}" min="20" max="200"></label>
+        <label class="field"><span>Példány / doboz</span><input id="lcp" type="number" value="${cp}" min="1" max="10"></label></div>
+      <div id="lst" class="meta"></div>
+      <button class="btn pri" id="pr">${I('print')}Nyomtatás</button></div></div>
+    <div class="card"><div class="hd"><h2>Előnézet</h2><span class="meta" id="lpn"></span></div><div class="lblprev" id="lpv"></div></div></div>`;
+  const vals = () => [Math.min(200, Math.max(30, +$('#lw').value || 100)), Math.min(200, Math.max(20, +$('#lh').value || 50)), Math.min(10, Math.max(1, +$('#lcp').value || 1))];
+  const refresh = () => {
+    const r = labelList(), [w2, h2, cp2] = vals();
+    $('#lst').innerHTML = `<b>${r.ok.length} doboz × ${cp2} = ${r.ok.length * cp2} címke</b>`
+      + (r.unknown.length ? `<div>Nincs a goodslistben, de nyomtatható: <span class="mono">${esc(r.unknown.join(', '))}</span></div>` : '')
+      + (r.bad.length ? `<div class="err">Nem értelmezhető: ${esc(r.bad.join(', '))}</div>` : '');
+    $('#lpn').textContent = r.ok.length ? r.ok[0] + (r.ok.length > 1 ? ` (+${r.ok.length - 1})` : '') : '';
+    $('#lpv').innerHTML = r.ok.length ? labelHtml(r.ok[0], w2, h2) : '<div class="empty"><b>Nincs doboz</b></div>';
+    drawBarcodes($('#lpv'));
   };
-  const upd = () => $('#lcnt').textContent = items().length + ' címke';
-  upd();
-  document.querySelectorAll('[data-lm]').forEach(b => b.onclick = () => { F.lmode = b.dataset.lm; vLabels(); });
-  const ll = $('#ll'); if (ll) ll.oninput = e => { F.ltxt = e.target.value; upd(); };
-  $('#pr').onclick = () => {
-    const w = +$('#lw').value || 100, h = +$('#lh').value || 50, list = items();
-    if (!list.length) return toast('Nincs doboz');
-    ls.set('rk_lw', w); ls.set('rk_lh', h);
-    $('#labels').innerHTML = `<style>@page{size:${w}mm ${h}mm;margin:0}.lbl{width:${w}mm;height:${h}mm;--lbl-big:${Math.round(h * .42)}mm}</style>` +
-      list.map(c => `<div class="lbl"><div class="big">${short(c)}</div><svg class="bc" data-v="${esc(c)}"></svg><div class="sm">${esc(c)}</div></div>`).join('');
-    document.querySelectorAll('#labels svg.bc').forEach(s => { try { JsBarcode(s, s.dataset.v, {format: 'CODE128', displayValue: false, height: Math.round(h * 0.9), width: 2, margin: 0}); } catch (e) {} });
-    window.print();
-  };
+  refresh();
+  M.querySelectorAll('[data-lm]').forEach(b => b.onclick = () => { F.lmode = b.dataset.lm; vLabels(); });
+  M.querySelectorAll('[data-law]').forEach(b => b.onclick = () => { F.lawb = b.dataset.law; vLabels(); });
+  M.querySelectorAll('[data-sz]').forEach(b => b.onclick = () => { const [a, c] = b.dataset.sz.split('x'); ls.set('rk_lw', a); ls.set('rk_lh', c); vLabels(); });
+  const ll = $('#ll'); if (ll) ll.oninput = e => { F.ltxt = e.target.value; refresh(); };
+  ['#lw', '#lh', '#lcp'].forEach(id => $(id).oninput = () => { const [a, b, c] = vals(); ls.set('rk_lw', a); ls.set('rk_lh', b); ls.set('rk_lcp', c); refresh(); });
+  $('#pr').onclick = () => { const [a, b, c] = vals(); printLabels(labelList().ok, a, b, c); };
 }
 function vSettings() {
   const aw = [...D.awbs.values()];

@@ -50,7 +50,7 @@ const fmtDT = t => new Date(t).toLocaleString('hu', {month: '2-digit', day: '2-d
 
 // ---------- adat ----------
 const D = {lines: [], byKey: new Map(), byCarton: new Map(), byId: new Map(), cartonByDigits: new Map(),
-  awbs: new Map(), open: new Map(), lineDone: new Map(), claims: new Map(), sig: '', online: true, err: ''};
+  awbs: new Map(), open: new Map(), lineDone: new Map(), claims: new Map(), parked: new Map(), parkInfo: new Map(), parkShared: true, sig: '', online: true, err: ''};
 
 function indexLines() {
   D.byKey = new Map(); D.byCarton = new Map(); D.byId = new Map(); D.cartonByDigits = new Map();
@@ -96,6 +96,16 @@ async function loadOpen() {
   D.open = new Map(o.data.map(r => [r.carton, r]));
   D.lineDone = new Map(s.data.map(r => [r.line_id, r]));
   D.claims = new Map(k.data.map(r => [r.carton, r]));
+  await loadParked();
+}
+// felretett polc: termek kulcs -> darab, minden eszkoz kozosen latja (rk_parked tabla).
+// Amig a tabla nincs letrehozva (sql/v2.2_felretett_polc.sql), eszkozonkent helyben tarolodik.
+async function loadParked() {
+  const {data, error} = await sb.from('rk_parked').select('*');
+  if (error && !/rk_parked|does not exist|schema cache/i.test(error.message || '')) throw error;
+  D.parkShared = !error;
+  if (error) { try { D.parked = new Map(JSON.parse(ls.get('rk_parked_local') || '[]')); } catch (e) { D.parked = new Map(); } }
+  else { D.parked = new Map(data.filter(r => r.n > 0).map(r => [r.key, r.n])); D.parkInfo = new Map(data.map(r => [r.key, r])); }
 }
 // full=true: goodslist ujratoltese is; kulonben csak ha valtozott
 async function refreshData(full) {
@@ -113,7 +123,8 @@ async function refreshData(full) {
 function watch(cb) {
   sb.channel('rk_ch').on('postgres_changes', {event: '*', schema: 'public', table: 'rk_open'}, () => loadOpen().then(cb).catch(() => {}))
     .on('postgres_changes', {event: '*', schema: 'public', table: 'rk_linestat'}, () => loadOpen().then(cb).catch(() => {}))
-    .on('postgres_changes', {event: '*', schema: 'public', table: 'rk_claims'}, () => loadOpen().then(cb).catch(() => {})).subscribe();
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'rk_claims'}, () => loadOpen().then(cb).catch(() => {}))
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'rk_parked'}, () => loadParked().then(cb).catch(() => {})).subscribe();
 }
 
 // ---------- szamitott ertekek ----------
@@ -128,6 +139,22 @@ function cartonProg(c) {
   let done = 0, got = 0, qty = 0;
   ls_.forEach(l => { qty += l.qty; const g = lineGot(l); got += g; if (g >= l.qty) done++; });
   return {n: ls_.length, done, qty, got, qtyDone: got, ratio: qty ? got / qty : 0};
+}
+const remPieces = c => (D.byCarton.get(c) || []).reduce((a, l) => a + (l.qty - lineGot(l)), 0);
+const keyName = k => ((D.byKey.get(k) || [])[0] || {}).descr || k;
+// meg nem nyitott dobozok a felretett polc alapjan: mennyi van meg belole, mi hianyzik.
+// full: minden darabja a polcon van, ez legyen a kovetkezo doboz.
+function collected() {
+  const cs = new Set();
+  D.parked.forEach((n, k) => (D.byKey.get(k) || []).forEach(l => { if (!cartonStatus(l.carton)) cs.add(l.carton); }));
+  return [...cs].map(c => {
+    const need = new Map();
+    D.byCarton.get(c).forEach(l => need.set(l.key, (need.get(l.key) || 0) + l.qty - lineGot(l)));
+    let have = 0, total = 0; const miss = [];
+    need.forEach((q, k) => { const h = Math.min(q, D.parked.get(k) || 0); have += h; total += q; if (h < q) miss.push({k, n: q - h}); });
+    return {c, have, total, miss, full: total > 0 && have >= total, ratio: total ? have / total : 0};
+  }).filter(x => x.have > 0)
+    .sort((a, b) => b.full - a.full || (a.full ? b.total - a.total : b.ratio - a.ratio || b.have - a.have) || a.c.localeCompare(b.c));
 }
 function awbTag(l) { return `<span class="tag mono" title="AWB">${esc(l.awb)}</span>`; }
 // kor alaku haladasjelzo (0..1)
