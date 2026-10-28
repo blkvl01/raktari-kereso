@@ -535,23 +535,39 @@ function boxCard(x, i, full) {
     <div class="needs ${open ? 'on' : ''}"><div class="ni">${rows}</div></div>
     ${full ? `<div class="pad" style="padding:var(--s3) var(--s4)"><button class="btn pri block" data-build="${esc(x.c)}" data-full="1">${ic('check')}Összeraktam</button></div>` : ''}</div>`;
 }
+// kezi polcra tetel (ami mar fizikailag felre van teve): ha nyitott doboz varja vagy felesleg, eloszor szol
+function addToShelf(raw, force) {
+  raw = raw.trim(); if (!raw) return;
+  const c = classify(raw); animNext = true;
+  if (c.kind !== 'sku') { PV.msg = {tone: 'bad', html: c.kind === 'cands' ? 'Írd be a teljes termékkódot.' : c.kind === 'carton' || c.kind === 'badcarton' ? 'Ez doboz azonosító, termék kódot szkennelj.' : 'Nincs a goodslistben: ' + esc(raw)}; beep('bad'); return updatePark(); }
+  const key = c.key, t = putTargets(key)[0];
+  if (!force && t) { PV.msg = {tone: 'warn', html: `<b>${esc(keyName(key))}</b>: van nyitott doboza, tedd inkább oda: ${idHtml(t.c)} <button class="btn xs" data-force="${key}">Mégis polcra</button>`}; beep('bad'); return updatePark(); }
+  if ((D.parked.get(key) || 0) >= freeNeed(key)) { PV.msg = {tone: 'bad', html: `<b>${esc(keyName(key))}</b>: felesleg, egyik nyitatlan dobozba sem kell több.`}; beep('bad'); return updatePark(); }
+  park(key, 1); logScan('sku', raw, key, 'aside'); beep('park');
+  const full = collected().find(x => x.full && D.byCarton.get(x.c).some(l => l.key === key));
+  PV.msg = {tone: 'ok', html: `Polcra téve: <b>${esc(keyName(key))}</b> (${D.parked.get(key)} db)` + (full ? ` · összegyűlt: ${idHtml(full.c)}` : '')};
+  updatePark();
+}
 function parkHtml() {
   const msg = PV.msg ? `<div class="msg ${PV.msg.tone}" role="status" style="margin-bottom:var(--s3)">${PV.msg.html}</div>` : '';
   const items = [...D.parked].filter(([k]) => D.byKey.has(k)).sort((a, b) => keyName(a[0]).localeCompare(keyName(b[0]), 'hu'));
   const local = D.parkShared ? '' : '<div class="msg warn" style="margin-bottom:var(--s3)">A polc csak ezen az eszközön látszik (admin: SQL frissítés kell).</div>';
-  if (!items.length) return msg + local + `<div class="idle"><div class="frame">${ic('layers').replace('class="i"', 'class="i lg"')}</div><h2>Üres a félretett polc</h2><p>Ide kerül, ami egyik nyitott dobozba sem kell</p></div>`;
+  if (!items.length) return msg + local + `<div class="idle"><div class="frame">${ic('layers').replace('class="i"', 'class="i lg"')}</div><h2>Üres a félretett polc</h2><p>Ami már félre van téve, szkenneld be fent, és felkerül a polcra</p></div>`;
   const cs = collected(), full = cs.filter(x => x.full), near = cs.filter(x => !x.full).slice(0, 3);
   const total = items.reduce((a, x) => a + x[1], 0);
   return msg + local
     + (full.length ? `<div class="eyebrow alt-h" style="margin-top:0">Összegyűlt, ez a következő doboz (${full.length})</div>${full.slice(0, 5).map((x, i) => boxCard(x, i, true)).join('')}`
       : `<div class="msg warn" style="margin-bottom:var(--s2)">Még egy doboz sem gyűlt össze teljesen.</div>`)
     + (near.length ? `<div class="eyebrow alt-h">Legközelebb áll</div>${near.map((x, i) => boxCard(x, full.length ? i + 1 : i, false)).join('')}` : '')
-    + `<div class="eyebrow alt-h">A polcon (${total} db, ${items.length} termék)</div><div class="card">${items.map(([k, n], i) => `<div class="pk ${stI(i)}"><div class="t"><b>${esc(keyName(k))}</b><small class="mono">${esc(k)}</small></div><span class="n">${n} db</span><button class="btn xs" data-unpark="${k}" aria-label="Levesz egyet">${ic('minus')}</button></div>`).join('')}</div>`;
+    + `<div class="eyebrow alt-h">A polcon (${total} db, ${items.length} termék)</div><div class="card">${items.map(([k, n], i) => `<div class="pk ${stI(i)}"><div class="t"><b>${esc(keyName(k))}</b><small class="mono">${esc(k)}</small></div><span class="n">${n} db</span><button class="btn xs" data-unpark="${k}" aria-label="Levesz egyet">${ic('minus')}</button><button class="btn xs" data-addk="${k}" aria-label="Még egy">${ic('plus')}</button></div>`).join('')}</div>`;
 }
 function updatePark() {
   if (shellView !== 'park') {
     shellView = 'park';
-    app.innerHTML = `<div id="pr"></div>`;
+    app.innerHTML = `<form class="scan sm" id="pf" autocomplete="off"><span class="lead">${ic('plus')}</span>
+        <input id="pin" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Termék polcra tétele" placeholder="Termék polcra tétele"></form>
+      <div id="pr" style="margin-top:var(--s3)"></div>`;
+    $('#pf').onsubmit = e => { e.preventDefault(); const v = $('#pin').value; $('#pin').value = ''; addToShelf(v); };
     $('#pr').onclick = async e => {
       const b = e.target.closest('button'); if (!b || b.disabled) return; const d = b.dataset;
       if (d.build) {
@@ -560,6 +576,8 @@ function updatePark() {
       }
       if (d.exp) { const c = d.exp, cur = PV.exp[c] !== undefined ? PV.exp[c] : d.i === '0'; PV.exp[c] = !cur; return updatePark(); }
       if (d.unpark) { park(d.unpark, -1); PV.msg = null; return update(); }
+      if (d.addk) return addToShelf(d.addk, true);
+      if (d.force) return addToShelf(d.force, true);
     };
     animNext = true;
   }

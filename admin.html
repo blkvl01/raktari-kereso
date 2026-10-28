@@ -527,8 +527,9 @@ function vParked() {
     ${(() => { const o = orphans(); return o.length ? `<div class="card ${stI(4)}" style="margin-bottom:var(--s4);border-color:var(--warn-strong)"><div class="hd"><h2>Nyitott doboz nélkül szkennelt, nincs a polcon (${o.length})</h2><button class="btn xs" id="oall">${I('layers', 'sm')}Mind a polcra</button></div>
       <div class="pad meta" style="padding-bottom:0">A napló szerint ezeket olyankor szkennelték, amikor nem volt nyitott dobozuk, és most sincs. Ha fizikailag félre vannak téve, vedd fel őket a polcra. A darabszám a szkennelések száma, ha valamit kétszer lőttek be, javítsd a polcon.</div>
       <div class="scroll"><table><thead><tr><th>Termék</th><th class="n">Szkennelve</th><th class="n">Polcra</th><th>Utoljára</th><th>Eszköz</th><th></th></tr></thead><tbody>${o.map(x => `<tr><td><b>${esc(keyName(x.k))}</b><br><span class="mono meta">${esc(x.k)}</span></td><td class="n">${x.n}</td><td class="n"><b>${x.add}</b></td><td class="meta">${fmtDT(x.last)}</td><td class="meta">${esc([...x.dev].join(', '))}</td><td class="n"><button class="btn xs" data-ok="${x.k}">Polcra</button></td></tr>`).join('')}</tbody></table></div></div>` : ''; })()}
-    <div class="card ${stI(4)}"><div class="hd"><h2>A polcon</h2><span class="meta">${total} db, ${items.length} termék</span><button class="btn xs" id="ex">${I('dl', 'sm')}CSV</button></div><div class="scroll">${items.length ? `<table><thead><tr><th>Termék</th><th class="n">Db</th><th class="n">Lehetséges doboz</th><th>Utoljára</th><th></th></tr></thead><tbody>${items.map(([k, n]) => { const r = D.parkInfo.get(k) || {};
-      return `<tr class="clk" data-k="${k}"><td><b>${esc(keyName(k))}</b><br><span class="mono meta">${esc(k)}</span></td><td class="n"><b>${n}</b></td><td class="n">${free(k) || '<span class="tag warn">0, felesleg</span>'}</td><td class="meta">${r.ts ? fmtDT(r.ts) + ' · ' + esc(r.device || '') : ''}</td><td class="n"><button class="btn xs" data-pm="${k}" aria-label="Levesz egyet">${I('minus', 'sm')}</button></td></tr>`; }).join('')}</tbody></table>` : '<div class="empty"><b>Üres a polc</b></div>'}</div></div>`;
+    <div class="card ${stI(4)}"><div class="hd"><h2>A polcon</h2><span class="meta">${total} db, ${items.length} termék</span><button class="btn xs" id="ex">${I('dl', 'sm')}CSV</button></div>
+      <form class="tools" id="paf" autocomplete="off" style="padding:var(--s3) var(--s4) 0;margin:0"><input class="inp" id="pak" placeholder="Termék kód" aria-label="Termék kód" style="width:220px"><input class="inp" id="pan" type="number" min="1" max="999" value="1" aria-label="Darab" style="width:90px"><button class="btn sm pri">${I('plus', 'sm')}Polcra</button><span class="meta" id="pam"></span></form><div class="scroll">${items.length ? `<table><thead><tr><th>Termék</th><th class="n">Db</th><th class="n">Lehetséges doboz</th><th>Utoljára</th><th></th></tr></thead><tbody>${items.map(([k, n]) => { const r = D.parkInfo.get(k) || {};
+      return `<tr class="clk" data-k="${k}"><td><b>${esc(keyName(k))}</b><br><span class="mono meta">${esc(k)}</span></td><td class="n"><b>${n}</b></td><td class="n">${free(k) || '<span class="tag warn">0, felesleg</span>'}</td><td class="meta">${r.ts ? fmtDT(r.ts) + ' · ' + esc(r.device || '') : ''}</td><td class="n"><button class="btn xs" data-pm="${k}" aria-label="Levesz egyet">${I('minus', 'sm')}</button></td></tr>`; }).join('')}</tbody></table>` : '<div class="empty"><b>Üres a polc</b>Ami már félre van téve, add hozzá fent</div>'}</div></div>`;
   M.onclick = async e => {
     const pm = e.target.closest('[data-pm]');
     if (pm) { if (!await confirmDlg(`Leveszel egyet a polcról: ${keyName(pm.dataset.pm)}?`, 'Levesz', true)) return; const r = await sb.rpc('rk_park', {p_key: pm.dataset.pm, p_delta: -1, p_device: 'admin'}); if (r.error) return toast('Hiba: ' + r.error.message); await loadParked(); return render(true); }
@@ -536,6 +537,17 @@ function vParked() {
     if (e.target.closest('#oall')) { const o = orphans(); if (o.length && await confirmDlg(`${o.length} termék, ${o.reduce((a, x) => a + x.add, 0)} db a polcra? Csak ha tényleg félre vannak téve.`, 'Mind a polcra', false)) await orphanToShelf(o); return; }
     const c = e.target.closest('[data-c]'); if (c) return showCarton(c.dataset.c);
     const k = e.target.closest('[data-k]'); if (k) return showSku(k.dataset.k);
+  };
+  // kezi polcra tetel: ami mar fizikailag felre van teve
+  $('#paf').onsubmit = async e => {
+    e.preventDefault(); const raw = $('#pak').value.trim(), n = Math.max(1, Math.min(999, +$('#pan').value || 1)); if (!raw) return;
+    const c = classify(raw), m = $('#pam');
+    if (c.kind !== 'sku') { m.innerHTML = `<span class="err">${c.kind === 'cands' ? 'Több termék is illik, add meg a teljes kódot.' : 'Nincs a goodslistben: ' + esc(raw)}</span>`; return; }
+    const free = (D.byKey.get(c.key) || []).filter(l => !cartonStatus(l.carton)).reduce((a, l) => a + l.qty - lineGot(l), 0), room = free - (D.parked.get(c.key) || 0);
+    if (room <= 0 && !await confirmDlg(`${keyName(c.key)}: egyik nyitatlan dobozba sem kell több. Mégis polcra teszed?`, 'Polcra', false)) return;
+    if (room > 0 && n > room && !await confirmDlg(`${keyName(c.key)}: csak ${room} db kell még a nyitatlan dobozokba. Mégis ${n} db?`, 'Polcra', false)) return;
+    const r = await sb.rpc('rk_park', {p_key: c.key, p_delta: n, p_device: 'admin'}); if (r.error) return toast('Hiba: ' + r.error.message);
+    await loadParked(); toast(`Polcra: ${keyName(c.key)}, ${n} db`); render(true);
   };
   const pl = $('#pl'); if (pl) pl.onclick = () => { const [w, h] = lblSize(); printLabels(full.map(x => x.c), w, h, 1); };
   $('#ex').onclick = () => csv([['Termék kód', 'Termék', 'Db', 'Utoljára', 'Eszköz']].concat(items.map(([k, n]) => { const r = D.parkInfo.get(k) || {}; return [k, keyName(k), n, r.ts || '', r.device || '']; })), 'felretett_polc.csv');

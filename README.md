@@ -17,7 +17,8 @@ Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
    - Doboz címkét is lehet szkennelni: megnyitja vagy megmutatja a dobozt.
 2. **Félretett fül**: az **összegyűlt** doboz (minden darabja a polcon van) a következő doboz.
    Az „Összeraktam” gombbal a darabok a dobozba kerülnek, a doboz kész. Alatta a legközelebb álló dobozok és a polc tartalma.
-   Az admin Félretett oldalán a napló alapján azok a termékek is látszanak, amelyeket nyitott doboz nélkül szkenneltek, de nincsenek a polcon; egy gombbal felvehetők.
+   A fül tetején lévő mezővel kézzel is polcra tehető, ami már félre van téve (szól, ha nyitott doboz várja vagy felesleg); a sorok +/− gombjával a darabszám javítható.
+   Az admin Félretett oldalán kód + darabszám megadásával is lehet polcra tenni. Ugyanitt a napló alapján azok a termékek is látszanak, amelyeket nyitott doboz nélkül szkenneltek, de nincsenek a polcon; egy gombbal felvehetők.
 3. **Dobozok fül**: a dobozok az utolsó 4 számjegy szerint sorban, ahogy a polcon állnak. Itt van a nem olvasható címkéjű doboz azonosítása is.
 
 ## Frissítés v2.2-re
