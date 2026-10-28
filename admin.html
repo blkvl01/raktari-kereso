@@ -208,7 +208,7 @@ const M = $('#main');
 
 const RES = {open1: ['találat, 1 doboz', 'ok'], openN: ['találat, több doboz', 'ok'], closed: ['nincs nyitott dobozban', 'warn'], surplus: ['felesleg', 'warn'],
   unknown: ['ismeretlen', 'bad'], opened: ['felvéve', 'ok'], already: ['már felvéve', 'mute'], done: ['kész doboz', 'warn'],
-  line_done: ['tétel kész', 'ok'], line_undone: ['tétel visszavonva', 'mute'], ident: ['azonosításhoz', 'mute'], ident_pick: ['azonosítva', 'ok'], pack: ['csomagolva', 'ok'], aside: ['félretéve', 'warn'], newbox: ['új doboz nyitva', 'ok'], move: ['áttéve', 'mute'], built: ['összerakva a polcról', 'ok']};
+  qty: ['darabszám', 'ok'], line_done: ['tétel kész', 'ok'], line_undone: ['tétel visszavonva', 'mute'], ident: ['azonosításhoz', 'mute'], ident_pick: ['azonosítva', 'ok'], pack: ['csomagolva', 'ok'], aside: ['félretéve', 'warn'], newbox: ['új doboz nyitva', 'ok'], move: ['áttéve', 'mute'], built: ['összerakva a polcról', 'ok']};
 const resTag = r => { const x = RES[r] || [r, 'mute']; return `<span class="tag ${x[1]}">${esc(x[0])}</span>`; };
 const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '0%';
 const I = (n, c) => ic(n).replace('class="i"', `class="i ${c || ''}"`);
@@ -656,20 +656,27 @@ function scanAwbs(s) {
 const awbCell = s => `<span class="awbs">${scanAwbs(s).map(awbChip).join('')}</span>`;
 // ---------- naplo: mozgasok idovonalon vagy dobozonkent ----------
 // az esemenyhez tartozo tetel (doboz + termek) aktualis allapota: hany db van bent a goodslist szerintihez kepest
+const qd = s => { const q = /^(\d+):(\d+)>(\d+)$/.exec(s.raw || ''); return s.result === 'qty' && q ? q[3] - q[2] : 0; };
 function logLine(s) {
   const ls_ = s.carton ? D.byCarton.get(s.carton) : null; if (!ls_) return null;
   return ls_.find(l => l.id === s.raw) || ls_.find(l => s.key && l.key === s.key) || null;
 }
 // mennyiseg-cella: az esemeny valtozasa (+1 db) es a tetel jelenlegi allapota
 function logQty(s) {
-  const l = logLine(s), d = {open1: '+1 db', openN: '+1 db', aside: '+1 db a polcra', move: '1 db áthelyezve', built: 'összerakva'}[s.result];
+  const q = /^(\d+):(\d+)>(\d+)$/.exec(s.raw || '');
+  if (s.result === 'qty' && q) {
+    const l = D.byId.get(+q[1]), a = +q[2], b = +q[3], dl = b - a;
+    return `<div><span class="tag ${dl > 0 ? 'ok' : 'warn'}">${dl > 0 ? '+' : '−'}${Math.abs(dl)} db</span></div><b>${b}${l ? '/' + l.qty : ''} db</b> <span class="meta">(volt: ${a})</span>${l ? xBar(b, l.qty) : ''}`;
+  }
+  const l = logLine(s), d = {aside: '+1 db a polcra', move: '1 db áthelyezve', built: 'összerakva'}[s.result];
   const st = l ? (() => { const g = gotX(l); return `<b>${g}/${l.qty} db</b> bent${xBar(g, l.qty)}${g < l.qty ? `<div class="meta">hiányzik: ${l.qty - g} db</div>` : ''}`; })() : '';
   return (d ? `<div><span class="tag ${s.result === 'aside' ? 'warn' : 'ok'}">${d}</span></div>` : '') + st;
 }
 function logRow(s) {
-  const prod = s.key && D.byKey.has(s.key) ? lnk('sku', s.key, esc(keyName(s.key))) + `<div class="mono meta">${esc(s.key)}</div>` : s.kind === 'carton' ? '' : `<span class="mono meta">${esc(s.raw || '')}</span>`;
+  const ql = s.result === 'qty' ? D.byId.get(+(s.raw || '').split(':')[0]) : null;
+  const prod = ql ? lnk('sku', ql.key, esc(ql.descr)) + `<div class="mono meta">${esc(ql.sku)}</div>` : s.key && D.byKey.has(s.key) ? lnk('sku', s.key, esc(keyName(s.key))) + `<div class="mono meta">${esc(s.key)}</div>` : s.kind === 'carton' ? '' : `<span class="mono meta">${esc(s.raw || '')}</span>`;
   return `<tr><td style="white-space:nowrap"><span class="mono">${fmtT(s.ts)}</span><div class="meta">${esc(s.device)}</div></td>
-    <td>${resTag(s.result)}<div class="meta">${esc(KIND_HU[s.kind] || s.kind || '')}</div></td>
+    <td>${resTag(s.result)}</td>
     <td>${prod}</td><td>${s.carton ? lnk('carton', s.carton, idHtml(s.carton, 0, 1)) + `<div>${awbCell(s)}</div>` : ''}</td>
     <td style="min-width:120px">${logQty(s)}</td></tr>`;
 }
@@ -677,7 +684,7 @@ function logTimeline(r) {
   const days = new Map();
   r.slice(0, 400).forEach(s => { const d = new Date(s.ts).toLocaleDateString('hu', {year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'}); if (!days.has(d)) days.set(d, []); days.get(d).push(s); });
   return [...days].map(([d, rows], i) => `<div class="card ${stI(i)}" style="margin-bottom:var(--s4)"><div class="hd"><h2>${esc(d)}</h2><span class="meta">${rows.length} mozgás</span></div>
-    <div class="scroll" style="max-height:none"><table><thead><tr><th>Idő, eszköz</th><th>Esemény</th><th>Termék</th><th>Doboz</th><th>Mennyiség</th></tr></thead><tbody>${rows.map(logRow).join('')}</tbody></table></div></div>`).join('')
+    <div class="scroll" style="max-height:none"><table><thead><tr><th>Idő, eszköz</th><th>Esemény</th><th>Termék</th><th>Doboz</th><th>Fizikailag bent</th></tr></thead><tbody>${rows.map(logRow).join('')}</tbody></table></div></div>`).join('')
     + (r.length > 400 ? `<div class="pg">400 / ${r.length}</div>` : '');
 }
 function logByCarton(r) {
@@ -688,12 +695,12 @@ function logByCarton(r) {
     const p = cartonProg(c), s = cartonStatus(c), last = ev[0];
     const keys = [...new Set(ev.map(e => e.key).filter(Boolean))];
     const rows = keys.map(k => { const e = ev.filter(x => x.key === k), l = D.byCarton.get(c).find(x => x.key === k), g = l ? gotX(l) : 0;
-      return `<tr><td>${lnk('sku', k, esc(keyName(k)))}<div class="mono meta">${esc(k)}</div></td><td class="n">${e.filter(x => x.result === 'open1' || x.result === 'openN').length || '<span class="meta">-</span>'}</td>
+      return `<tr><td>${lnk('sku', k, esc(keyName(k)))}<div class="mono meta">${esc(k)}</div></td><td class="n">${(n => n ? `<b>${n > 0 ? '+' : ''}${n}</b>` : '<span class="meta">-</span>')(e.reduce((a, x) => a + qd(x), 0))}</td>
         <td style="min-width:130px">${l ? `<b>${g}/${l.qty} db</b>${xBar(g, l.qty)}` : '<span class="meta">nincs a dobozban</span>'}</td><td class="meta">${esc(e[0].device)}<br>${fmtDT(e[0].ts)}</td></tr>`; }).join('');
     return `<div class="card ${stI(i)}" style="margin-bottom:var(--s4)"><div class="hd"><h2>${lnk('carton', c, idHtml(c))}</h2>
       <span class="meta">${stTag(c)} · ${p.got}/${p.qty} db · ${ev.length} mozgás · utoljára ${fmtDT(last.ts)} (${esc(last.device)})</span></div>
       <div style="padding:0 var(--s4)">${xBar(p.got, p.qty)}</div>
-      <div class="scroll" style="max-height:none">${rows ? `<table><thead><tr><th>Termék</th><th class="n">Beszkennelve</th><th>Bent / szükséges</th><th>Utolsó mozgás</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="empty">Csak doboz-esemény</div>'}</div></div>`; }).join('');
+      <div class="scroll" style="max-height:none">${rows ? `<table><thead><tr><th>Termék</th><th class="n">Betett db</th><th>Bent / szükséges</th><th>Utolsó mozgás</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="empty">Csak doboz-esemény</div>'}</div></div>`; }).join('');
 }
 function vLog() {
   const LG = {hit: s => s.result === 'open1' || s.result === 'openN', miss: s => s.result === 'closed' || s.result === 'surplus', unknown: s => s.result === 'unknown', carton: s => s.kind === 'carton', line: s => s.kind === 'line', park: s => s.kind === 'park' || s.result === 'aside', ident: s => s.kind === 'ident'};
@@ -712,7 +719,7 @@ function vLog() {
     $('#lc').textContent = r.length + ' bejegyzés';
     const fact = (t, v, sub) => `<div><span>${t}</span><b style="font-size:22px">${v}</b>${sub ? `<div class="meta">${sub}</div>` : ''}</div>`;
     $('#lk').innerHTML = `<div class="facts">${fact('Mozgás', r.length, 'a szűrés szerint')}
-      ${fact('Ma beszkennelt db', r.filter(s => LG.hit(s) && new Date(s.ts).toDateString() === day).length, 'találat, +1 db / szkennelés')}
+      ${fact('Ma bepakolt db', r.filter(s => new Date(s.ts).toDateString() === day).reduce((a, s) => a + Math.max(0, qd(s)), 0), 'a + gombokkal rögzítve')}
       ${fact('Érintett doboz', new Set(r.map(s => s.carton).filter(Boolean)).size)}
       ${fact('Aktív eszköz', new Set(r.filter(s => now - new Date(s.ts) < 5 * 60e3).map(s => s.device)).size, 'az elmúlt 5 percben')}
       ${fact('Eltérés', r.filter(s => LG.miss(s) || LG.unknown(s)).length, 'nincs nyitott / ismeretlen')}</div>`;

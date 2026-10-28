@@ -245,6 +245,8 @@ async function setDone(c, done) {
 async function setGot(id, n) {
   const l = D.byId.get(id); if (!l) return;
   n = Math.max(0, Math.min(l.qty, n));
+  const before = lineGot(l);
+  if (n !== before) logScan('line', `${id}:${before}>${n}`, l.key, 'qty', l.carton);
   D.lineDone.set(id, {line_id: id, got: n, done_by: device});
   const o = D.open.get(l.carton), p = cartonProg(l.carton);
   if (o) { if (p.done >= p.n) o.status = 'done'; else if (o.status === 'done') o.status = 'open'; }
