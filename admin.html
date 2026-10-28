@@ -150,7 +150,7 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="common.js?v=22"></script>
 <script src="import.js?v=22"></script>
 <script>
-const SECS = [['overview', 'Áttekintés', 'chart'], ['import', 'Importálás', 'up'], ['cartons', 'Dobozok', 'box'], ['skus', 'SKU-k', 'search'], ['diffs', 'Eltérések', 'alert'],
+const SECS = [['overview', 'Áttekintés', 'chart'], ['import', 'Importálás', 'up'], ['cartons', 'Dobozok', 'box'], ['parked', 'Félretett', 'layers'], ['skus', 'SKU-k', 'search'], ['diffs', 'Eltérések', 'alert'],
   ['log', 'Napló', 'list'], ['devices', 'Eszközök', 'users'], ['labels', 'Címkék', 'print'], ['settings', 'Beállítások', 'gear']];
 let adminCode = ls.get('rk_admin') || '';
 let sec = (location.hash || '#overview').slice(1);
@@ -279,10 +279,10 @@ function buildNav() {
     <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.2</div>`;
 }
 function renderNav() {
-  const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, diffs: a.unk + a.closed + a.ucart + a.amb};
+  const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length, diffs: a.unk + a.closed + a.ucart + a.amb};
   document.querySelectorAll('#nav a').forEach(l => {
     const k = l.dataset.s; l.toggleAttribute('aria-current', false); if (k === sec) l.setAttribute('aria-current', 'page'); else l.removeAttribute('aria-current');
-    const c = l.querySelector('.cnt'); c.hidden = !cnt[k]; c.textContent = cnt[k] || ''; c.classList.toggle('hot', k === 'diffs');
+    const c = l.querySelector('.cnt'); c.hidden = !cnt[k]; c.textContent = cnt[k] || ''; c.classList.toggle('hot', k === 'diffs' || k === 'parked');
   });
   const cur = document.querySelector('#nav a[aria-current]'), ind = $('.navind');
   if (cur && ind) { ind.style.height = cur.offsetHeight + 'px'; ind.style.transform = `translateY(${cur.offsetTop}px)`; }
@@ -302,7 +302,7 @@ function render(force) {
     M.classList.remove('enter'); void M.offsetWidth; M.classList.add('enter'); clearTimeout(M._et); M._et = setTimeout(() => M.classList.remove('enter'), 1500);
   }
   M.onclick = null;
-  ({overview: vOverview, import: vImport, cartons: vCartons, skus: vSkus, diffs: vDiffs, log: vLog, devices: vDevices, labels: vLabels, settings: vSettings})[sec]();
+  ({overview: vOverview, import: vImport, cartons: vCartons, parked: vParked, skus: vSkus, diffs: vDiffs, log: vLog, devices: vDevices, labels: vLabels, settings: vSettings})[sec]();
   if (M.classList.contains('enter')) M.querySelectorAll('[data-n]').forEach(el => { el.dataset.from = 0; countUp(el, +el.dataset.n, 900); });
 }
 window.addEventListener('hashchange', () => { sec = (location.hash || '#overview').slice(1); if (!SECS.some(s => s[0] === sec)) sec = 'overview'; render(true); window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'}); });
@@ -348,6 +348,7 @@ function vOverview() {
         ${row('alert', 'warn', 'Nincs nyitott dobozban', at.closed, '#diffs')}
         ${row('layers', 'warn', 'Többértelmű SKU', at.amb, '#skus')}
         ${row('box', 'warn', 'Hiányzó tétel', at.miss, '#diffs')}
+        ${row('layers', 'warn', 'Összegyűlt doboz a polcon', collected().filter(x => x.full).length, '#parked')}
         ${row('x', 'bad', 'Ismeretlen doboz', at.ucart, '#diffs')}</div></div>
     <div class="eyebrow" style="margin:0 var(--s1) var(--s2)">AWB</div>
     <div class="grid g-awb" style="margin-bottom:var(--s4)">${awbCards}</div>
@@ -498,6 +499,29 @@ function showCarton(c) {
   [['cr', 'reopen'], ['cd', 'done'], ['co', 'open'], ['cl', 'release']].forEach(([id, a]) => { const b = d.querySelector('#' + id); if (b) b.onclick = () => act(a); });
   d.querySelector('#cp').onclick = () => { const [w, h] = lblSize(); printLabels([c], w, h, 1); };
   const cz = d.querySelector('#cz'); if (cz) cz.onclick = async () => { if (await confirmDlg('Eltávolítod a dobozt a listáról?', 'Eltávolítás', true)) act('remove'); else showCarton(c); };
+}
+
+// ---------- felretett polc ----------
+// Amit a PDA "Tedd felre"-vel a polcra kuldott; az osszegyult doboz (minden darabja a polcon) a kovetkezo doboz.
+function vParked() {
+  const items = [...D.parked].filter(([k]) => D.byKey.has(k)).sort((a, b) => keyName(a[0]).localeCompare(keyName(b[0]), 'hu'));
+  const cs = collected(), full = cs.filter(x => x.full), near = cs.filter(x => !x.full).slice(0, 20), total = items.reduce((a, x) => a + x[1], 0);
+  const local = D.parkShared ? '' : `<div class="card pad" style="margin-bottom:var(--s4);border-color:var(--warn-strong)"><b>${I('alert', 'sm')} A közös polc nincs bekapcsolva.</b><div class="meta">Futtasd le a <span class="mono">sql/v2.2_felretett_polc.sql</span> fájlt a Supabase SQL Editorban. Addig minden PDA csak a saját félretett termékeit látja, itt semmi nem jelenik meg.</div></div>`;
+  const free = k => new Set((D.byKey.get(k) || []).filter(l => !cartonStatus(l.carton)).map(l => l.carton)).size;
+  M.innerHTML = local + `<div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:var(--s4)">${kpi('layers', 'Darab a polcon', total, 0, total)}${kpi('list', 'Termék a polcon', items.length, 1, items.length)}${kpi('check', 'Összegyűlt doboz', full.length, 2, full.length)}${kpi('box', 'Nyitott doboz', overall().open, 3, overall().open)}</div>
+    <div class="grid g-2" style="margin-bottom:var(--s4)">
+      <div class="card ${stI(2)}"><div class="hd"><h2>Összegyűlt, ezek a következő dobozok</h2>${full.length ? `<button class="btn xs" id="pl">${I('print', 'sm')}Címkék</button>` : ''}</div><div class="scroll">${full.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th class="n">Tétel</th><th class="n">Db</th></tr></thead><tbody>${full.map(x => `<tr class="clk" data-c="${esc(x.c)}"><td>${idHtml(x.c)}</td><td class="mono meta">${esc(D.byCarton.get(x.c)[0].awb)}</td><td class="n">${D.byCarton.get(x.c).length}</td><td class="n">${x.total}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Még egy doboz sem gyűlt össze</b></div>'}</div></div>
+      <div class="card ${stI(3)}"><div class="hd"><h2>Legközelebb álló dobozok</h2></div><div class="scroll">${near.length ? `<table><thead><tr><th>Doboz</th><th>Megvan</th><th>Hiányzik</th></tr></thead><tbody>${near.map(x => `<tr class="clk" data-c="${esc(x.c)}"><td>${idHtml(x.c)}</td><td style="min-width:120px"><b>${x.have}/${x.total} db</b><div class="bar"><i class="o" style="width:${Math.round(x.ratio * 100)}%"></i></div></td><td class="meta">${x.miss.slice(0, 4).map(m => esc(keyName(m.k)) + (m.n > 1 ? ' ×' + m.n : '')).join(', ')}${x.miss.length > 4 ? ` +${x.miss.length - 4}` : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs</b></div>'}</div></div></div>
+    <div class="card ${stI(4)}"><div class="hd"><h2>A polcon</h2><span class="meta">${total} db, ${items.length} termék</span><button class="btn xs" id="ex">${I('dl', 'sm')}CSV</button></div><div class="scroll">${items.length ? `<table><thead><tr><th>Termék</th><th class="n">Db</th><th class="n">Lehetséges doboz</th><th>Utoljára</th><th></th></tr></thead><tbody>${items.map(([k, n]) => { const r = D.parkInfo.get(k) || {};
+      return `<tr class="clk" data-k="${k}"><td><b>${esc(keyName(k))}</b><br><span class="mono meta">${esc(k)}</span></td><td class="n"><b>${n}</b></td><td class="n">${free(k) || '<span class="tag warn">0, felesleg</span>'}</td><td class="meta">${r.ts ? fmtDT(r.ts) + ' · ' + esc(r.device || '') : ''}</td><td class="n"><button class="btn xs" data-pm="${k}" aria-label="Levesz egyet">${I('minus', 'sm')}</button></td></tr>`; }).join('')}</tbody></table>` : '<div class="empty"><b>Üres a polc</b></div>'}</div></div>`;
+  M.onclick = async e => {
+    const pm = e.target.closest('[data-pm]');
+    if (pm) { if (!await confirmDlg(`Leveszel egyet a polcról: ${keyName(pm.dataset.pm)}?`, 'Levesz', true)) return; const r = await sb.rpc('rk_park', {p_key: pm.dataset.pm, p_delta: -1, p_device: 'admin'}); if (r.error) return toast('Hiba: ' + r.error.message); await loadParked(); return render(true); }
+    const c = e.target.closest('[data-c]'); if (c) return showCarton(c.dataset.c);
+    const k = e.target.closest('[data-k]'); if (k) return showSku(k.dataset.k);
+  };
+  const pl = $('#pl'); if (pl) pl.onclick = () => { const [w, h] = lblSize(); printLabels(full.map(x => x.c), w, h, 1); };
+  $('#ex').onclick = () => csv([['Termék kód', 'Termék', 'Db', 'Utoljára', 'Eszköz']].concat(items.map(([k, n]) => { const r = D.parkInfo.get(k) || {}; return [k, keyName(k), n, r.ts || '', r.device || '']; })), 'felretett_polc.csv');
 }
 
 // ---------- SKU-k ----------

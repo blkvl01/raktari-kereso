@@ -1,7 +1,7 @@
 # Raktári kereső
 
 - `index.html`: PDA felület
-- `admin.html`: admin felület (kóddal védett), címkenyomtatás
+- `admin.html`: admin felület (kóddal védett): félretett polc, címkenyomtatás
 - `sql/`: adatbázis frissítések, a Supabase SQL Editorban kell egyszer lefuttatni
 
 Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.

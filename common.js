@@ -50,7 +50,7 @@ const fmtDT = t => new Date(t).toLocaleString('hu', {month: '2-digit', day: '2-d
 
 // ---------- adat ----------
 const D = {lines: [], byKey: new Map(), byCarton: new Map(), byId: new Map(), cartonByDigits: new Map(),
-  awbs: new Map(), open: new Map(), lineDone: new Map(), claims: new Map(), parked: new Map(), parkShared: true, sig: '', online: true, err: ''};
+  awbs: new Map(), open: new Map(), lineDone: new Map(), claims: new Map(), parked: new Map(), parkInfo: new Map(), parkShared: true, sig: '', online: true, err: ''};
 
 function indexLines() {
   D.byKey = new Map(); D.byCarton = new Map(); D.byId = new Map(); D.cartonByDigits = new Map();
@@ -105,7 +105,7 @@ async function loadParked() {
   if (error && !/rk_parked|does not exist|schema cache/i.test(error.message || '')) throw error;
   D.parkShared = !error;
   if (error) { try { D.parked = new Map(JSON.parse(ls.get('rk_parked_local') || '[]')); } catch (e) { D.parked = new Map(); } }
-  else D.parked = new Map(data.filter(r => r.n > 0).map(r => [r.key, r.n]));
+  else { D.parked = new Map(data.filter(r => r.n > 0).map(r => [r.key, r.n])); D.parkInfo = new Map(data.map(r => [r.key, r])); }
 }
 // full=true: goodslist ujratoltese is; kulonben csak ha valtozott
 async function refreshData(full) {
