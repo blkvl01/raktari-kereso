@@ -178,8 +178,26 @@ function ring(ratio, size, label) {
 // ---------- szkennelt kod ertelmezese ----------
 // Doboz azonosito: pontosan RQ-XPW + 10 szamjegy (mint a goodslistben). Mas formatumot nem fogadunk el dobozkent.
 const CARTON_RE = /^RQ-XPW\d{10}$/;
-function idHtml(c, stack) {
-  return `<span class="idc${stack ? ' stack' : ''}"><span class="idp">${esc(c.slice(0, -4))}</span><b class="id4">${esc(c.slice(-4))}</b></span>`;
+// AWB jelolo: a legrovidebb egyedi vegzodes (min. 4 jegy) + AWB-nkent allando szin, hogy tobb AWB ranezesre elvaljon
+let awbMeta = {sig: null, m: new Map()};
+function awbInfo(a) {
+  if (awbMeta.sig !== D.sig + D.awbs.size) {
+    const ids = [...D.awbs.keys()].sort(), m = new Map();
+    ids.forEach((id, i) => { let n = 4; while (n < id.length && ids.some(o => o !== id && o.endsWith(id.slice(-n)))) n++; m.set(id, {s: id.slice(-n), i: i % 6}); });
+    awbMeta = {sig: D.sig + D.awbs.size, m};
+  }
+  return awbMeta.m.get(a) || {s: String(a || '').slice(-4), i: 0};
+}
+function awbChip(a) { if (!a) return ''; const x = awbInfo(a); return `<span class="awbt" style="--awb:var(--awb-${x.i})" title="AWB ${esc(a)}">AWB ${esc(x.s)}</span>`; }
+const cartonAwb = c => ((D.byCarton.get(c) || [])[0] || {}).awb || '';
+// egy termek mely AWB-k dobozaiba kell (alapbol: meg nem nyitott dobozok, ahol van hely)
+function keyAwbChips(key, pred) {
+  pred = pred || (l => !cartonStatus(l.carton) && lineGot(l) < l.qty);
+  return [...new Set((D.byKey.get(key) || []).filter(pred).map(l => l.awb))].sort().map(awbChip).join('');
+}
+// noAwb: ahol mellette kulon AWB oszlop van
+function idHtml(c, stack, noAwb) {
+  return `<span class="idc${stack ? ' stack' : ''}"><span class="idp">${esc(c.slice(0, -4))}</span><b class="id4">${esc(c.slice(-4))}</b>${noAwb ? '' : awbChip(cartonAwb(c))}</span>`;
 }
 function classify(raw) {
   const t = raw.trim().toUpperCase().replace(/\s+/g, '');

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2342d6">
 <title>Raktári kereső</title>
-<link rel="stylesheet" href="common.css?v=25">
+<link rel="stylesheet" href="common.css?v=26">
 <style>
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
 .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
@@ -169,7 +169,7 @@ nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
 <dialog id="dlg"></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="common.js?v=25"></script>
+<script src="common.js?v=26"></script>
 <script>
 // Folyamat: a kalodabol kivett termeket a Valogatas fulon szkenneled.
 //  - ha egy nyitott dobozba kell: "Ide tedd" + a doboz utolso 4 szamjegye, a darab be is szamolodik
@@ -409,7 +409,7 @@ function boxView(c, headKey) {
   return `<section class="hero ${cls} compact"><div class="hero-top"><span class="hero-ico">${ic(icn)}</span>${txt}<span class="aux">${p.got}/${p.qty} db</span></div>
       ${idHtml(c, true)}
       <div class="pbar" role="img" aria-label="${pct}% kész"><i style="width:${pct}%"></i></div>
-      <div class="hchips"><span class="hchip">${p.done}/${p.n} tétel</span><span class="hchip mono">${esc(ls_[0].awb)}</span></div></section>
+      <div class="hchips"><span class="hchip">${p.done}/${p.n} tétel</span></div></section>
     <div class="card" style="margin-top:var(--s3)">${ls_.map(l => lineRow(l, st === 'open')).join('')}</div>
     <div class="row" style="justify-content:stretch">
       ${!st ? `<button class="btn pri" style="flex:1" data-bopen="${esc(c)}">Megnyitom</button>` : ''}
@@ -454,14 +454,14 @@ function askHtml(r) {
   const l0 = D.byKey.get(r.key)[0], n = D.parked.get(r.key) || 0;
   const after = newBoxCands(r.key).find(x => x.full);
   return `<section class="hero warn"><div class="hero-top"><span class="hero-ico">${ic('alert')}</span>Nincs nyitott doboza<span class="aux">${n ? n + ' db már a polcon' : ''}</span></div>
-      <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub mono">${esc(r.key)}</div>
-      <div class="hero-note">${after ? `Ha félreteszed, összegyűlik a <b class="mono">${esc(after.c.slice(-4))}</b> doboz.` : 'Félreteszed, vagy új dobozt nyitsz neki?'}</div>
+      <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub"><span class="mono">${esc(r.key)}</span> <span class="awbs">${keyAwbChips(r.key)}</span></div>
+      <div class="hero-note">${after ? `Ha félreteszed, összegyűlik: ${idHtml(after.c)}` : 'Félreteszed, vagy új dobozt nyitsz neki?'}</div>
       <div class="hero-acts"><button class="hero-btn" data-askpark>${ic('layers')}Félreteszem</button><button class="hero-btn alt" data-asknew>${ic('box')}Új doboz</button></div></section>`;
 }
 function newHtml(r) {
   const l0 = D.byKey.get(r.key)[0], cs = newBoxCands(r.key).slice(0, 5);
   return `<section class="hero info compact"><div class="hero-top"><span class="hero-ico">${ic('box')}</span>Új doboz ehhez<span class="aux">már ${openCount()} nyitott</span></div>
-      <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub mono">${esc(r.key)}</div>
+      <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub"><span class="mono">${esc(r.key)}</span> <span class="awbs">${keyAwbChips(r.key)}</span></div>
       <div class="hero-acts"><button class="hero-btn alt" data-askpark>${ic('layers')}Mégis félreteszem</button></div></section>
     <div class="eyebrow alt-h">Melyik dobozt nyitod? (a legjobb elöl)</div><div class="card">${cs.map((x, i) => `<div class="row-i ${stI(i)} ${i ? '' : 'best'}"><div class="rest">${idHtml(x.c)}<span class="meta">${x.have}/${x.total} db megvan (polc + ez) · ${D.byCarton.get(x.c).length} tétel</span></div><button class="btn sm ${i ? '' : 'pri'}" data-newbox="${esc(x.c)}">Megnyitom</button></div>`).join('')}</div>`;
 }
@@ -469,7 +469,7 @@ function parkResHtml(r) {
   const l0 = D.byKey.get(r.key)[0], n = D.parked.get(r.key) || 0;
   const full = fullBoxes().filter(x => D.byCarton.get(x.c).some(l => l.key === r.key));
   return `<section class="hero warn"><div class="hero-top"><span class="hero-ico">${ic('layers')}</span>Tedd félre<span class="aux">${n} db a polcon</span></div>
-      <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub mono">${esc(r.key)}</div>
+      <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub"><span class="mono">${esc(r.key)}</span> <span class="awbs">${keyAwbChips(r.key)}</span></div>
       <div class="hero-note">Tedd a félretett polcra. Ha összegyűlik egy doboz, a Félretett fül szól.</div>
       ${n ? `<div class="hero-acts"><button class="hero-btn alt" data-unpark="${r.key}">${ic('undo')}Visszavon</button></div>` : ''}</section>
     ${full.length ? `<section class="hero ok compact" style="margin-top:var(--s3)"><div class="hero-top"><span class="hero-ico">${ic('check')}</span>Összegyűlt egy doboz</div>${idHtml(full[0].c, true)}
@@ -479,7 +479,7 @@ function resultHtml() {
   const r = SV.res;
   if (!r || !D.lines.length) return idleHtml();
   if (r.t === 'err') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>${esc(r.title)}</div><div class="mono" style="margin-top:var(--s3);font-size:20px;word-break:break-all">${esc(r.raw)}</div>${r.note ? `<div class="hero-note">${esc(r.note)}</div>` : ''}</section>`;
-  if (r.t === 'cands') return `<div class="eyebrow alt-h" style="margin-top:0">Melyik termék?</div><div class="card">${r.skus.map((k, i) => { const l = D.byKey.get(k); return `<button class="lrow ${stI(i)}" data-pick="${k}"><span class="t"><b>${esc(l[0].descr)}</b><small class="mono">${esc(k)}</small></span><span class="tag">${l.length} doboz</span></button>`; }).join('')}</div>`;
+  if (r.t === 'cands') return `<div class="eyebrow alt-h" style="margin-top:0">Melyik termék?</div><div class="card">${r.skus.map((k, i) => { const l = D.byKey.get(k); return `<button class="lrow ${stI(i)}" data-pick="${k}"><span class="t"><b>${esc(l[0].descr)}</b><small><span class="mono">${esc(k)}</span> <span class="awbs">${keyAwbChips(k, () => true)}</span></small></span><span class="tag">${l.length} doboz</span></button>`; }).join('')}</div>`;
   if (r.t === 'surplus') { const l0 = D.byKey.get(r.key)[0]; return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Felesleg</div><div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub mono">${esc(r.key)}</div><div class="hero-note">Egyik dobozba sem kell több, a polcon is van már elég. Tedd külön, jelezd.</div></section>`; }
   if (r.t === 'put') return putHtml(r);
   if (r.t === 'park') return parkResHtml(r);
@@ -493,7 +493,7 @@ function updateSort() {
     shellView = 'sort';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
         <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Termék vagy doboz kódja"></form>
-      <div id="res"></div><div class="ver">v2.5</div>`;
+      <div id="res"></div><div class="ver">v2.6</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();
@@ -559,7 +559,7 @@ function parkHtml() {
     + (full.length ? `<div class="eyebrow alt-h" style="margin-top:0">Összegyűlt, ez a következő doboz (${full.length})</div>${full.slice(0, 5).map((x, i) => boxCard(x, i, true)).join('')}`
       : `<div class="msg warn" style="margin-bottom:var(--s2)">Még egy doboz sem gyűlt össze teljesen.</div>`)
     + (near.length ? `<div class="eyebrow alt-h">Legközelebb áll</div>${near.map((x, i) => boxCard(x, full.length ? i + 1 : i, false)).join('')}` : '')
-    + `<div class="eyebrow alt-h">A polcon (${total} db, ${items.length} termék)</div><div class="card">${items.map(([k, n], i) => `<div class="pk ${stI(i)}"><div class="t"><b>${esc(keyName(k))}</b><small class="mono">${esc(k)}</small></div><span class="n">${n} db</span><button class="btn xs" data-unpark="${k}" aria-label="Levesz egyet">${ic('minus')}</button><button class="btn xs" data-addk="${k}" aria-label="Még egy">${ic('plus')}</button></div>`).join('')}</div>`;
+    + `<div class="eyebrow alt-h">A polcon (${total} db, ${items.length} termék)</div><div class="card">${items.map(([k, n], i) => `<div class="pk ${stI(i)}"><div class="t"><b>${esc(keyName(k))}</b><small><span class="mono">${esc(k)}</span> <span class="awbs">${keyAwbChips(k)}</span></small></div><span class="n">${n} db</span><button class="btn xs" data-unpark="${k}" aria-label="Levesz egyet">${ic('minus')}</button><button class="btn xs" data-addk="${k}" aria-label="Még egy">${ic('plus')}</button></div>`).join('')}</div>`;
 }
 function updatePark() {
   if (shellView !== 'park') {
