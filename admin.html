@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raktári kereső - Admin</title>
-<link rel="stylesheet" href="common.css?v=23">
+<link rel="stylesheet" href="common.css?v=25">
 <style>
 .shell{display:grid;grid-template-columns:240px 1fr;min-height:100dvh}
 aside{background:var(--side);color:var(--side-ink);padding:var(--s4) var(--s3);position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;overflow:auto}
@@ -175,8 +175,8 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/cfb@1.2.2/dist/cfb.min.js" integrity="sha384-peTByNpmIz2Wq5hOZJ3dZmZP4MJ6ZXwF9dZ3R8kW7/C6bMWdHEME3on5mt9DH7d5" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
-<script src="common.js?v=23"></script>
-<script src="import.js?v=23"></script>
+<script src="common.js?v=25"></script>
+<script src="import.js?v=25"></script>
 <script>
 ICON.tag = '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01"/>';
 ICON.back = '<path d="M15 18l-6-6 6-6"/>';
@@ -195,7 +195,7 @@ function readHash() {
 }
 readHash();
 let SC = [];
-let F = {cst: 'felvett', cq: '', cawb: '', sq: '', lq: '', lres: '', lmode: 'felvett', ltxt: '', xq: '', xm: '', xaf: ''};
+let F = {lawbf: '', cst: 'felvett', cq: '', cawb: '', sq: '', lq: '', lres: '', lmode: 'felvett', ltxt: '', xq: '', xm: '', xaf: ''};
 let loading = true, shownSec = '';
 let IM = {files: [], pw: '', dict: null, dictInfo: '', busy: false, stage: 'pick', done: null};
 const M = $('#main');
@@ -315,7 +315,7 @@ function areaChart(vals, labels) {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.4</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.5</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -647,22 +647,32 @@ function vDiffs() {
     </div>`;
   $('#ex').onclick = () => csv([['AWB', 'Doboz', 'SKU', 'Termék', 'Eredeti megnevezés', 'Db']].concat(miss.map(l => [l.awb, l.carton, l.sku, l.descr, l.mat, l.qty])), 'hianyzo_tetelek.csv');
 }
+// a szkennelt kod AWB-je: doboznal (vagy ha a termek dobozba ment) a doboze, kulonben azok, amelyekben a termek szerepel
+function scanAwbs(s) {
+  if (s.carton && D.byCarton.has(s.carton)) return [D.byCarton.get(s.carton)[0].awb];
+  const ls_ = s.key && D.byKey.get(s.key);
+  return ls_ ? [...new Set(ls_.map(l => l.awb))].sort() : [];
+}
+const awbCell = s => { const a = scanAwbs(s); return a.length ? `<span class="mono">${esc(a[0])}</span>${a.length > 1 ? ` <span class="tag mute" title="${esc(a.join(', '))}">+${a.length - 1}</span>` : ''}` : ''; };
 function vLog() {
   const LG = {hit: s => s.result === 'open1' || s.result === 'openN', miss: s => s.result === 'closed' || s.result === 'surplus', unknown: s => s.result === 'unknown', carton: s => s.kind === 'carton', line: s => s.kind === 'line', park: s => s.kind === 'park' || s.result === 'aside', ident: s => s.kind === 'ident'};
-  const flt = () => SC.filter(s => (!F.lres || LG[F.lres](s)) && (!F.lq || (s.raw || '').includes(F.lq) || (s.device || '').toLowerCase().includes(F.lq.toLowerCase()) || (s.carton || '').includes(F.lq)));
-  M.innerHTML = `<div class="tools"><input class="inp" id="lq" placeholder="Kód, eszköz, doboz" value="${esc(F.lq)}" aria-label="Szűrés">
+  const flt = () => SC.filter(s => (!F.lres || LG[F.lres](s)) && (!F.lawbf || scanAwbs(s).includes(F.lawbf))
+    && (!F.lq || (s.raw || '').includes(F.lq) || (s.device || '').toLowerCase().includes(F.lq.toLowerCase()) || (s.carton || '').includes(F.lq) || scanAwbs(s).some(a => a.toLowerCase().includes(F.lq.toLowerCase()))));
+  M.innerHTML = `<div class="tools"><input class="inp" id="lq" placeholder="Kód, eszköz, doboz, AWB" value="${esc(F.lq)}" aria-label="Szűrés">
+    <select class="inp" id="la" aria-label="AWB" style="width:auto"><option value="">Minden AWB</option>${[...D.awbs.keys()].sort().map(a => `<option value="${esc(a)}" ${F.lawbf === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>
     ${[['', 'Mind'], ['hit', 'Találat'], ['miss', 'Nincs nyitott'], ['unknown', 'Ismeretlen'], ['carton', 'Dobozok'], ['line', 'Tételek'], ['park', 'Polc'], ['ident', 'Azonosítás']].map(([k, n]) => `<button class="chip" data-lr="${k}" aria-pressed="${F.lres === k}">${n}</button>`).join('')}
     <span class="meta" id="lc"></span><button class="btn sm" id="ex" style="margin-left:auto">${I('dl')}CSV</button></div>
     <div class="card"><div class="scroll" style="max-height:none" id="lt"></div></div>`;
   const fill = () => {
     const r = flt();
     $('#lc').textContent = r.length + ' bejegyzés';
-    setHtml($('#lt'), r.length ? `<table><thead><tr><th>Idő</th><th>Eszköz</th><th>Típus</th><th>Kód</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${r.slice(0, 500).map(s => `<tr><td class="mono">${fmtDT(s.ts)}</td><td>${esc(s.device)}</td><td>${esc(s.kind)}</td><td class="mono">${esc(s.raw)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton) : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs bejegyzés</b></div>');
+    setHtml($('#lt'), r.length ? `<table><thead><tr><th>Idő</th><th>Eszköz</th><th>Típus</th><th>Kód</th><th>AWB</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${r.slice(0, 500).map(s => `<tr><td class="mono">${fmtDT(s.ts)}</td><td>${esc(s.device)}</td><td>${esc(s.kind)}</td><td class="mono">${esc(s.raw)}</td><td>${awbCell(s)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton) : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs bejegyzés</b></div>');
   };
   fill();
   $('#lq').oninput = e => { F.lq = e.target.value.trim(); fill(); };
+  $('#la').onchange = e => { F.lawbf = e.target.value; fill(); };
   document.querySelectorAll('[data-lr]').forEach(b => b.onclick = () => { F.lres = b.dataset.lr; vLog(); });
-  $('#ex').onclick = () => csv([['Idő', 'Eszköz', 'Típus', 'Kód', 'SKU kulcs', 'Eredmény', 'Doboz']].concat(flt().map(s => [s.ts, s.device, s.kind, s.raw, s.key, s.result, s.carton])), 'naplo.csv');
+  $('#ex').onclick = () => csv([['Idő', 'Eszköz', 'Típus', 'Kód', 'SKU kulcs', 'AWB', 'Eredmény', 'Doboz']].concat(flt().map(s => [s.ts, s.device, s.kind, s.raw, s.key, scanAwbs(s).join(', '), s.result, s.carton])), 'naplo.csv');
 }
 function vDevices() {
   const dv = devStats(), now = Date.now();
