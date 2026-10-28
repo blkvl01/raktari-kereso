@@ -26,6 +26,8 @@ Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
 Az admin **Kereső** oldalán (és a fejléc gyorskeresőjében) dobozra, SKU-ra (kód, kódrészlet vagy terméknév) és AWB-re (szám, vége vagy jelölés) lehet keresni.
 Pontos találatnál azonnal a részletek látszanak, több találatnál típusonként csoportosított lista.
 
+**Több keresés egyszerre:** minden keresőmezőbe (PDA Dobozok; admin fejléc, Kereső, Dobozok, SKU-k, Napló) soronkénti listát is be lehet illeszteni (pl. Excelből), vagy kézzel `;` / `,` jellel elválasztva több tételt írni. A találatok összeadódnak; a Keresőben az is látszik, mire nem volt találat.
+
 - **Doboz**: státusz, AWB, ki vette fel és mikor, lezárás ideje, tartalom tételenként (mennyi került bele, belőtték-e, ki jelölte, van-e a polcon, milyen más dobozba kell még), hiányok, polc-lefedettség, napló.
 - **SKU**: mennyi van a goodslistben, mennyi került dobozba, mennyi kell még nyitott és fel nem vett dobozba, polc, belövések, dobozonkénti bontás.
 - **AWB**: dobozok állapota (szűrhető), darab, súly, eszközök, hiánnyal lezárt tételek, összegyűlt dobozok, napló.

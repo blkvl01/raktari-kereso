@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2342d6">
 <title>Raktári kereső</title>
-<link rel="stylesheet" href="common.css?v=26">
+<link rel="stylesheet" href="common.css?v=27">
 <style>
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
 .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
@@ -169,7 +169,7 @@ nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
 <dialog id="dlg"></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="common.js?v=26"></script>
+<script src="common.js?v=27"></script>
 <script>
 // Folyamat: a kalodabol kivett termeket a Valogatas fulon szkenneled.
 //  - ha egy nyitott dobozba kell: "Ide tedd" + a doboz utolso 4 szamjegye, a darab be is szamolodik
@@ -493,7 +493,7 @@ function updateSort() {
     shellView = 'sort';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
         <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Termék vagy doboz kódja"></form>
-      <div id="res"></div><div class="ver">v2.6</div>`;
+      <div id="res"></div><div class="ver">v2.7</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();
@@ -593,6 +593,8 @@ function identCands(keys) {
 }
 function onCartonsSubmit(raw) {
   raw = raw.trim(); if (!raw) return;
+  // tobb tag: a lista szurese mar megtortent; azonositasnal mindegyik termek hozzaadodik
+  const terms = multiTerms(raw); if (terms.length > 1) { if (cf.ident) { $('#cq').value = ''; terms.forEach(onCartonsSubmit); } return; }
   const c = classify(raw); animNext = true;
   if (c.kind === 'carton') {
     if (!D.byCarton.has(c.carton)) { cf.msg = {tone: 'bad', html: idHtml(c.carton) + ' nincs a goodslistben'}; beep('bad'); return updateCartons(); }
@@ -618,9 +620,9 @@ function cartonsHtml() {
   if (cf.box) return msg + `<button class="btn block" style="margin-bottom:var(--s3)" data-back>${ic('undo')}${cf.ident ? 'Vissza az azonosításhoz' : 'Vissza a listához'}</button>` + boxView(cf.box);
   if (cf.ident) return msg + identHtml();
   const all = [...D.open.values()], cnt = {open: all.filter(x => x.status === 'open').length, done: all.filter(x => x.status === 'done').length, all: all.length};
-  const q = cf.q.replace(/\D/g, '');
+  const qs = multiTerms(cf.q).map(t => t.replace(/\D/g, '')).filter(Boolean), q = qs.length;
   // sorrend: utolso 4 szamjegy szerint, ahogy a polcon allnak
-  const rows = all.filter(r => (cf.st === 'all' || r.status === cf.st) && (!q || r.carton.replace(/\D/g, '').includes(q)))
+  const rows = all.filter(r => (cf.st === 'all' || r.status === cf.st) && (!q || qs.some(x => r.carton.replace(/\D/g, '').includes(x))))
     .sort((a, b) => a.carton.slice(-4).localeCompare(b.carton.slice(-4)) || a.carton.localeCompare(b.carton));
   return msg + `<div class="bar2"><button class="btn" data-ident>${ic('target')}Címke nem olvasható</button></div>
     <div class="seg">${[['open', 'Nyitott'], ['done', 'Kész'], ['all', 'Mind']].map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${cf.st === k}">${n}<span class="n">${cnt[k]}</span></button>`).join('')}</div>
@@ -632,7 +634,7 @@ function updateCartons() {
   if (shellView !== 'cartons') {
     shellView = 'cartons';
     app.innerHTML = `<form class="scan sm" id="af" autocomplete="off"><span class="lead">${ic('search')}</span>
-        <input id="cq" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Keresés"></form>
+        <input id="cq" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Keresés" title="Több keresés: soronként beillesztve, vagy ; jellel elválasztva" data-multi></form>
       <div id="cr" style="margin-top:var(--s3)"></div>`;
     $('#af').onsubmit = e => { e.preventDefault(); onCartonsSubmit($('#cq').value); };
     $('#cq').oninput = e => { if (!cf.ident) { cf.q = e.target.value.toUpperCase(); if (!cf.box) updateCartons(); } };
