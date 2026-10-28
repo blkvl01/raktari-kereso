@@ -272,6 +272,9 @@ function devStats() {
     if (s.kind === 'sku') { d.sku++; d.scans++; if (s.result === 'open1' || s.result === 'openN') d.hit++; }
     if (s.kind === 'carton') { d.scans++; if (s.result === 'opened') d.opened++; }
     if (s.kind === 'line' && s.result === 'line_done') d.lines++;
+    // a tetel kesz, ha a darabszam valtozas eleri a goodslist szerinti mennyiseget
+    const q = s.kind === 'line' && s.result === 'qty' && /^(\d+):(\d+)>(\d+)$/.exec(s.raw || '');
+    if (q) { const l = D.byId.get(+q[1]); if (l && +q[3] >= l.qty && +q[2] < l.qty) d.lines++; }
     m.set(s.device, d);
   });
   return [...m.values()].sort((a, b) => b.last - a.last);
