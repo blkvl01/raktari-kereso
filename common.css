@@ -8,6 +8,7 @@
   --side:#0f1624;--side-ink:#c5cfe3;--side-line:#1f2a40;
   --sh:0 1px 2px rgb(16 20 27 / .06),0 10px 28px -14px rgb(16 20 27 / .22);
   --r:14px;--r-sm:10px;--s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;
+  --awb-0:#2342d6;--awb-1:#c2410c;--awb-2:#7c3aed;--awb-3:#0e7490;--awb-4:#be185d;--awb-5:#4d7c0f;
   --t-small:13px;--t-body:15px;--t-title:20px;
   --ease:cubic-bezier(.2,.8,.2,1);
   color-scheme:light;
@@ -19,6 +20,7 @@
   --warn:#f5c26b;--warn-soft:#33250a;--warn-strong:#96500a;--warn-strong-ink:#fffaf0;
   --bad:#ff9d94;--bad-soft:#3a1614;--bad-strong:#c0392b;--bad-strong-ink:#fff6f5;
   --side:#0a0e16;--side-ink:#aab6cc;--side-line:#1a2233;
+  --awb-0:#8aa8ff;--awb-1:#fb923c;--awb-2:#c4b5fd;--awb-3:#67e8f9;--awb-4:#f9a8d4;--awb-5:#bef264;
   --sh:0 1px 2px rgb(0 0 0 / .4),0 10px 28px -14px rgb(0 0 0 / .6);
   color-scheme:dark;
 }}
@@ -29,6 +31,7 @@
   --warn:#f5c26b;--warn-soft:#33250a;--warn-strong:#96500a;--warn-strong-ink:#fffaf0;
   --bad:#ff9d94;--bad-soft:#3a1614;--bad-strong:#c0392b;--bad-strong-ink:#fff6f5;
   --side:#0a0e16;--side-ink:#aab6cc;--side-line:#1a2233;
+  --awb-0:#8aa8ff;--awb-1:#fb923c;--awb-2:#c4b5fd;--awb-3:#67e8f9;--awb-4:#f9a8d4;--awb-5:#bef264;
   --sh:0 1px 2px rgb(0 0 0 / .4),0 10px 28px -14px rgb(0 0 0 / .6);
   color-scheme:dark;
 }
@@ -116,6 +119,13 @@ dialog h2{margin:0 0 var(--s3);font-size:18px}
 .idc .idp{color:var(--mute)}
 .idc .id4{margin-left:2px;padding:0 6px;border-radius:7px;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:1.14em;letter-spacing:.04em}
 .idc.stack{display:grid;justify-items:start;gap:2px}
+.idc{flex-wrap:wrap;row-gap:2px}
+/* AWB jelolo a doboz azonosito mellett */
+.awbt{display:inline-flex;align-items:center;gap:5px;margin-left:6px;padding:1px 8px 1px 6px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);
+  font:700 11px/1.5 system-ui,"Segoe UI",Roboto,sans-serif;letter-spacing:0;white-space:nowrap;align-self:center}
+.awbt::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--awb,var(--mute));flex:none}
+.idc.stack .awbt{margin-left:0;justify-self:start;font-size:12px}
+.awbs{display:inline-flex;flex-wrap:wrap;gap:4px}.awbs .awbt{margin-left:0}
 
 /* ===== mozgas: atmenetek, rugos beuszas, finom visszajelzes ===== */
 [hidden]{display:none!important}

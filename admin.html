@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raktári kereső - Admin</title>
-<link rel="stylesheet" href="common.css?v=25">
+<link rel="stylesheet" href="common.css?v=26">
 <style>
 .shell{display:grid;grid-template-columns:240px 1fr;min-height:100dvh}
 aside{background:var(--side);color:var(--side-ink);padding:var(--s4) var(--s3);position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;overflow:auto}
@@ -175,8 +175,8 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/cfb@1.2.2/dist/cfb.min.js" integrity="sha384-peTByNpmIz2Wq5hOZJ3dZmZP4MJ6ZXwF9dZ3R8kW7/C6bMWdHEME3on5mt9DH7d5" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
-<script src="common.js?v=25"></script>
-<script src="import.js?v=25"></script>
+<script src="common.js?v=26"></script>
+<script src="import.js?v=26"></script>
 <script>
 ICON.tag = '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01"/>';
 ICON.back = '<path d="M15 18l-6-6 6-6"/>';
@@ -315,7 +315,7 @@ function areaChart(vals, labels) {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.5</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.6</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -366,7 +366,7 @@ function vOverview() {
   const awbCards = [...D.awbs.values()].map((a, i) => {
     const cs = [...new Set(D.lines.filter(l => l.awb === a.id).map(l => l.carton))];
     const dn = cs.filter(c => cartonStatus(c) === 'done').length, op = cs.filter(c => cartonStatus(c) === 'open').length, no = cs.length - dn - op;
-    return `<div class="card awbc ${stI(i + 4)}"><div class="no mono">${esc(a.id)}</div>
+    return `<div class="card awbc ${stI(i + 4)}"><div class="no mono">${esc(a.id)} ${awbChip(a.id)}</div>
       <div class="seg3" role="img" aria-label="${dn} kész, ${op} nyitott, ${no} nincs felvéve"><i style="width:${100 * dn / cs.length}%;background:var(--ok-strong)"></i><i style="width:${100 * op / cs.length}%;background:var(--accent)"></i></div>
       <div class="nums"><div><b>${dn}</b>kész</div><div><b>${op}</b>nyitott</div><div><b>${no}</b>nincs felvéve</div><div><b>${cs.length}</b>doboz</div></div></div>`;
   }).join('');
@@ -502,7 +502,7 @@ function fillCartons() {
   const cs = cartonRows(), shown = cs.slice(0, 300);
   setHtml($('#ct'), shown.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th>Foglalta</th><th class="n">Tétel</th><th class="n">Db</th><th>Haladás</th><th>Felvette</th><th>Idő</th></tr></thead><tbody>${shown.map(c => {
     const o = D.open.get(c), p = cartonProg(c), l0 = D.byCarton.get(c)[0];
-    return `<tr class="clk" data-c="${esc(c)}"><td>${idHtml(c)}</td><td class="mono meta">${esc(l0.awb)}</td>
+    return `<tr class="clk" data-c="${esc(c)}"><td>${idHtml(c, 0, 1)}</td><td>${awbChip(l0.awb)}</td>
       <td>${o ? `<span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td>
       <td>${claimOf(c) ? esc(claimOf(c)) : ''}</td><td class="n">${p.done}/${p.n}</td><td class="n">${p.qty}</td><td style="min-width:110px"><div class="bar"><i style="width:${Math.round(p.ratio * 100)}%"></i></div></td>
       <td>${esc(o && o.opened_by || '')}</td><td class="meta">${o ? fmtDT(o.opened_at) : ''}</td></tr>`;
@@ -564,14 +564,14 @@ function vParked() {
   const free = k => new Set((D.byKey.get(k) || []).filter(l => !cartonStatus(l.carton)).map(l => l.carton)).size;
   M.innerHTML = local + `<div class="kpis" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:var(--s4)">${kpi('layers', 'Darab a polcon', total, 0, total)}${kpi('list', 'Termék a polcon', items.length, 1, items.length)}${kpi('check', 'Összegyűlt doboz', full.length, 2, full.length)}${kpi('box', 'Nyitott doboz', overall().open, 3, overall().open)}</div>
     <div class="grid g-2" style="margin-bottom:var(--s4)">
-      <div class="card ${stI(2)}"><div class="hd"><h2>Összegyűlt, ezek a következő dobozok</h2>${full.length ? `<button class="btn xs" id="pl">${I('print', 'sm')}Címkék</button>` : ''}</div><div class="scroll">${full.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th class="n">Tétel</th><th class="n">Db</th></tr></thead><tbody>${full.map(x => `<tr class="clk" data-c="${esc(x.c)}"><td>${idHtml(x.c)}</td><td class="mono meta">${esc(D.byCarton.get(x.c)[0].awb)}</td><td class="n">${D.byCarton.get(x.c).length}</td><td class="n">${x.total}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Még egy doboz sem gyűlt össze</b></div>'}</div></div>
+      <div class="card ${stI(2)}"><div class="hd"><h2>Összegyűlt, ezek a következő dobozok</h2>${full.length ? `<button class="btn xs" id="pl">${I('print', 'sm')}Címkék</button>` : ''}</div><div class="scroll">${full.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th class="n">Tétel</th><th class="n">Db</th></tr></thead><tbody>${full.map(x => `<tr class="clk" data-c="${esc(x.c)}"><td>${idHtml(x.c, 0, 1)}</td><td>${awbChip(cartonAwb(x.c))}</td><td class="n">${D.byCarton.get(x.c).length}</td><td class="n">${x.total}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Még egy doboz sem gyűlt össze</b></div>'}</div></div>
       <div class="card ${stI(3)}"><div class="hd"><h2>Legközelebb álló dobozok</h2></div><div class="scroll">${near.length ? `<table><thead><tr><th>Doboz</th><th>Megvan</th><th>Hiányzik</th></tr></thead><tbody>${near.map(x => `<tr class="clk" data-c="${esc(x.c)}"><td>${idHtml(x.c)}</td><td style="min-width:120px"><b>${x.have}/${x.total} db</b><div class="bar"><i class="o" style="width:${Math.round(x.ratio * 100)}%"></i></div></td><td class="meta">${x.miss.slice(0, 4).map(m => esc(keyName(m.k)) + (m.n > 1 ? ' ×' + m.n : '')).join(', ')}${x.miss.length > 4 ? ` +${x.miss.length - 4}` : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs</b></div>'}</div></div></div>
     ${(() => { const o = orphans(); return o.length ? `<div class="card ${stI(4)}" style="margin-bottom:var(--s4);border-color:var(--warn-strong)"><div class="hd"><h2>Nyitott doboz nélkül szkennelt, nincs a polcon (${o.length})</h2><button class="btn xs" id="oall">${I('layers', 'sm')}Mind a polcra</button></div>
       <div class="pad meta" style="padding-bottom:0">A napló szerint ezeket olyankor szkennelték, amikor nem volt nyitott dobozuk, és most sincs. Ha fizikailag félre vannak téve, vedd fel őket a polcra. A darabszám a szkennelések száma, ha valamit kétszer lőttek be, javítsd a polcon.</div>
-      <div class="scroll"><table><thead><tr><th>Termék</th><th class="n">Szkennelve</th><th class="n">Polcra</th><th>Utoljára</th><th>Eszköz</th><th></th></tr></thead><tbody>${o.map(x => `<tr><td><b>${esc(keyName(x.k))}</b><br><span class="mono meta">${esc(x.k)}</span></td><td class="n">${x.n}</td><td class="n"><b>${x.add}</b></td><td class="meta">${fmtDT(x.last)}</td><td class="meta">${esc([...x.dev].join(', '))}</td><td class="n"><button class="btn xs" data-ok="${x.k}">Polcra</button></td></tr>`).join('')}</tbody></table></div></div>` : ''; })()}
+      <div class="scroll"><table><thead><tr><th>Termék</th><th class="n">Szkennelve</th><th class="n">Polcra</th><th>Utoljára</th><th>Eszköz</th><th></th></tr></thead><tbody>${o.map(x => `<tr><td><b>${esc(keyName(x.k))}</b><br><span class="mono meta">${esc(x.k)}</span> <span class="awbs">${keyAwbChips(x.k)}</span></td><td class="n">${x.n}</td><td class="n"><b>${x.add}</b></td><td class="meta">${fmtDT(x.last)}</td><td class="meta">${esc([...x.dev].join(', '))}</td><td class="n"><button class="btn xs" data-ok="${x.k}">Polcra</button></td></tr>`).join('')}</tbody></table></div></div>` : ''; })()}
     <div class="card ${stI(4)}"><div class="hd"><h2>A polcon</h2><span class="meta">${total} db, ${items.length} termék</span><button class="btn xs" id="ex">${I('dl', 'sm')}CSV</button></div>
       <form class="tools" id="paf" autocomplete="off" style="padding:var(--s3) var(--s4) 0;margin:0"><input class="inp" id="pak" placeholder="Termék kód" aria-label="Termék kód" style="width:220px"><input class="inp" id="pan" type="number" min="1" max="999" value="1" aria-label="Darab" style="width:90px"><button class="btn sm pri">${I('plus', 'sm')}Polcra</button><span class="meta" id="pam"></span></form><div class="scroll">${items.length ? `<table><thead><tr><th>Termék</th><th class="n">Db</th><th class="n">Lehetséges doboz</th><th>Utoljára</th><th></th></tr></thead><tbody>${items.map(([k, n]) => { const r = D.parkInfo.get(k) || {};
-      return `<tr class="clk" data-k="${k}"><td><b>${esc(keyName(k))}</b><br><span class="mono meta">${esc(k)}</span></td><td class="n"><b>${n}</b></td><td class="n">${free(k) || '<span class="tag warn">0, felesleg</span>'}</td><td class="meta">${r.ts ? fmtDT(r.ts) + ' · ' + esc(r.device || '') : ''}</td><td class="n"><button class="btn xs" data-pm="${k}" aria-label="Levesz egyet">${I('minus', 'sm')}</button></td></tr>`; }).join('')}</tbody></table>` : '<div class="empty"><b>Üres a polc</b>Ami már félre van téve, add hozzá fent</div>'}</div></div>`;
+      return `<tr class="clk" data-k="${k}"><td><b>${esc(keyName(k))}</b><br><span class="mono meta">${esc(k)}</span> <span class="awbs">${keyAwbChips(k)}</span></td><td class="n"><b>${n}</b></td><td class="n">${free(k) || '<span class="tag warn">0, felesleg</span>'}</td><td class="meta">${r.ts ? fmtDT(r.ts) + ' · ' + esc(r.device || '') : ''}</td><td class="n"><button class="btn xs" data-pm="${k}" aria-label="Levesz egyet">${I('minus', 'sm')}</button></td></tr>`; }).join('')}</tbody></table>` : '<div class="empty"><b>Üres a polc</b>Ami már félre van téve, add hozzá fent</div>'}</div></div>`;
   M.onclick = async e => {
     const pm = e.target.closest('[data-pm]');
     if (pm) { if (!await confirmDlg(`Leveszel egyet a polcról: ${keyName(pm.dataset.pm)}?`, 'Levesz', true)) return; const r = await sb.rpc('rk_park', {p_key: pm.dataset.pm, p_delta: -1, p_device: 'admin'}); if (r.error) return toast('Hiba: ' + r.error.message); await loadParked(); return render(true); }
@@ -599,7 +599,7 @@ function vParked() {
 function skuTable(rows) {
   return `<table><thead><tr><th>Termék</th><th class="n">Doboz</th><th class="n">Nyitott</th><th class="n">Db</th></tr></thead><tbody>${rows.map(k => {
     const ls_ = D.byKey.get(k), op = ls_.filter(l => cartonStatus(l.carton) === 'open' && !isLineDone(l)).length;
-    return `<tr class="clk" data-k="${k}"><td><b>${esc(ls_[0].descr)}</b><br><span class="meta mono">${esc(k)}</span></td><td class="n">${ls_.length}</td><td class="n">${op ? `<span class="tag ok">${op}</span>` : '0'}</td><td class="n">${ls_.reduce((a, l) => a + l.qty, 0)}</td></tr>`;
+    return `<tr class="clk" data-k="${k}"><td><b>${esc(ls_[0].descr)}</b><br><span class="meta mono">${esc(k)}</span> <div class="awbs">${keyAwbChips(k, () => true)}</div></td><td class="n">${ls_.length}</td><td class="n">${op ? `<span class="tag ok">${op}</span>` : '0'}</td><td class="n">${ls_.reduce((a, l) => a + l.qty, 0)}</td></tr>`;
   }).join('')}</tbody></table>`;
 }
 function vSkus() {
@@ -653,7 +653,7 @@ function scanAwbs(s) {
   const ls_ = s.key && D.byKey.get(s.key);
   return ls_ ? [...new Set(ls_.map(l => l.awb))].sort() : [];
 }
-const awbCell = s => { const a = scanAwbs(s); return a.length ? `<span class="mono">${esc(a[0])}</span>${a.length > 1 ? ` <span class="tag mute" title="${esc(a.join(', '))}">+${a.length - 1}</span>` : ''}` : ''; };
+const awbCell = s => `<span class="awbs">${scanAwbs(s).map(awbChip).join('')}</span>`;
 function vLog() {
   const LG = {hit: s => s.result === 'open1' || s.result === 'openN', miss: s => s.result === 'closed' || s.result === 'surplus', unknown: s => s.result === 'unknown', carton: s => s.kind === 'carton', line: s => s.kind === 'line', park: s => s.kind === 'park' || s.result === 'aside', ident: s => s.kind === 'ident'};
   const flt = () => SC.filter(s => (!F.lres || LG[F.lres](s)) && (!F.lawbf || scanAwbs(s).includes(F.lawbf))
@@ -666,7 +666,7 @@ function vLog() {
   const fill = () => {
     const r = flt();
     $('#lc').textContent = r.length + ' bejegyzés';
-    setHtml($('#lt'), r.length ? `<table><thead><tr><th>Idő</th><th>Eszköz</th><th>Típus</th><th>Kód</th><th>AWB</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${r.slice(0, 500).map(s => `<tr><td class="mono">${fmtDT(s.ts)}</td><td>${esc(s.device)}</td><td>${esc(s.kind)}</td><td class="mono">${esc(s.raw)}</td><td>${awbCell(s)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton) : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs bejegyzés</b></div>');
+    setHtml($('#lt'), r.length ? `<table><thead><tr><th>Idő</th><th>Eszköz</th><th>Típus</th><th>Kód</th><th>AWB</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${r.slice(0, 500).map(s => `<tr><td class="mono">${fmtDT(s.ts)}</td><td>${esc(s.device)}</td><td>${esc(s.kind)}</td><td class="mono">${esc(s.raw)}</td><td>${awbCell(s)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton, 0, 1) : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs bejegyzés</b></div>');
   };
   fill();
   $('#lq').oninput = e => { F.lq = e.target.value.trim(); fill(); };
@@ -923,12 +923,12 @@ function xList() {
   let out = '', i = 1;
   if (r.carton.length) out += grp('Dobozok', r.carton.length, '<th>Doboz</th><th>Státusz</th><th>AWB</th><th class="n">Tétel</th><th>Darab</th>', r.carton.slice(0, XLIM).map(c => {
     const p = cartonSum(c), l0 = (D.byCarton.get(c) || [])[0];
-    return `<tr class="clk" ${go('carton', c)}><td>${idHtml(c)}</td><td>${stTag(c)}${claimOf(c) ? ` <span class="tag warn">${esc(claimOf(c))}</span>` : ''}</td><td class="mono meta">${l0 ? esc(l0.awb) : ''}</td>
+    return `<tr class="clk" ${go('carton', c)}><td>${idHtml(c, 0, 1)}</td><td>${stTag(c)}${claimOf(c) ? ` <span class="tag warn">${esc(claimOf(c))}</span>` : ''}</td><td>${l0 ? awbChip(l0.awb) : ''}</td>
       <td class="n">${l0 ? `${p.done}/${p.n}` : ''}</td><td style="min-width:130px">${l0 ? `<b>${p.got}/${p.qty} db</b>${xBar(p.got, p.qty)}` : ''}</td></tr>`;
   }).join(''), i++);
   if (r.sku.length) out += grp('Termékek', r.sku.length, '<th>Termék</th><th class="n">Doboz</th><th>Bekerült</th><th class="n">Polcon</th>', r.sku.slice(0, XLIM).map(k => {
     const ls_ = D.byKey.get(k), qty = ls_.reduce((a, l) => a + l.qty, 0), got = ls_.reduce((a, l) => a + gotX(l), 0), pk = D.parked.get(k) || 0;
-    return `<tr class="clk" ${go('sku', k)}><td><b>${esc(ls_[0].descr)}</b><div class="mono meta">${esc(k)}</div></td><td class="n">${new Set(ls_.map(l => l.carton)).size}</td>
+    return `<tr class="clk" ${go('sku', k)}><td><b>${esc(ls_[0].descr)}</b><div class="mono meta">${esc(k)}</div><div class="awbs">${keyAwbChips(k, () => true)}</div></td><td class="n">${new Set(ls_.map(l => l.carton)).size}</td>
       <td style="min-width:130px"><b>${got}/${qty} db</b>${xBar(got, qty)}</td><td class="n">${pk ? `<span class="tag">${pk} db</span>` : '<span class="meta">-</span>'}</td></tr>`;
   }).join(''), i++);
   if (r.awb.length) out += grp('AWB', r.awb.length, '<th>AWB</th><th>Jelölés</th><th class="n">Doboz</th><th>Kész doboz</th>', r.awb.slice(0, XLIM).map(id => {
@@ -994,10 +994,10 @@ function xSku(k) {
   const ord = l => { const s = cartonStatus(l.carton); return s === 'open' ? (gotX(l) < l.qty ? 0 : 3) : !s ? 1 : 2; };
   const rows = ls_.slice().sort((x, y) => ord(x) - ord(y) || x.carton.localeCompare(y.carton)).map(l => {
     const g = gotX(l), [st, tone] = lineState(l), n = log.filter(s => s.kind === 'sku' && s.carton === l.carton).length;
-    return `<tr class="clk" ${go('carton', l.carton)}><td>${idHtml(l.carton)}</td><td>${stTag(l.carton)}</td><td class="mono meta">${esc(l.awb)}</td>
+    return `<tr class="clk" ${go('carton', l.carton)}><td>${idHtml(l.carton, 0, 1)}</td><td>${stTag(l.carton)}</td><td>${awbChip(l.awb)}</td>
       <td class="n" style="min-width:100px"><b>${g}/${l.qty}</b>${xBar(g, l.qty)}</td><td><span class="tag ${tone}">${st}</span></td><td class="n">${n ? n + '×' : '<span class="meta">-</span>'}</td></tr>`;
   }).join('');
-  const sub = `<span class="mono">${esc(k)}</span>${skus.some(x => x !== k) ? ' · SKU: <span class="mono">' + esc(skus.join(', ')) + '</span>' : ''}${l0.mat && l0.mat !== l0.descr ? ' · ' + esc(l0.mat) : ''}`;
+  const sub = `<span class="mono">${esc(k)}</span>${skus.some(x => x !== k) ? ' · SKU: <span class="mono">' + esc(skus.join(', ')) + '</span>' : ''}${l0.mat && l0.mat !== l0.descr ? ' · ' + esc(l0.mat) : ''} <div class="awbs">${keyAwbChips(k, () => true)}</div>`;
   return `<div class="card ${stI(0)}" style="margin-bottom:var(--s4)">${xHead(esc(l0.descr), (openN >= 2 ? '<span class="tag">többértelmű</span>' : '') + (pk ? ` <span class="tag">polcon ${pk} db</span>` : ''), '', sub)}
     ${facts([
       ['Goodslistben', qty + ' db', ncs + ' dobozban'],
