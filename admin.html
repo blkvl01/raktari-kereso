@@ -294,7 +294,7 @@ function attention() {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.11</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.12</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -334,7 +334,7 @@ let ow = OW.some(x => x[0] === ls.get('rk_ow')) ? ls.get('rk_ow') : 'day';
 const SC_LIM = 2000, HIST = {rows: [], at: 0, lim: 20000};
 // ma / 7 nap: a hosszabb naplo percenkent egyszer toltodik, a friss resz a 6 mp-es SC-bol jon
 async function loadHist(force) {
-  if (!adminCode || ow === '1h' || SC.length < SC_LIM || (!force && Date.now() - HIST.at < 60e3)) return;
+  if (!adminCode || (sec === 'overview' && ow === '1h') || SC.length < SC_LIM || (!force && Date.now() - HIST.at < 60e3)) return;
   HIST.at = Date.now();
   const r = await adm('rk_admin_scans', {p_limit: HIST.lim}); if (r) { HIST.rows = r.rows; render(); }
 }
@@ -583,14 +583,21 @@ function cartonRows() {
   const m = {felvett: c => cartonStatus(c), nyitott: c => cartonStatus(c) === 'open', kesz: c => cartonStatus(c) === 'done', nincs: c => !cartonStatus(c), mind: () => true}[F.cst];
   return cs.filter(m).sort((a, b) => cartonProg(b).ratio - cartonProg(a).ratio || a.localeCompare(b));
 }
+// dobozonkent az utolso bepakolas (pozitiv darabszam-valtozas) a betoltott naplobol: {t, dev}
+function lastPacks() {
+  const m = new Map(), old = SC.length ? tms(SC[SC.length - 1].ts) : Infinity;
+  SC.concat(HIST.rows.filter(s => tms(s.ts) < old)).forEach(s => { if (s.carton && !m.has(s.carton) && qd(s) > 0) m.set(s.carton, {t: s.ts, dev: s.device}); });
+  return m;
+}
 function fillCartons() {
-  const cs = cartonRows(), shown = cs.slice(0, 300);
-  setHtml($('#ct'), shown.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th>Foglalta</th><th class="n">Tétel</th><th class="n">Db</th><th>Töltöttség</th><th>Felvette</th><th>Idő</th></tr></thead><tbody>${shown.map(c => {
+  const cs = cartonRows(), shown = cs.slice(0, 300), lp = lastPacks();
+  setHtml($('#ct'), shown.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th>Foglalta</th><th class="n">Tétel</th><th class="n">Db</th><th>Töltöttség</th><th>Felvette</th><th>Megnyitva</th><th>Utoljára bepakolva</th></tr></thead><tbody>${shown.map(c => {
     const o = D.open.get(c), p = cartonProg(c), l0 = D.byCarton.get(c)[0];
     return `<tr class="clk" data-c="${esc(c)}"><td>${idHtml(c, 0, 1)}</td><td>${awbChip(l0.awb)}</td>
       <td>${o ? `<span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td>
       <td>${claimOf(c) ? esc(claimOf(c)) : ''}</td><td class="n">${p.done}/${p.n}</td><td class="n">${o ? p.got + '/' : ''}${p.qty}</td><td style="min-width:170px">${o ? `<div style="display:flex;align-items:center;gap:var(--s2)"><div class="bar" style="flex:1"><i style="width:${Math.round(p.ratio * 100)}%"></i></div>${pctPill(p.ratio)}</div>` : '<span class="meta">-</span>'}</td>
-      <td>${esc(o && o.opened_by || '')}</td><td class="meta">${o ? fmtDT(o.opened_at) : ''}</td></tr>`;
+      <td>${esc(o && o.opened_by || '')}</td><td class="meta">${o ? fmtDT(o.opened_at) : ''}</td>
+      <td class="meta">${(x => x ? `${fmtDT(x.t)}${x.dev !== (o && o.opened_by) ? `<div>${esc(x.dev)}</div>` : ''}` : o ? '<span title="A betöltött naplóban nincs bepakolás">–</span>' : '')(lp.get(c))}</td></tr>`;
   }).join('')}</tbody></table>${cs.length > 300 ? `<div class="pg">300 / ${cs.length}</div>` : ''}` : '<div class="empty"><b>Nincs találat</b></div>');
   $('#cc').textContent = cs.length + ' doboz';
 }
@@ -602,13 +609,13 @@ function vCartons() {
     <span class="meta" id="cc"></span>
     <button class="btn sm" id="ex" style="margin-left:auto">${I('dl')}CSV</button></div>
     <div class="card"><div class="scroll" id="ct"></div></div>`;
-  fillCartons();
+  fillCartons(); loadHist();
   document.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { F.cst = b.dataset.st; vCartons(); });
   $('#cq').oninput = e => { F.cq = e.target.value.trim().toUpperCase(); fillCartons(); };
   document.querySelectorAll('[data-aw]').forEach(b => b.onclick = () => { F.cawb = b.dataset.aw; vCartons(); });
   $('#ct').onclick = e => { const r = e.target.closest('[data-c]'); if (r) showCarton(r.dataset.c); };
-  $('#ex').onclick = () => csv([['AWB', 'Doboz', 'Státusz', 'Kész tétel', 'Összes tétel', 'Várt db', 'Bent db', 'Töltöttség %', 'Felvette', 'Felvétel ideje']].concat(cartonRows().map(c => {
-    const o = D.open.get(c), p = cartonProg(c); return [D.byCarton.get(c)[0].awb, c, o ? o.status : 'nincs felvéve', p.done, p.n, p.qty, o ? p.got : '', o ? Math.round(p.ratio * 100) : '', o && o.opened_by, o && o.opened_at]; })), 'dobozok.csv');
+  $('#ex').onclick = () => csv([['AWB', 'Doboz', 'Státusz', 'Kész tétel', 'Összes tétel', 'Várt db', 'Bent db', 'Töltöttség %', 'Felvette', 'Megnyitva', 'Utoljára bepakolva', 'Bepakolta']].concat((lp => cartonRows().map(c => {
+    const o = D.open.get(c), p = cartonProg(c), x = lp.get(c) || {}; return [D.byCarton.get(c)[0].awb, c, o ? o.status : 'nincs felvéve', p.done, p.n, p.qty, o ? p.got : '', o ? Math.round(p.ratio * 100) : '', o && o.opened_by, o && o.opened_at, x.t || '', x.dev || '']; }))(lastPacks())), 'dobozok.csv');
 }
 function showCarton(c) {
   const o = D.open.get(c), p = cartonProg(c), ls_ = D.byCarton.get(c);
