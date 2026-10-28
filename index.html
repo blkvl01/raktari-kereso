@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2342d6">
 <title>Raktári kereső</title>
-<link rel="stylesheet" href="common.css?v=28">
+<link rel="stylesheet" href="common.css?v=30">
 <style>
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
 .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
@@ -203,7 +203,7 @@ nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
 <dialog id="dlg"></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="common.js?v=27"></script>
+<script src="common.js?v=28"></script>
 <script>
 // Folyamat: a kalodabol kivett termeket a Valogatas fulon szkenneled.
 //  - ha egy nyitott dobozba kell: megmutatjuk a dobozt, a dolgozo megadja hany darabot tesz bele, csak ezutan szamolodik be
@@ -545,7 +545,7 @@ function updateSort() {
     shellView = 'sort';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
         <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Termék vagy doboz kódja"></form>
-      <div id="res"></div><div class="ver">v2.13</div>`;
+      <div id="res"></div><div class="ver">v2.15</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();

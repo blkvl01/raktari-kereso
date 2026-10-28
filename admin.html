@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raktári kereső - Admin</title>
-<link rel="stylesheet" href="common.css?v=28">
+<link rel="stylesheet" href="common.css?v=30">
 <style>
 .shell{display:grid;grid-template-columns:240px 1fr;min-height:100dvh}
 aside{background:var(--side);color:var(--side-ink);padding:var(--s4) var(--s3);position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;overflow:auto}
@@ -89,6 +89,10 @@ a.tile:hover{transform:translateY(-3px);border-color:var(--accent-line)}
 .lrow[aria-pressed=true] .box{background:var(--ok-strong);border-color:var(--ok-strong);color:var(--ok-strong-ink);transform:scale(1.1)}
 .lrow .t{flex:1;min-width:0}.lrow .t small{display:block;color:var(--mute)}
 tbody tr{transition:background .15s}
+/* 100%-ban teli doboz: halvany, szurkes sor, hogy ne tunjon aktivnak (a meg nem lezart "nyitott" allapot szines marad) */
+tr.fin td{opacity:.5;filter:grayscale(1);transition:opacity .15s}
+tr.fin:hover td{opacity:.9}
+tr.fin td.act{opacity:1;filter:none}
 .lblform{display:flex;gap:var(--s3);flex-wrap:wrap;align-items:end;margin-bottom:var(--s3)}
 .lblform .field{margin:0}.lblform .field input{width:110px}
 .g-lbl{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
@@ -177,7 +181,7 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/cfb@1.2.2/dist/cfb.min.js" integrity="sha384-peTByNpmIz2Wq5hOZJ3dZmZP4MJ6ZXwF9dZ3R8kW7/C6bMWdHEME3on5mt9DH7d5" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
-<script src="common.js?v=27"></script>
+<script src="common.js?v=28"></script>
 <script src="import.js?v=27"></script>
 <script>
 ICON.tag = '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01"/>';
@@ -301,7 +305,7 @@ function attention() {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.13</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.15</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -600,8 +604,8 @@ function fillCartons() {
   const cs = cartonRows(), shown = cs.slice(0, 300), lp = lastPacks();
   setHtml($('#ct'), shown.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th>Foglalta</th><th class="n">Tétel</th><th class="n">Db</th><th>Töltöttség</th><th>Felvette</th><th>Megnyitva</th><th>Utoljára bepakolva</th></tr></thead><tbody>${shown.map(c => {
     const o = D.open.get(c), p = cartonProg(c), l0 = D.byCarton.get(c)[0];
-    return `<tr class="clk" data-c="${esc(c)}"><td>${idHtml(c, 0, 1)}</td><td>${awbChip(l0.awb)}</td>
-      <td>${o ? `<span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td>
+    return `<tr class="clk${o && p.ratio >= 1 ? ' fin' : ''}" data-c="${esc(c)}"><td>${idHtml(c, 0, 1)}</td><td>${awbChip(l0.awb)}</td>
+      <td${o && o.status === 'open' ? ' class="act"' : ''}>${o ? `<span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td>
       <td>${claimOf(c) ? esc(claimOf(c)) : ''}</td><td class="n">${p.done}/${p.n}</td><td class="n">${o ? p.got + '/' : ''}${p.qty}</td><td style="min-width:170px">${o ? `<div style="display:flex;align-items:center;gap:var(--s2)"><div class="bar" style="flex:1"><i style="width:${Math.round(p.ratio * 100)}%"></i></div>${pctPill(p.ratio)}</div>` : '<span class="meta">-</span>'}</td>
       <td>${esc(o && o.opened_by || '')}</td><td class="meta">${o ? fmtDT(o.opened_at) : ''}</td>
       <td class="meta">${(x => x ? `${fmtDT(x.t)}${x.dev !== (o && o.opened_by) ? `<div>${esc(x.dev)}</div>` : ''}` : o ? '<span title="A betöltött naplóban nincs bepakolás">–</span>' : '')(lp.get(c))}</td></tr>`;
