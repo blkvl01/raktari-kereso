@@ -41,42 +41,37 @@ main.enter{animation:secIn .45s var(--ease-out)}
 #rf.spin svg{transform:rotate(360deg)}
 
 .grid{display:grid;gap:var(--s4)}
-.g-hero{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
 .g-2{grid-template-columns:repeat(auto-fit,minmax(420px,1fr))}
-.g-awb{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
-.hero{display:flex;gap:var(--s5);align-items:center;padding:var(--s5);background:linear-gradient(135deg,var(--surface),var(--accent-soft))}
-.legend{flex:1;display:grid;gap:var(--s3);min-width:0}
-.lg{display:flex;align-items:center;gap:var(--s3)}
-.lg .sw{width:12px;height:12px;border-radius:4px;flex:none}
-.lg b{font-size:22px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;margin-left:auto}
-.donut-c{position:relative;flex:none}
-.donut-c .mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
-.donut-c .mid b{font-size:40px;letter-spacing:-.03em;line-height:1}
-.enter .seg{animation:seg 1s .2s var(--ease-out) both}
-.enter .ln{stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.2s .25s var(--ease-out) forwards}
-.enter .ar{animation:fadeIn .9s .6s both}
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)}
 .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);box-shadow:var(--sh);display:flex;flex-direction:column;gap:2px;transition:transform .3s var(--spring),box-shadow .25s}
 .kpi:hover{transform:translateY(-3px)}
 .kpi .ic{width:34px;height:34px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:var(--s2)}
 .kpi b{font-size:30px;letter-spacing:-.03em;line-height:1.05;font-variant-numeric:tabular-nums}
 .kpi span{font-size:12px;color:var(--mute);font-weight:650}
-.attn a{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s4);color:inherit;text-decoration:none;border-bottom:1px solid var(--line-2);transition:background .15s,padding .25s var(--ease-out)}
-.attn a:last-child{border-bottom:0}
-.attn a:hover{background:var(--accent-soft);padding-left:calc(var(--s4) + 6px)}
-.attn .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none}
-.attn .ic.warn{background:var(--warn-soft);color:var(--warn)}.attn .ic.bad{background:var(--bad-soft);color:var(--bad)}.attn .ic.ok{background:var(--ok-soft);color:var(--ok)}
-.attn .t{flex:1;min-width:0;font-weight:650}
-.attn b{font-size:20px;font-variant-numeric:tabular-nums}
-.chartbox{padding:var(--s4)}
-.awbc{padding:var(--s4);display:grid;gap:var(--s3)}
-.awbc:hover{transform:translateY(-3px)}
-.awbc .no{font-size:17px;font-weight:800;letter-spacing:.01em}
 .seg3{display:flex;height:10px;border-radius:5px;overflow:hidden;background:var(--line)}
 .seg3 i{display:block;height:100%;transform-origin:left;transition:width .6s var(--ease-out)}
 .enter .seg3 i{animation:grow .9s .3s var(--ease-out) both}
 @keyframes grow{from{transform:scaleX(0)}}
-.nums{display:flex;gap:var(--s4);flex-wrap:wrap;font-size:var(--t-small);color:var(--mute)}.nums b{color:var(--ink);font-size:16px;display:block}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:var(--s3);margin-bottom:var(--s4)}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);box-shadow:var(--sh);display:flex;flex-direction:column;gap:4px;min-width:0;color:inherit;text-decoration:none}
+a.tile{transition:transform .3s var(--spring),border-color .2s}
+a.tile:hover{transform:translateY(-3px);border-color:var(--accent-line)}
+.tile .tl{font-size:13px;font-weight:700;color:var(--ink-2)}
+.tile .tv{font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .tv small{font-size:15px;font-weight:700;color:var(--mute);margin-left:5px;letter-spacing:0}
+.tile .ts{font-size:12px;color:var(--mute);font-weight:600}
+.sech{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;margin:0 var(--s1) var(--s3)}
+.sech h2{margin:0;font-size:18px;letter-spacing:-.01em}
+.sech .meta{flex:1}
+.g-ch{grid-template-columns:repeat(auto-fit,minmax(340px,1fr))}
+.bch{display:block;width:100%;height:auto}
+.bch .bm{fill:var(--accent);transition:opacity .15s}
+.bch:hover .bm{opacity:.45}
+.bch .bk:hover .bm{opacity:1}
+.enter .bch .bm{animation:fadeIn .6s .2s both}
+#tip{position:fixed;left:0;top:0;z-index:50;pointer-events:none;background:var(--surface);color:var(--mute);border:1px solid var(--line);box-shadow:var(--sh);border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;opacity:0;transition:opacity .12s;white-space:nowrap}
+#tip.on{opacity:1}
+#tip b{display:block;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
 .scroll{max-height:560px;overflow:auto}
 .tools{display:flex;gap:var(--s2);margin-bottom:var(--s3);flex-wrap:wrap;align-items:center}
 .tools .inp{width:260px;min-height:40px;padding:6px 12px}
@@ -147,8 +142,8 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 .xhelp{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--s4)}
 .xhelp .card{padding:var(--s4);display:grid;gap:6px;align-content:start}
 .xhelp .ic{width:38px;height:38px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:var(--s1)}
-@media (max-width:1100px){.g-hero,.g-lbl,.g-x{grid-template-columns:1fr}}
-@media (max-width:900px){.shell{grid-template-columns:1fr}aside{position:static;height:auto;overflow:visible}.links{flex-direction:row;flex-wrap:wrap}.navind{display:none}aside a[aria-current=page]{background:var(--accent)}aside .foot{display:none}main{padding:var(--s3)}.top{padding:var(--s3)}.gsearch{display:none}.hero{flex-direction:column;align-items:flex-start}.g-2{grid-template-columns:1fr}}
+@media (max-width:1100px){.g-lbl,.g-x{grid-template-columns:1fr}}
+@media (max-width:900px){.shell{grid-template-columns:1fr}aside{position:static;height:auto;overflow:visible}.links{flex-direction:row;flex-wrap:wrap}.navind{display:none}aside a[aria-current=page]{background:var(--accent)}aside .foot{display:none}main{padding:var(--s3)}.top{padding:var(--s3)}.gsearch{display:none}.g-2{grid-template-columns:1fr}}
 @media print{
   body{background:#fff;color:#000}.shell,dialog,#toast{display:none!important}
   #labels{display:block}
@@ -296,29 +291,10 @@ function attention() {
   };
 }
 
-// ---------- abrak ----------
-function donut(parts, size, w) {
-  const r = (size - w) / 2, c = 2 * Math.PI * r, total = parts.reduce((a, p) => a + p.v, 0); let off = 0;
-  const segs = total ? parts.filter(p => p.v > 0).map(p => { const len = c * p.v / total; const el = `<circle class="seg" style="--c:${c}" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${p.color}" stroke-width="${w}" stroke-dasharray="${len} ${c - len}" stroke-dashoffset="${-off}"><title>${esc(p.label)}: ${p.v}</title></circle>`; off += len; return el; }).join('') : '';
-  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="Dobozok állapota" style="transform:rotate(-90deg)"><circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/>${segs}</svg>`;
-}
-function areaChart(vals, labels) {
-  const W = 640, H = 170, pl = 8, pr = 8, pt = 14, pb = 22, mx = Math.max(4, ...vals), n = vals.length;
-  const x = i => pl + (W - pl - pr) * i / (n - 1), y = v => pt + (H - pt - pb) * (1 - v / mx);
-  const pts = vals.map((v, i) => [x(i), y(v)]);
-  const line = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
-  const area = line + ` L${x(n - 1).toFixed(1)} ${H - pb} L${x(0).toFixed(1)} ${H - pb} Z`;
-  const grid = [0, .5, 1].map(f => { const yy = pt + (H - pt - pb) * (1 - f); return `<line x1="${pl}" x2="${W - pr}" y1="${yy}" y2="${yy}" stroke="var(--line-2)"/><text x="${W - pr}" y="${yy - 3}" text-anchor="end" font-size="10" fill="var(--mute)">${Math.round(mx * f)}</text>`; }).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto" role="img" aria-label="Szkennelések 10 percenként"><defs><linearGradient id="ag" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
-    ${grid}<path class="ar" d="${area}" fill="url(#ag)"/><path class="ln" pathLength="1" d="${line}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
-    ${pts.map((p, i) => vals[i] ? `<circle class="ar" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="var(--surface)" stroke="var(--accent)" stroke-width="2"><title>${labels[i]}: ${vals[i]}</title></circle>` : '').join('')}
-    <text x="${pl}" y="${H - 5}" font-size="10" fill="var(--mute)">${labels[0]}</text><text x="${W - pr}" y="${H - 5}" text-anchor="end" font-size="10" fill="var(--mute)">most</text></svg>`;
-}
-
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.8</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.10</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -352,51 +328,157 @@ function render(force) {
 window.addEventListener('hashchange', () => { readHash(); render(true); window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'}); });
 const kpi = (icon, l, v, i, raw) => `<div class="kpi ${stI(i)}"><span class="ic">${ic(icon)}</span><b ${raw === undefined ? '' : `data-n="${raw}"`}>${v}</b><span>${l}</span></div>`;
 
+// ---------- attekintes: tempo (valaszthato idoablak) es folyamatban levo munka (most) ----------
+const OW = [['1h', '1 óra'], ['day', 'Ma'], ['7d', '7 nap']];
+let ow = OW.some(x => x[0] === ls.get('rk_ow')) ? ls.get('rk_ow') : 'day';
+const SC_LIM = 2000, HIST = {rows: [], at: 0, lim: 20000};
+// ma / 7 nap: a hosszabb naplo percenkent egyszer toltodik, a friss resz a 6 mp-es SC-bol jon
+async function loadHist(force) {
+  if (!adminCode || ow === '1h' || SC.length < SC_LIM || (!force && Date.now() - HIST.at < 60e3)) return;
+  HIST.at = Date.now();
+  const r = await adm('rk_admin_scans', {p_limit: HIST.lim}); if (r) { HIST.rows = r.rows; render(); }
+}
+const tms = t => +new Date(t);
+function fmtDur(ms, short) {
+  const m = Math.round(ms / 60e3);
+  if (m < 1) return short ? '<1 p' : '<1 perc';
+  if (m < 60) return m + (short ? ' p' : ' perc');
+  if (m < 1440) return Math.floor(m / 60) + ' ó ' + (m % 60) + ' p';
+  return Math.floor(m / 1440) + ' nap ' + Math.floor(m % 1440 / 60) + ' ó';
+}
+const ago = (t, suf) => { const ms = Date.now() - t; return ms < 60e3 ? 'most' : fmtDur(ms, 1) + (suf || ' óta'); };
+const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), h = s.length >> 1; return s.length % 2 ? s[h] : (s[h - 1] + s[h]) / 2; };
+const fmtN = (v, d) => v.toLocaleString('hu', {maximumFractionDigits: d || 0});
+// idoablak: kezdet, vodorok hatarai (b[i]..b[i+1]), cimkek
+function owRange(now, firstAct) {
+  const d0 = new Date(now); d0.setHours(0, 0, 0, 0);
+  const b = [], lab = [], tip = [];
+  if (ow === '1h') {
+    for (let i = 0; i <= 12; i++) b.push(now - (12 - i) * 300e3);
+    for (let i = 0; i < 12; i++) { const t = fmtHM(b[i]); lab.push(t); tip.push(t + '–' + fmtHM(b[i + 1])); }
+    return {t0: b[0], b, lab, tip, desc: 'az elmúlt 60 perc, 5 perces bontás'};
+  }
+  if (ow === 'day') {
+    const h0 = Math.min(new Date(Math.max(firstAct || now, +d0)).getHours(), new Date(now).getHours());
+    for (let h = h0; h <= new Date(now).getHours() + 1; h++) { const x = new Date(d0); x.setHours(h); b.push(+x); }
+    for (let i = 0; i < b.length - 1; i++) { lab.push(new Date(b[i]).getHours() + ':00'); tip.push(new Date(b[i]).getHours() + ':00–' + new Date(b[i + 1]).getHours() + ':00'); }
+    return {t0: +d0, b, lab, tip, desc: 'ma 0:00 óta, óránkénti bontás'};
+  }
+  for (let i = 6; i >= -1; i--) { const x = new Date(d0); x.setDate(x.getDate() - i); b.push(+x); }
+  for (let i = 0; i < 7; i++) { const x = new Date(b[i]); lab.push(x.toLocaleDateString('hu', {weekday: 'short'}) + ' ' + x.getDate() + '.'); tip.push(x.toLocaleDateString('hu', {month: 'long', day: 'numeric', weekday: 'long'})); }
+  return {t0: b[0], b, lab, tip, desc: 'az elmúlt 7 nap, napi bontás'};
+}
+const fmtHM = t => new Date(t).toLocaleTimeString('hu', {hour: '2-digit', minute: '2-digit'});
+const bIdx = (b, t) => { for (let i = b.length - 2; i >= 0; i--) if (t >= b[i]) return t < b[i + 1] ? i : -1; return -1; };
+// oszlopdiagram egy sorozatra: 4px-es lekerekitett teteje, halvany racs, vodronkenti tooltip
+function bars(vals, R, unit, aria) {
+  const W = 560, H = 190, pl = 34, pr = 4, pt = 12, pb = 24, n = vals.length, ih = H - pt - pb, iw = W - pl - pr;
+  const m = Math.max(...vals), mx = m <= 4 ? 4 : (p => [1, 2, 5, 10].map(f => f * p).find(v => v >= m))(10 ** Math.floor(Math.log10(m)));
+  const bw = iw / n, gap = Math.max(2, Math.min(bw * .3, 12)), w = bw - gap, base = pt + ih;
+  const grid = [0, mx / 2, mx].filter(v => Number.isInteger(v)).map(v => { const y = base - ih * v / mx;
+    return `<line x1="${pl}" x2="${W - pr}" y1="${y}" y2="${y}" stroke="var(--line-2)"/><text x="${pl - 6}" y="${y + 4}" text-anchor="end" font-size="11" fill="var(--mute)">${fmtN(v)}</text>`; }).join('');
+  const every = Math.ceil(n / 8);
+  const cols = vals.map((v, i) => {
+    const x = pl + i * bw + gap / 2, h = v ? Math.max(2, ih * v / mx) : 0, y = base - h, r = Math.min(4, w / 2, h);
+    const bar = h ? `<path class="bm" d="M${x} ${base}V${y + r}Q${x} ${y} ${x + r} ${y}H${x + w - r}Q${x + w} ${y} ${x + w} ${y + r}V${base}Z"/>` : '';
+    const lbl = i % every === 0 ? `<text x="${x + w / 2}" y="${H - 6}" text-anchor="middle" font-size="11" fill="var(--mute)">${esc(R.lab[i])}</text>` : '';
+    return `<g class="bk">${bar}<rect x="${pl + i * bw}" y="${pt}" width="${bw}" height="${ih}" fill="transparent" data-tip="${esc(R.tip[i] + (i === n - 1 ? ' (folyamatban)' : ''))}" data-tv="${fmtN(v)} ${unit}"/>${lbl}</g>`;
+  }).join('');
+  return `<svg class="bch" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(aria)}">${grid}${cols}<line x1="${pl}" x2="${W - pr}" y1="${base}" y2="${base}" stroke="var(--line)"/></svg>`;
+}
+function tipInit() {
+  const t = document.createElement('div'); t.id = 'tip'; t.setAttribute('aria-hidden', 'true'); document.body.append(t);
+  document.addEventListener('mousemove', e => {
+    const h = e.target.closest && e.target.closest('[data-tip]');
+    if (!h) { t.classList.remove('on'); return; }
+    t.innerHTML = `${esc(h.dataset.tip)}<b>${esc(h.dataset.tv)}</b>`; t.classList.add('on');
+    const x = Math.min(e.clientX + 14, innerWidth - t.offsetWidth - 8), y = e.clientY - t.offsetHeight - 12;
+    t.style.transform = `translate(${x}px,${y < 8 ? e.clientY + 16 : y}px)`;
+  });
+}
+const tile = (label, v, unit, sub, i, opt) => { opt = opt || {};
+  const tag = opt.href ? `a href="${opt.href}"` : 'div';
+  return `<${tag} class="tile ${stI(i)}"><span class="tl">${label}</span><b class="tv"><span ${opt.n === undefined ? '' : `data-n="${opt.n}"`}>${v}</span>${unit ? `<small>${unit}</small>` : ''}</b><span class="ts">${sub || ''}</span></${opt.href ? 'a' : 'div'}>`;
+};
+
 function vOverview() {
   if (!D.awbs.size) {
     M.innerHTML = `<div class="card"><div class="onb"><div class="big">${I('up', 'lg')}</div><h2>Nincs goodslist</h2>
       <a class="btn pri" href="#import" style="text-decoration:none">${I('up')}Importálás</a></div></div>`;
     return;
   }
-  const o = overall(), sk = skuScans(), now = Date.now(), at = attention();
-  const hit = sk.filter(s => s.result === 'open1' || s.result === 'openN').length;
-  const last15 = SC.filter(s => (s.kind === 'sku' || s.kind === 'carton') && now - new Date(s.ts) < 15 * 60e3).length;
-  const dv = devStats(), act = dv.filter(d => now - d.last < 5 * 60e3).length;
-  const B = 18, buckets = Array(B).fill(0), labels = [];
-  for (let i = 0; i < B; i++) labels.push(new Date(now - (B - 1 - i) * 600e3).toLocaleTimeString('hu', {hour: '2-digit', minute: '2-digit'}));
-  SC.forEach(s => { if (s.kind !== 'sku' && s.kind !== 'carton') return; const i = B - 1 - Math.floor((now - new Date(s.ts)) / 600e3); if (i >= 0 && i < B) buckets[i]++; });
-  const handled = o.open + o.done, ratio = handled ? o.done / handled : 0;
-  const awbCards = [...D.awbs.values()].map((a, i) => {
-    const cs = [...new Set(D.lines.filter(l => l.awb === a.id).map(l => l.carton))];
-    const dn = cs.filter(c => cartonStatus(c) === 'done').length, op = cs.filter(c => cartonStatus(c) === 'open').length, no = cs.length - dn - op;
-    return `<div class="card awbc ${stI(i + 4)}"><div class="no mono">${esc(a.id)} ${awbChip(a.id)}</div>
-      <div class="seg3" role="img" aria-label="${dn} kész, ${op} nyitott, ${no} nincs felvéve"><i style="width:${100 * dn / cs.length}%;background:var(--ok-strong)"></i><i style="width:${100 * op / cs.length}%;background:var(--accent)"></i></div>
-      <div class="nums"><div><b>${dn}</b>kész</div><div><b>${op}</b>nyitott</div><div><b>${no}</b>nincs felvéve</div><div><b>${cs.length}</b>doboz</div></div></div>`;
-  }).join('');
-  const feed = SC.filter(s => s.kind !== 'line').slice(0, 12).map(s => `<tr><td class="mono">${fmtT(s.ts)}</td><td>${esc(s.device)}</td><td class="mono">${esc(s.raw)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton) : ''}</td></tr>`).join('');
-  const row = (icon, tone, t, n, href) => `<a href="${href}"><span class="ic ${n ? tone : 'ok'}">${ic(n ? icon : 'check')}</span><span class="t">${t}</span><b>${n}</b></a>`;
-  M.innerHTML = `<div class="grid g-hero" style="margin-bottom:var(--s4)">
-    <div class="card hero ${stI(0)}"><div class="donut-c">${donut([{v: o.done, color: 'var(--ok-strong)', label: 'Kész'}, {v: o.open, color: 'var(--accent)', label: 'Nyitott'}, {v: o.none, color: 'var(--line)', label: 'Nincs felvéve'}], 190, 24)}
-        <div class="mid"><b data-n="${Math.round(100 * ratio)}">${Math.round(100 * ratio)}</b><span class="meta">% kész</span></div></div>
-      <div class="legend">
-        <div class="lg"><span class="sw" style="background:var(--ok-strong)"></span>Kész<b data-n="${o.done}">${o.done}</b></div>
-        <div class="lg"><span class="sw" style="background:var(--accent)"></span>Nyitott<b data-n="${o.open}">${o.open}</b></div>
-        <div class="lg"><span class="sw" style="background:var(--line)"></span>Nincs felvéve<b data-n="${o.none}">${o.none}</b></div>
-        <div class="meta">${o.total} doboz · ${o.linesDone}/${o.lines} tétel</div></div></div>
-    <div class="kpis">${kpi('bolt', 'Szkennelés / perc', (last15 / 15).toFixed(1), 1)}${kpi('target', 'Találati arány', pct(hit, sk.length), 2)}
-      ${kpi('users', 'Aktív eszköz', `${act}/${dv.length}`, 3)}${kpi('layers', 'Többértelmű SKU', at.amb, 4, at.amb)}</div></div>
-    <div class="grid g-2" style="margin-bottom:var(--s4)">
-      <div class="card ${stI(3)}"><div class="hd"><h2>Szkennelés</h2><span class="meta">10 perces bontás, 3 óra</span></div><div class="chartbox">${areaChart(buckets, labels)}</div></div>
-      <div class="card attn ${stI(4)}"><div class="hd"><h2>Figyelem</h2></div>
-        ${row('alert', 'bad', 'Ismeretlen kód', at.unk, '#diffs')}
-        ${row('alert', 'warn', 'Nincs nyitott dobozban', at.closed, '#diffs')}
-        ${row('layers', 'warn', 'Többértelmű SKU', at.amb, '#skus')}
-        ${row('box', 'warn', 'Hiányzó tétel', at.miss, '#diffs')}
-        ${row('layers', 'warn', 'Összegyűlt doboz a polcon', collected().filter(x => x.full).length, '#parked')}
-        ${row('x', 'bad', 'Ismeretlen doboz', at.ucart, '#diffs')}</div></div>
-    <div class="eyebrow" style="margin:0 var(--s1) var(--s2)">AWB</div>
-    <div class="grid g-awb" style="margin-bottom:var(--s4)">${awbCards}</div>
-    <div class="card ${stI(6)}"><div class="hd"><h2>Élő napló</h2><a href="#log" class="btn xs" style="text-decoration:none">Összes</a></div><div class="scroll" style="max-height:420px"><table><thead><tr><th>Idő</th><th>Eszköz</th><th>Kód</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${feed || '<tr><td colspan="5"><div class="empty"><b>Nincs szkennelés</b></div></td></tr>'}</tbody></table></div></div>`;
+  loadHist();
+  const now = Date.now(), opens = [...D.open.values()];
+  // naplo: a friss SC + a regebbi resz a hosszabb lekerdezesbol
+  const scOld = SC.length ? tms(SC[SC.length - 1].ts) : now;
+  const log = ow === '1h' ? SC : SC.concat(HIST.rows.filter(s => tms(s.ts) < scOld));
+  const logFrom = log.length ? tms(log[log.length - 1].ts) : now;
+  const built = new Set(log.filter(s => s.kind === 'park' && s.result === 'built').map(s => s.carton));
+  const d0 = new Date(now); d0.setHours(0, 0, 0, 0);
+  const firstToday = log.filter(s => qd(s)).map(s => tms(s.ts)).concat(opens.flatMap(o => [o.opened_at, o.done_at]).filter(Boolean).map(tms)).reduce((a, t) => t >= +d0 && t < a ? t : a, Infinity);
+  const R = owRange(now, isFinite(firstToday) ? firstToday : 0), n = R.b.length - 1, inW = t => t >= R.t0 && t <= now;
+  const partial = logFrom > R.t0 && SC.length >= SC_LIM && !(HIST.rows.length > SC_LIM && HIST.rows.length < HIST.lim);
+
+  // tempo
+  const pcs = Array(n).fill(0), cls = Array(n).fill(0), hours = new Set(), touched = new Set();
+  log.forEach(s => { const d = qd(s), t = tms(s.ts); if (!d || !inW(t)) return; const i = bIdx(R.b, t); if (i >= 0) pcs[i] += d; hours.add(Math.floor(t / 3600e3)); touched.add(s.carton); });
+  const closed = opens.filter(o => o.status === 'done' && o.done_at && inW(tms(o.done_at)));
+  closed.forEach(o => { const i = bIdx(R.b, tms(o.done_at)); if (i >= 0) cls[i]++; });
+  const opened = opens.filter(o => o.opened_at && inW(tms(o.opened_at))).length;
+  const packed = Math.max(0, pcs.reduce((a, v) => a + v, 0)), ah = hours.size;
+  const nBuilt = closed.filter(o => built.has(o.carton)).length;
+  const cyc = closed.filter(o => !built.has(o.carton) && o.opened_at).map(o => tms(o.done_at) - tms(o.opened_at)).filter(v => v >= 60e3);
+  const cycM = median(cyc), bal = opened - closed.length;
+  const pcsV = pcs.map(v => Math.max(0, v));
+
+  // folyamatban (most)
+  const lastMv = new Map(); SC.forEach(s => { if (s.carton && !lastMv.has(s.carton)) lastMv.set(s.carton, tms(s.ts)); });
+  const wip = opens.filter(o => o.status === 'open' && D.byCarton.has(o.carton)).map(o => ({c: o.carton, o, p: cartonProg(o.carton), last: Math.max(lastMv.get(o.carton) || 0, tms(o.opened_at || 0))}))
+    .sort((a, b) => b.p.ratio - a.p.ratio || a.c.localeCompare(b.c));
+  const near = wip.filter(x => x.p.ratio >= .9).length, missPcs = wip.reduce((a, x) => a + x.p.qty - x.p.got, 0), missLines = wip.reduce((a, x) => a + x.p.n - x.p.done, 0);
+  const ready = collected().filter(x => x.full).length;
+  let shelf = 0; D.parked.forEach(v => shelf += v);
+  const act = new Set(SC.filter(s => now - tms(s.ts) < 5 * 60e3).map(s => s.device)).size;
+  const devW = new Set(log.filter(s => inW(tms(s.ts))).map(s => s.device)).size;
+
+  const wipRows = wip.slice(0, 10).map(x => { const r = Math.round(x.p.ratio * 100);
+    return `<tr><td>${lnk('carton', x.c, idHtml(x.c))}</td><td style="white-space:nowrap">${esc(x.o.opened_by || '')}<div class="meta">${x.o.opened_at ? ago(tms(x.o.opened_at)) : ''}</div></td>
+      <td style="min-width:130px"><b>${x.p.got}/${x.p.qty} db</b> ${r >= 90 ? `<span class="tag ok">${r}%</span>` : `<span class="meta">${r}%</span>`}<div class="bar"><i class="${r >= 90 ? '' : 'o'}" style="width:${r}%"></i></div></td>
+      <td class="n"><b>${x.p.qty - x.p.got}</b></td><td class="meta" style="white-space:nowrap">${x.last ? ago(x.last, ' ezelőtt') : ''}</td></tr>`; }).join('');
+  const feed = SC.filter(s => s.kind !== 'line').slice(0, 10).map(s => `<tr><td class="mono">${fmtT(s.ts)}</td><td>${esc(s.device)}</td><td class="mono">${esc(s.raw)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton) : ''}</td></tr>`).join('');
+
+  M.innerHTML = `<div class="sech"><h2>Tempó</h2><span class="meta">${R.desc}</span>
+      <div class="chips" role="group" aria-label="Időablak">${OW.map(([k, l]) => `<button type="button" class="chip" data-ow="${k}" aria-pressed="${ow === k}">${l}</button>`).join('')}</div></div>
+    ${partial ? `<div class="note warn" style="margin-bottom:var(--s3)">${I('alert', 'sm')}<span>A napló csak ${fmtDT(logFrom)} óta van betöltve, a bepakolt darabszám ennél régebbre nem számolódik. A dobozszámok teljesek.</span></div>` : ''}
+    <div class="tiles">
+      ${tile('Bepakolt darab', fmtN(packed), 'db', ow === '1h' ? `${touched.size} dobozba` : ah ? `${fmtN(packed / ah, 1)} db / aktív óra · ${ah} aktív óra` : 'nem volt pakolás', 0, {n: packed})}
+      ${tile('Lezárt doboz', closed.length, 'doboz', ow !== '1h' && ah ? `${fmtN(closed.length / ah, 1)} doboz / aktív óra${nBuilt ? ` · ${nBuilt} a polcról` : ''}` : nBuilt ? `ebből ${nBuilt} a polcról összerakva` : '&nbsp;', 1, {n: closed.length})}
+      ${tile('Felvett doboz', opened, 'doboz', opened || closed.length ? `nyitottak száma: ${bal > 0 ? '+' : bal < 0 ? '−' : '±'}${Math.abs(bal)}` : '&nbsp;', 2, {n: opened})}
+      ${tile('Átfutási idő', cycM == null ? '–' : fmtDur(cycM), '', cycM == null ? 'nincs lezárt doboz' : `medián, felvételtől lezárásig · ${cyc.length} doboz`, 3)}
+    </div>
+    <div class="grid g-ch" style="margin-bottom:var(--s5)">
+      <div class="card ${stI(4)}"><div class="hd"><h2>Bepakolt darab</h2><span class="meta">${fmtN(packed)} db · ${devW} eszköz</span></div><div class="pad">${bars(pcsV, R, 'db', `Bepakolt darab, ${R.desc}: összesen ${packed} db`)}</div></div>
+      <div class="card ${stI(5)}"><div class="hd"><h2>Lezárt doboz</h2><span class="meta">${closed.length} doboz</span></div><div class="pad">${bars(cls, R, 'doboz', `Lezárt doboz, ${R.desc}: összesen ${closed.length}`)}</div></div>
+    </div>
+    <div class="sech"><h2>Folyamatban</h2><span class="meta">jelenlegi állapot</span></div>
+    <div class="tiles">
+      ${tile('Nyitott doboz', wip.length, 'doboz', near ? `ebből ${near} legalább 90%-os` : '&nbsp;', 6, {n: wip.length, href: '#cartons'})}
+      ${tile('Hiányzik a nyitottakból', fmtN(missPcs), 'db', `${missLines} tétel`, 7, {n: missPcs})}
+      ${tile('Összerakható a polcról', ready, 'doboz', 'minden darabja a polcon', 8, {n: ready, href: '#parked'})}
+      ${tile('Félretett polcon', fmtN(shelf), 'db', `${D.parked.size} féle termék`, 9, {n: shelf, href: '#parked'})}
+      ${tile('Aktív eszköz', act, '', 'az elmúlt 5 percben', 10, {n: act, href: '#devices'})}
+    </div>
+    <div class="grid g-2">
+      <div class="card ${stI(11)}"><div class="hd"><h2>Nyitott dobozok</h2><span class="meta">a legtöbbet teljesítők elöl</span><button type="button" class="btn xs" data-cst="nyitott">Mind (${wip.length})</button></div>
+        <div class="scroll" style="max-height:440px">${wipRows ? `<table><thead><tr><th>Doboz</th><th>Felvette</th><th>Töltöttség</th><th class="n">Hiányzik</th><th>Utolsó mozgás</th></tr></thead><tbody>${wipRows}</tbody></table>` : '<div class="empty"><b>Nincs nyitott doboz</b></div>'}</div></div>
+      <div class="card ${stI(12)}"><div class="hd"><h2>Élő napló</h2><a href="#log" class="btn xs" style="text-decoration:none">Összes</a></div>
+        <div class="scroll" style="max-height:440px"><table><thead><tr><th>Idő</th><th>Eszköz</th><th>Kód</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${feed || '<tr><td colspan="5"><div class="empty"><b>Nincs szkennelés</b></div></td></tr>'}</tbody></table></div></div>
+    </div>`;
+  M.onclick = e => {
+    const w = e.target.closest('[data-ow]'); if (w) { ow = w.dataset.ow; ls.set('rk_ow', ow); loadHist(true); return render(true); }
+    const g = e.target.closest('[data-go]'); if (g) { const [t, ...r] = g.dataset.go.split('/'); return xGo(t, r.join('/')); }
+    if (e.target.closest('[data-cst]') || e.target.closest('a.tile[href="#cartons"]')) { e.preventDefault(); F.cst = 'nyitott'; location.hash = '#cartons'; }
+  };
 }
 
 // ---------- import ----------
@@ -1131,6 +1213,7 @@ async function tick(full) {
 const th = ls.get('rk_theme'); if (th) document.documentElement.dataset.theme = th;
 if (ls.get('rk_gpw_rem') === '1') IM.pw = sessionStorage.getItem('rk_gpw') || '';
 loadDict().then(r => { IM.dict = r.dict; IM.dictInfo = r.dict ? `${r.source}, ${r.dict.revision}. rev.` : 'Szótár nem elérhető'; const di = $('#di'); if (di) di.innerHTML = r.dict ? `Szótár: ${IM.dictInfo}, ${r.dict.entries.size} szó` : `<span class="err">${esc(IM.dictInfo)}</span>`; });
+tipInit();
 $('#rf').onclick = async () => { const b = $('#rf'); b.classList.remove('spin'); void b.offsetWidth; b.classList.add('spin'); await tick(true); setTimeout(() => b.classList.remove('spin'), 700); };
 buildNav();
 if (!adminCode) login();
