@@ -101,6 +101,9 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .crow .idc{font-size:17px;flex:1;min-width:0}
 .crow .frac{font-weight:800;font-variant-numeric:tabular-nums;color:var(--mute)}
 .crow .frac.ok{color:var(--ok)}
+.crow .frac{display:inline-flex;align-items:center;gap:4px;min-width:56px;justify-content:flex-end;font-size:13px}
+.tag.pct{display:inline-flex;align-items:center;gap:3px;font-weight:800;font-variant-numeric:tabular-nums;font-size:14px;padding:3px 9px}
+.tag.pct svg{width:14px;height:14px}
 
 nav.tabs{--i:0;position:fixed;left:0;right:0;bottom:0;z-index:10;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding:8px 12px;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
 nav.tabs .ind{position:absolute;top:8px;bottom:calc(8px + env(safe-area-inset-bottom));left:12px;width:calc((100% - 24px) / 3);border-radius:var(--r-sm);background:var(--accent);transform:translateX(calc(var(--i) * 100%));transition:transform .5s var(--spring);box-shadow:0 8px 18px -10px var(--accent)}
@@ -512,7 +515,7 @@ function updateSort() {
     shellView = 'sort';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
         <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Termék vagy doboz kódja"></form>
-      <div id="res"></div><div class="ver">v2.8</div>`;
+      <div id="res"></div><div class="ver">v2.9</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();
@@ -636,6 +639,11 @@ function identHtml() {
     : `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs ilyen doboz</div><div class="hero-note">Törölj egy terméket a listából.</div></section>`;
   return head + list + chips;
 }
+// toltottseg jelzo: 90%+ zold + pipa, 75%+ zold, 65%+ sarga, alatta piros (kb. 80%-nal mar zarhato)
+function pctPill(ratio) {
+  const pct = Math.round(ratio * 100), tone = pct >= 75 ? 'ok' : pct >= 65 ? 'warn' : 'bad';
+  return `<span class="tag pct ${tone}" title="${pct >= 75 ? 'zárható lehet' : 'még töltendő'}">${pct >= 90 ? icS('check') : ''}${pct}%</span>`;
+}
 function cartonsHtml() {
   const msg = cf.msg ? `<div class="msg ${cf.msg.tone}" role="alert" style="margin-bottom:var(--s3)">${cf.msg.html}</div>` : '';
   if (cf.box) return msg + `<button class="btn block" style="margin-bottom:var(--s3)" data-back>${ic('undo')}${cf.ident ? 'Vissza az azonosításhoz' : 'Vissza a listához'}</button>` + boxView(cf.box);
@@ -648,7 +656,7 @@ function cartonsHtml() {
   return msg + `<div class="bar2"><button class="btn" data-ident>${ic('target')}Címke nem olvasható</button></div>
     <div class="seg">${[['open', 'Nyitott'], ['done', 'Kész'], ['all', 'Mind']].map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${cf.st === k}">${n}<span class="n">${cnt[k]}</span></button>`).join('')}</div>
     <div class="card">${rows.length ? rows.map((r, i) => { const p = cartonProg(r.carton), dn = r.status === 'done';
-      return `<div class="crow ${stI(i)}" data-c="${esc(r.carton)}">${ring(p.ratio, 34, p.got + '/' + p.qty + ' db')}${idHtml(r.carton)}<span class="frac ${dn ? 'ok' : ''}">${dn ? icS('check') : p.got + '/' + p.qty}</span></div>`; }).join('')
+      return `<div class="crow ${stI(i)}" data-c="${esc(r.carton)}">${ring(p.ratio, 34, p.got + '/' + p.qty + ' db')}${idHtml(r.carton)}${pctPill(p.ratio)}<span class="frac">${p.got}/${p.qty}${dn ? ' ' + icS('check') : ''}</span></div>`; }).join('')
       : `<div class="empty"><b>${q ? 'Nincs találat' : 'Nincs doboz'}</b></div>`}</div>`;
 }
 function updateCartons() {

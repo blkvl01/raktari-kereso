@@ -19,7 +19,7 @@ Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
    Az „Összeraktam” gombbal a darabok a dobozba kerülnek, a doboz kész. Alatta a legközelebb álló dobozok és a polc tartalma.
    A fül tetején lévő mezővel kézzel is polcra tehető, ami már félre van téve (szól, ha nyitott doboz várja vagy felesleg); a sorok +/− gombjával a darabszám javítható.
    Az admin Félretett oldalán kód + darabszám megadásával is lehet polcra tenni. Ugyanitt a napló alapján azok a termékek is látszanak, amelyeket nyitott doboz nélkül szkenneltek, de nincsenek a polcon; egy gombbal felvehetők.
-3. **Dobozok fül**: a dobozok az utolsó 4 számjegy szerint sorban, ahogy a polcon állnak. Itt van a nem olvasható címkéjű doboz azonosítása is.
+3. **Dobozok fül**: a dobozok az utolsó 4 számjegy szerint sorban, ahogy a polcon állnak. Mindegyik mellett %-os töltöttség jelzés: 90% felett zöld pipával, 75% felett zöld (nagyjából zárható), 65–75% sárga, 65% alatt piros. Itt van a nem olvasható címkéjű doboz azonosítása is.
 
 ## Kereső (admin)
 
