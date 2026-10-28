@@ -60,6 +60,7 @@ svg.i.sm{width:16px;height:16px}svg.i.lg{width:28px;height:28px}
 .btn.xs{min-height:30px;padding:0 var(--s2);font-size:13px;border-radius:8px}
 .btn.block{width:100%}
 .btn[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent)}
+a.btn{color:inherit;text-decoration:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* chip, tag */
@@ -78,7 +79,7 @@ svg.i.sm{width:16px;height:16px}svg.i.lg{width:28px;height:28px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
 .card>.hd{display:flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--s4);border-bottom:1px solid var(--line-2)}
 .card>.hd h2{margin:0;font-size:15px;flex:1}
-.card .pad{padding:var(--s4)}
+.card .pad,.card.pad{padding:var(--s4)}
 .empty{padding:var(--s6) var(--s4);text-align:center;color:var(--mute)}
 .empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
 table{width:100%;border-collapse:collapse}
