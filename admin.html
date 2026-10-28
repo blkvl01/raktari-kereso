@@ -119,7 +119,35 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 .lbl svg{display:block;width:100%;flex:none}
 .lblprev{display:grid;place-items:center;padding:var(--s5) var(--s4);background:var(--surface-2);overflow:auto;min-height:220px}
 .lblprev .lbl{box-shadow:0 2px 12px rgb(0 0 0 / .22);border-radius:1.5mm}
-@media (max-width:1100px){.g-hero,.g-lbl{grid-template-columns:1fr}}
+/* kereso */
+.xsrch{padding:var(--s4);display:grid;gap:var(--s3)}
+.xin-wrap{position:relative}
+.xin-wrap .lead{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--mute);pointer-events:none;display:flex}
+.xin-wrap .inp{padding:14px 16px 14px 50px;font-size:19px;border-radius:12px;background:var(--surface-2);transition:box-shadow .25s,border-color .25s,background .25s}
+.xin-wrap .inp:focus{outline:none;border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 4px color-mix(in srgb,var(--accent) 20%,transparent)}
+.xhead{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;padding:var(--s4)}
+.xhead .grow{flex:1;min-width:220px}
+.xhead .ttl{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.2}
+.xhead .acts{display:flex;gap:var(--s2);flex-wrap:wrap}
+.facts{display:flex;flex-wrap:wrap;margin-left:-1px}
+.facts>div{flex:1 1 180px;padding:var(--s3) var(--s4);border-left:1px solid var(--line-2);border-top:1px solid var(--line-2);min-width:0}
+.facts>div>span{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--mute)}
+.facts>div>b{display:block;font-size:17px;font-variant-numeric:tabular-nums;margin-top:2px;overflow-wrap:anywhere}
+.facts>div>small{display:block;color:var(--mute);font-size:12px;overflow-wrap:anywhere}
+.notes{display:grid;gap:var(--s2);margin-bottom:var(--s4)}
+.note{display:flex;gap:var(--s3);align-items:flex-start;padding:var(--s3) var(--s4);border-radius:var(--r-sm);background:var(--accent-soft);border:1px solid var(--accent-line);font-size:14px}
+.note>svg{margin-top:2px}
+.note.ok{background:var(--ok-soft);border-color:color-mix(in srgb,var(--ok) 30%,transparent);color:var(--ok)}
+.note.warn{background:var(--warn-soft);border-color:color-mix(in srgb,var(--warn) 30%,transparent);color:var(--warn)}
+.note.bad{background:var(--bad-soft);border-color:color-mix(in srgb,var(--bad) 30%,transparent);color:var(--bad)}
+.note.mute{background:var(--surface-2);border-color:var(--line);color:var(--mute)}
+.g-x{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);align-items:start}
+.lnk{background:none;border:0;padding:0;font:inherit;font-weight:700;color:inherit;cursor:pointer;text-align:left;text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
+.lnk:hover{color:var(--accent);text-decoration-color:var(--accent)}
+.xhelp{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:var(--s4)}
+.xhelp .card{padding:var(--s4);display:grid;gap:6px;align-content:start}
+.xhelp .ic{width:38px;height:38px;border-radius:10px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:var(--s1)}
+@media (max-width:1100px){.g-hero,.g-lbl,.g-x{grid-template-columns:1fr}}
 @media (max-width:900px){.shell{grid-template-columns:1fr}aside{position:static;height:auto;overflow:visible}.links{flex-direction:row;flex-wrap:wrap}.navind{display:none}aside a[aria-current=page]{background:var(--accent)}aside .foot{display:none}main{padding:var(--s3)}.top{padding:var(--s3)}.gsearch{display:none}.hero{flex-direction:column;align-items:flex-start}.g-2{grid-template-columns:1fr}}
 @media print{
   body{background:#fff;color:#000}.shell,dialog,#toast{display:none!important}
@@ -134,7 +162,7 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
   <div>
     <header class="top">
       <h1 id="ttl"></h1>
-      <form class="gsearch" id="gs" autocomplete="off"><span class="lead"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><input id="gq" placeholder="Doboz vagy SKU" aria-label="Gyorskereső"></form>
+      <form class="gsearch" id="gs" autocomplete="off"><span class="lead"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><input id="gq" placeholder="Doboz, SKU vagy AWB" aria-label="Gyorskereső"></form>
       <span class="sync" id="sync" role="status" aria-live="polite"></span>
       <button class="btn sm" id="rf" aria-label="Frissítés"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></button>
     </header>
@@ -150,13 +178,24 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="common.js?v=23"></script>
 <script src="import.js?v=23"></script>
 <script>
-const SECS = [['overview', 'Áttekintés', 'chart'], ['import', 'Importálás', 'up'], ['cartons', 'Dobozok', 'box'], ['parked', 'Félretett', 'layers'], ['skus', 'SKU-k', 'search'], ['diffs', 'Eltérések', 'alert'],
+ICON.tag = '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01"/>';
+ICON.back = '<path d="M15 18l-6-6 6-6"/>';
+const SECS = [['overview', 'Áttekintés', 'chart'], ['search', 'Kereső', 'search'], ['import', 'Importálás', 'up'], ['cartons', 'Dobozok', 'box'], ['parked', 'Félretett', 'layers'], ['skus', 'SKU-k', 'tag'], ['diffs', 'Eltérések', 'alert'],
   ['log', 'Napló', 'list'], ['devices', 'Eszközök', 'users'], ['labels', 'Címkék', 'print'], ['settings', 'Beállítások', 'gear']];
 let adminCode = ls.get('rk_admin') || '';
-let sec = (location.hash || '#overview').slice(1);
-if (!SECS.some(s => s[0] === sec)) sec = 'overview';
+let sec = 'overview', XT = null;               // XT: a keresoben megnyitott doboz / termek / AWB ({t, id})
+// #szekcio vagy #search/<carton|sku|awb>/<azonosito>
+function readHash() {
+  let h = (location.hash || '#overview').slice(1);
+  try { h = decodeURIComponent(h); } catch (e) {}
+  const [s, t, ...r] = h.split('/');
+  sec = SECS.some(x => x[0] === s) ? s : 'overview';
+  XT = sec === 'search' && ['carton', 'sku', 'awb'].includes(t) && r.join('/') ? {t, id: r.join('/')} : null;
+  if (XT) xRemember(XT);
+}
+readHash();
 let SC = [];
-let F = {cst: 'felvett', cq: '', cawb: '', sq: '', lq: '', lres: '', lmode: 'felvett', ltxt: ''};
+let F = {cst: 'felvett', cq: '', cawb: '', sq: '', lq: '', lres: '', lmode: 'felvett', ltxt: '', xq: '', xm: '', xaf: ''};
 let loading = true, shownSec = '';
 let IM = {files: [], pw: '', dict: null, dictInfo: '', busy: false, stage: 'pick', done: null};
 const M = $('#main');
@@ -276,7 +315,7 @@ function areaChart(vals, labels) {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.3</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.4</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -294,18 +333,20 @@ function render(force) {
   renderNav();
   if (loading) { M.innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'; return; }
   const a = document.activeElement;
-  if (!force && a && ['INPUT', 'TEXTAREA'].includes(a.tagName) && M.contains(a)) return;
+  // gepeles kozben a kereso talalatai akkor is frissulnek, a mezo nem rajzolodik ujra
+  if (!force && a && ['INPUT', 'TEXTAREA'].includes(a.tagName) && M.contains(a)) { if (sec === 'search' && !document.querySelector('dialog[open]')) xFill(); return; }
   if (!force && document.querySelector('dialog[open]')) return;
   if (!force && sec === 'import') return;
-  if (shownSec !== sec) {                       // szekcio valtas: beuszo animacio
-    shownSec = sec; M._h = null;
+  const vk = sec + (XT ? '/' + XT.t + '/' + XT.id : '');
+  if (shownSec !== vk) {                        // szekcio (vagy keresoben megnyitott elem) valtas: beuszo animacio
+    shownSec = vk; M._h = null;
     M.classList.remove('enter'); void M.offsetWidth; M.classList.add('enter'); clearTimeout(M._et); M._et = setTimeout(() => M.classList.remove('enter'), 1500);
   }
   M.onclick = null;
-  ({overview: vOverview, import: vImport, cartons: vCartons, parked: vParked, skus: vSkus, diffs: vDiffs, log: vLog, devices: vDevices, labels: vLabels, settings: vSettings})[sec]();
+  ({overview: vOverview, search: vSearch, import: vImport, cartons: vCartons, parked: vParked, skus: vSkus, diffs: vDiffs, log: vLog, devices: vDevices, labels: vLabels, settings: vSettings})[sec]();
   if (M.classList.contains('enter')) M.querySelectorAll('[data-n]').forEach(el => { el.dataset.from = 0; countUp(el, +el.dataset.n, 900); });
 }
-window.addEventListener('hashchange', () => { sec = (location.hash || '#overview').slice(1); if (!SECS.some(s => s[0] === sec)) sec = 'overview'; render(true); window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'}); });
+window.addEventListener('hashchange', () => { readHash(); render(true); window.scrollTo({top: 0, behavior: reduceMotion ? 'auto' : 'smooth'}); });
 const kpi = (icon, l, v, i, raw) => `<div class="kpi ${stI(i)}"><span class="ic">${ic(icon)}</span><b ${raw === undefined ? '' : `data-n="${raw}"`}>${v}</b><span>${l}</span></div>`;
 
 function vOverview() {
@@ -492,7 +533,8 @@ function showCarton(c) {
       <span class="box">${isLineDone(l) ? ic('check') : ''}</span><span class="t"><b>${esc(l.descr)}</b><small><span class="mono">${esc(l.sku)}</span>${l.mat && l.mat !== l.descr ? ' · ' + esc(l.mat) : ''}</small></span><b>${lineGot(l)}/${l.qty} db</b></button>`).join('')}</div>
     <div class="meta" style="margin-top:var(--s2)">${p.done}/${p.n} tétel · ${p.got}/${p.qty} db · ${ls_.reduce((a, l) => a + (l.gw || 0), 0).toFixed(1)} kg</div>
     <div class="row"><button class="btn" id="cx">Bezár</button>
-      ${o ? `${o.status === 'done' ? '<button class="btn" id="cr">Újranyitás</button>' : '<button class="btn pri" id="cd">Kész</button>'}<button class="btn dng" id="cz">Eltávolítás</button>${claimOf(c) ? '<button class="btn" id="cl">Foglalás elengedése</button>' : ''}` : '<button class="btn pri" id="co">Felvétel</button>'}<button class="btn" id="cp">${I('print', 'sm')}Címke</button></div>`);
+      ${o ? `${o.status === 'done' ? '<button class="btn" id="cr">Újranyitás</button>' : '<button class="btn pri" id="cd">Kész</button>'}<button class="btn dng" id="cz">Eltávolítás</button>${claimOf(c) ? '<button class="btn" id="cl">Foglalás elengedése</button>' : ''}` : '<button class="btn pri" id="co">Felvétel</button>'}<button class="btn" id="cp">${I('print', 'sm')}Címke</button><button class="btn" id="cdet">${I('search', 'sm')}Részletek</button></div>`);
+  d.querySelector('#cdet').onclick = () => { d.close(); xGo('carton', c); };
   const act = async a => { if (await adm('rk_admin_carton', {p_carton: c, p_action: a})) { await loadOpen(); render(true); showCarton(c); } };
   d.querySelectorAll('[data-line]').forEach(b => b.onclick = async () => { const r = await sb.rpc('rk_set_line', {p_line: +b.dataset.line, p_done: b.dataset.v === '1', p_device: 'admin'}); if (!r.error) { await loadOpen(); render(true); showCarton(c); } });
   d.querySelector('#cx').onclick = () => d.close();
@@ -582,8 +624,9 @@ function showSku(k) {
     <div class="card scroll" style="max-height:380px"><table><thead><tr><th>Doboz</th><th>Státusz</th><th class="n">Db</th></tr></thead><tbody>${ls_.map(l => {
       const s = cartonStatus(l.carton);
       return `<tr class="clk" data-c="${esc(l.carton)}"><td>${idHtml(l.carton)}</td><td>${s ? `<span class="tag ${s === 'done' || isLineDone(l) ? 'ok' : ''}">${isLineDone(l) ? 'tétel kész' : s === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td><td class="n">${l.qty}</td></tr>`; }).join('')}</tbody></table></div>
-    <div class="row"><button class="btn" id="cx">Bezár</button></div>`);
+    <div class="row"><button class="btn" id="cx">Bezár</button><button class="btn" id="sdet">${I('search', 'sm')}Részletek</button></div>`);
   d.querySelector('#cx').onclick = () => d.close();
+  d.querySelector('#sdet').onclick = () => { d.close(); xGo('sku', k); };
   d.querySelectorAll('[data-c]').forEach(r => r.onclick = () => showCarton(r.dataset.c));
 }
 
@@ -725,13 +768,285 @@ function vSettings() {
   };
 }
 
-// ---------- gyorskereso ----------
+// ---------- kereso ----------
+// Egy mezo: doboz, SKU (kod, kodreszlet vagy nev) vagy AWB (szam, jeloles). Pontos talalatnal rogton a reszletes nezet latszik,
+// Enterre megnyilik (#search/<tipus>/<azonosito>, a bongeszo Vissza gombja is mukodik).
+const KIND_HU = {sku: 'termék', carton: 'doboz', line: 'tétel', pack: 'csomagolás', ident: 'azonosítás', park: 'polc'};
+const XMODES = [['', 'Mind'], ['carton', 'Doboz'], ['sku', 'SKU'], ['awb', 'AWB']];
+const XLIM = 40;
+let xDepth = 0;                                 // hany lepest navigaltunk a keresoben (a Vissza gombhoz)
+const go = (t, id) => `data-go="${t}/${esc(id)}"`;
+const lnk = (t, id, html) => `<button class="lnk" ${go(t, id)}>${html}</button>`;
+function xGo(t, id) { const h = `#search/${t}/${id}`; if (location.hash === h) return; xDepth++; location.hash = h; }
+// a keresoben lepett vissza, ha onnan jott; kulonben (kozvetlen link, gepelt pontos talalat) ures kereso
+function xBack() {
+  if (XT && xDepth > 0) { xDepth--; history.back(); return; }
+  F.xq = '';
+  if (XT) location.hash = '#search'; else { vSearch(); $('#xq').focus(); }
+}
+function xHist() { try { const h = JSON.parse(ls.get('rk_xhist') || '[]'); return Array.isArray(h) ? h.filter(x => x && ['carton', 'sku', 'awb'].includes(x.t) && x.id) : []; } catch (e) { return []; } }
+function xRemember(t) { ls.set('rk_xhist', JSON.stringify([{t: t.t, id: t.id}].concat(xHist().filter(x => !(x.t === t.t && x.id === t.id))).slice(0, 8))); }
+
+// lezart dobozban a jeloles nelkuli tetel teljesnek szamit (mint a hianylistaban)
+function gotX(l) { return cartonStatus(l.carton) === 'done' && !D.lineDone.get(l.id) ? l.qty : lineGot(l); }
+function lineState(l) {
+  const s = cartonStatus(l.carton), g = gotX(l);
+  if (g >= l.qty) return ['kész', 'ok'];
+  if (s === 'done') return [`hiány: ${l.qty - g} db`, 'bad'];
+  if (s === 'open') return [g ? `${g}/${l.qty} db` : 'még kell', ''];
+  return ['nincs felvéve', 'mute'];
+}
+function stTag(c) {
+  if (!D.byCarton.has(c)) return '<span class="tag bad">nincs a goodslistben</span>';
+  const s = cartonStatus(c);
+  return s === 'done' ? '<span class="tag ok">kész</span>' : s === 'open' ? '<span class="tag">nyitott</span>' : '<span class="tag mute">nincs felvéve</span>';
+}
+function cartonSum(c) {
+  const ls_ = D.byCarton.get(c) || [], done = cartonStatus(c) === 'done';
+  const p = {n: ls_.length, qty: 0, got: 0, done: 0, short: 0, kg: 0};
+  ls_.forEach(l => { const g = gotX(l); p.qty += l.qty; p.got += g; p.kg += +l.gw || 0; if (g >= l.qty) p.done++; else if (done) p.short++; });
+  p.ratio = p.qty ? p.got / p.qty : 0; return p;
+}
+const xBar = (a, b) => `<div class="bar"><i style="width:${b ? Math.min(100, Math.round(100 * a / b)) : 0}%"></i></div>`;
+const facts = list => `<div class="facts">${list.filter(Boolean).map(([l, v, s]) => `<div><span>${l}</span><b>${v}</b>${s ? `<small>${s}</small>` : ''}</div>`).join('')}</div>`;
+const note = (tone, icon, html) => `<div class="note ${tone}">${I(icon, 'sm')}<div>${html}</div></div>`;
+const notesHtml = (list, i) => list.length ? `<div class="notes ${stI(i)}">${list.join('')}</div>` : '';
+function xHead(title, tags, acts, sub) {
+  return `<div class="xhead"><button class="btn sm ghost" data-back aria-label="Vissza">${I('back')}</button>
+    <div class="grow"><div class="ttl">${title}</div>${sub ? `<div class="meta">${sub}</div>` : ''}</div>
+    <div class="chips">${tags || ''}</div>${acts ? `<div class="acts">${acts}</div>` : ''}</div>`;
+}
+function xLogTable(rows, opt) {
+  if (!rows.length) return '<div class="empty"><b>Nincs bejegyzés</b>A naplóban nem szerepel</div>';
+  // keskeny oszlopba is kifer: ido + eszkoz, esemeny, termek es/vagy doboz egy oszlopban
+  const what = s => [opt.prod && (s.key && D.byKey.has(s.key) ? lnk('sku', s.key, esc(keyName(s.key))) + `<div class="mono meta">${esc(s.key)}</div>` : s.kind !== 'carton' ? `<span class="mono meta">${esc(s.raw)}</span>` : ''),
+    opt.carton && s.carton ? `<div>${lnk('carton', s.carton, `<span class="mono" style="font-size:13px">${esc(s.carton.slice(0, -4))}<b>${esc(s.carton.slice(-4))}</b></span>`)}</div>` : ''].filter(Boolean).join('');
+  return `<table><thead><tr><th>Idő</th><th>Esemény</th><th>${opt.prod && opt.carton ? 'Termék, doboz' : opt.prod ? 'Termék' : 'Doboz'}</th></tr></thead><tbody>${rows.slice(0, 150).map(s => `<tr>
+    <td style="white-space:nowrap"><span class="mono">${fmtDT(s.ts)}</span><div class="meta">${esc(s.device)}</div></td><td>${resTag(s.result)}<div class="meta">${esc(KIND_HU[s.kind] || s.kind || '')}</div></td>
+    <td>${what(s)}</td></tr>`).join('')}</tbody></table>${rows.length > 150 ? `<div class="pg">150 / ${rows.length}</div>` : ''}`;
+}
+const xLogCard = (title, rows, opt, i) => `<div class="card ${stI(i)}"><div class="hd"><h2>${title}</h2><span class="meta">${rows.length} bejegyzés</span></div><div class="scroll">${xLogTable(rows, opt)}</div></div>`;
+
+// talalatok tipusonkent; exact: pontos egyezes (teljes doboz azonosito, termek kulcs, AWB szam)
+function xFind(q, mode) {
+  const u = q.trim().toUpperCase().replace(/\s+/g, ''), d = u.replace(/\D/g, ''), low = q.trim().toLowerCase();
+  const r = {carton: [], sku: [], awb: [], exact: null, u, n: 0};
+  if (u.length < 3) return r;
+  const want = t => !mode || mode === t, onlyNum = /^[\d-]+$/.test(u);
+  if (want('carton')) {
+    if (CARTON_RE.test(u)) { r.carton = [u]; r.exact = {t: 'carton', id: u}; }      // goodslistben nem levo is: a naplo latszik
+    else if (d.length === 10 && onlyNum && D.cartonByDigits.has(d)) { const c = D.cartonByDigits.get(d); r.carton = [c]; r.exact = {t: 'carton', id: c}; }
+    else if (d.length >= 4 && onlyNum) r.carton = [...D.byCarton.keys()].filter(c => c.replace(/\D/g, '').endsWith(d)).sort();
+    else if (/^(RQ|XPW)/.test(u)) { const p = u.replace(/^(RQ-?)?XPW/, 'RQ-XPW'); r.carton = [...D.byCarton.keys()].filter(c => c.startsWith(p)).sort(); }
+  }
+  if (want('sku')) {
+    const key = u.split('-')[0].replace(/\D/g, '').replace(/^0+/, ''), name = /\p{L}/u.test(low) && low.length >= 3;
+    if (onlyNum && key && D.byKey.has(key)) { r.sku = [key]; r.exact = r.exact || {t: 'sku', id: key}; }
+    else if ((onlyNum && d.length >= 4) || name) {
+      const hit = k => { const l0 = D.byKey.get(k)[0]; return onlyNum ? k.includes(d) : (l0.descr || '').toLowerCase().includes(low) || (l0.mat || '').toLowerCase().includes(low); };
+      r.sku = [...D.byKey.keys()].filter(hit).sort((a, b) => keyName(a).localeCompare(keyName(b), 'hu'));
+    }
+  }
+  if (want('awb')) {
+    r.awb = [...D.awbs.values()].filter(a => onlyNum ? d.length >= 4 && a.id.includes(d) : a.id.toUpperCase().includes(u) || (a.mark || '').toUpperCase().replace(/\s+/g, '').includes(u)).map(a => a.id).sort();
+    const ex = r.awb.find(id => id.toUpperCase() === u); if (ex) r.exact = {t: 'awb', id: ex};
+  }
+  r.n = r.carton.length + r.sku.length + r.awb.length;
+  return r;
+}
+const xTarget = r => r.exact || (r.n === 1 ? (r.carton.length ? {t: 'carton', id: r.carton[0]} : r.sku.length ? {t: 'sku', id: r.sku[0]} : {t: 'awb', id: r.awb[0]}) : null);
+// Enter: egyertelmu talalat megnyitasa. Ha a keresesnek egyetlen talalata volt, a mezo kiurul, hogy a Vissza ne ugyanezt mutassa ujra;
+// tobb talalatnal megmarad, a Vissza a listara ter vissza.
+function xOpen(q, mode) {
+  const r = xFind(q, mode), t = xTarget(r);
+  if (!t) return false;
+  F.xq = r.n === 1 ? '' : q; xGo(t.t, t.id); return true;
+}
+
+function vSearch() {
+  M.innerHTML = `<form class="card xsrch" id="xf" autocomplete="off" style="margin-bottom:var(--s4)">
+    <div class="xin-wrap"><span class="lead">${I('search')}</span><input id="xq" class="inp" value="${esc(F.xq)}" placeholder="Doboz, SKU, terméknév vagy AWB" aria-label="Keresés" enterkeyhint="search" spellcheck="false"></div>
+    <div class="chips" role="group" aria-label="Mire keres">${XMODES.map(([k, n]) => `<button type="button" class="chip" data-xm="${k}" aria-pressed="${F.xm === k}">${n}</button>`).join('')}</div></form>
+    <div id="xr"></div>`;
+  const inp = $('#xq');
+  inp.oninput = () => { F.xq = inp.value; if (XT) { XT = null; history.pushState(null, '', '#search'); shownSec = 'search'; } xFill(); };
+  inp.onkeydown = e => { if (e.key === 'Escape' && inp.value) { e.preventDefault(); inp.value = ''; inp.oninput(); } };
+  $('#xf').onsubmit = e => { e.preventDefault(); xOpen(F.xq, F.xm); };
+  M.querySelectorAll('[data-xm]').forEach(b => b.onclick = () => { F.xm = b.dataset.xm; if (XT) location.hash = '#search'; else { vSearch(); $('#xq').focus(); } });
+  M.onclick = e => {
+    const g = e.target.closest('[data-go]'); if (g) { const [t, ...r] = g.dataset.go.split('/'); return xGo(t, r.join('/')); }
+    if (e.target.closest('[data-back]')) return xBack();
+    const lb = e.target.closest('[data-lbl]'); if (lb) { const [w, h] = lblSize(); return printLabels([lb.dataset.lbl], w, h, 1); }
+    const mg = e.target.closest('[data-mng]'); if (mg) return showCarton(mg.dataset.mng);
+    const af = e.target.closest('[data-xaf]'); if (af) { F.xaf = af.dataset.xaf; xFill(); }
+  };
+  xFill();
+  if (!XT && M.classList.contains('enter') && !matchMedia('(pointer: coarse)').matches) inp.focus();
+}
+function xFill() {
+  const el = $('#xr'); if (!el) return;
+  setHtml(el, XT ? xDetail(XT) : xList());
+}
+const xDetail = t => t.t === 'carton' ? xCarton(t.id) : t.t === 'sku' ? xSku(t.id) : xAwb(t.id);
+
+function xStart() {
+  const h = xHist(), lbl = x => x.t === 'sku' ? esc(keyName(x.id)) : `<span class="mono">${esc(x.id)}</span>`;
+  const tile = (icon, t, body, i) => `<div class="card ${stI(i)}"><span class="ic">${ic(icon)}</span><b>${t}</b><span class="meta">${body}</span></div>`;
+  return (h.length ? `<div class="card pad ${stI(1)}" style="margin-bottom:var(--s4)"><div class="eyebrow" style="margin-bottom:var(--s2)">Legutóbbi</div>
+      <div class="chips">${h.map(x => `<button class="chip" ${go(x.t, x.id)}>${I(x.t === 'carton' ? 'box' : x.t === 'sku' ? 'tag' : 'file', 'sm')}${lbl(x)}</button>`).join('')}</div></div>` : '')
+    + `<div class="xhelp">${tile('box', 'Doboz', 'Teljes azonosító, 10 számjegy vagy a vége (min. 4). Mi van benne, mi került bele, ki vette fel, napló.', 2)}
+      ${tile('tag', 'SKU', 'Kód, a kód része vagy terméknév. Mely dobozokba kell, mennyi került be, polc, belövések.', 3)}
+      ${tile('file', 'AWB', 'Szám vagy a vége, jelölés. Dobozok állapota, hiányok, ki dolgozott rajta.', 4)}</div>`;
+}
+function xList() {
+  const q = F.xq.trim();
+  if (q.replace(/\s+/g, '').length < 3) return xStart();
+  const r = xFind(q, F.xm);
+  if (r.exact && r.n === 1) return xDetail(r.exact);
+  if (!r.n) {
+    const log = r.u.length >= 4 ? SC.filter(s => (s.raw || '').toUpperCase().includes(r.u)) : [];
+    return `<div class="card ${stI(1)}" style="margin-bottom:var(--s4)"><div class="empty"><b>Nincs találat</b>Sem a goodslistben, sem az AWB-k között nem szerepel</div></div>`
+      + (log.length ? xLogCard('A naplóban szerepel', log, {prod: 1, carton: 1}, 2) : '');
+  }
+  const grp = (title, n, head, rows, i) => `<div class="card ${stI(i)}" style="margin-bottom:var(--s4)"><div class="hd"><h2>${title}</h2><span class="meta">${n > XLIM ? `${XLIM} / ${n}` : n}</span></div>
+    <div class="scroll" style="max-height:440px"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  let out = '', i = 1;
+  if (r.carton.length) out += grp('Dobozok', r.carton.length, '<th>Doboz</th><th>Státusz</th><th>AWB</th><th class="n">Tétel</th><th>Darab</th>', r.carton.slice(0, XLIM).map(c => {
+    const p = cartonSum(c), l0 = (D.byCarton.get(c) || [])[0];
+    return `<tr class="clk" ${go('carton', c)}><td>${idHtml(c)}</td><td>${stTag(c)}${claimOf(c) ? ` <span class="tag warn">${esc(claimOf(c))}</span>` : ''}</td><td class="mono meta">${l0 ? esc(l0.awb) : ''}</td>
+      <td class="n">${l0 ? `${p.done}/${p.n}` : ''}</td><td style="min-width:130px">${l0 ? `<b>${p.got}/${p.qty} db</b>${xBar(p.got, p.qty)}` : ''}</td></tr>`;
+  }).join(''), i++);
+  if (r.sku.length) out += grp('Termékek', r.sku.length, '<th>Termék</th><th class="n">Doboz</th><th>Bekerült</th><th class="n">Polcon</th>', r.sku.slice(0, XLIM).map(k => {
+    const ls_ = D.byKey.get(k), qty = ls_.reduce((a, l) => a + l.qty, 0), got = ls_.reduce((a, l) => a + gotX(l), 0), pk = D.parked.get(k) || 0;
+    return `<tr class="clk" ${go('sku', k)}><td><b>${esc(ls_[0].descr)}</b><div class="mono meta">${esc(k)}</div></td><td class="n">${new Set(ls_.map(l => l.carton)).size}</td>
+      <td style="min-width:130px"><b>${got}/${qty} db</b>${xBar(got, qty)}</td><td class="n">${pk ? `<span class="tag">${pk} db</span>` : '<span class="meta">-</span>'}</td></tr>`;
+  }).join(''), i++);
+  if (r.awb.length) out += grp('AWB', r.awb.length, '<th>AWB</th><th>Jelölés</th><th class="n">Doboz</th><th>Kész doboz</th>', r.awb.slice(0, XLIM).map(id => {
+    const a = D.awbs.get(id), cs = [...new Set(D.lines.filter(l => l.awb === id).map(l => l.carton))], dn = cs.filter(c => cartonStatus(c) === 'done').length;
+    return `<tr class="clk" ${go('awb', id)}><td class="mono"><b>${esc(id)}</b></td><td>${esc(a.mark || '')}</td><td class="n">${cs.length}</td><td style="min-width:130px"><b>${dn}/${cs.length}</b>${xBar(dn, cs.length)}</td></tr>`;
+  }).join(''), i++);
+  return out;
+}
+
+function xCarton(c) {
+  const ls_ = D.byCarton.get(c), log = SC.filter(s => s.carton === c || (s.raw || '').toUpperCase() === c);
+  const lbl = `<button class="btn sm" data-lbl="${esc(c)}">${I('print', 'sm')}Címke</button>`;
+  if (!ls_) return `<div class="card ${stI(0)}" style="margin-bottom:var(--s4)">${xHead(idHtml(c), stTag(c), lbl)}</div>
+    ${notesHtml([note('warn', 'alert', 'Ez az azonosító egyik importált AWB goodslistjében sem szerepel.' + (log.length ? ` A naplóban ${log.length} alkalommal fordul elő.` : ''))], 1)}
+    ${xLogCard('Napló', log, {prod: 1}, 2)}`;
+  const o = D.open.get(c), s = cartonStatus(c), l0 = ls_[0], a = D.awbs.get(l0.awb) || {}, p = cartonSum(c), cl = claimOf(c), last = log[0];
+  const nt = [];
+  if (s === 'done' && p.short) nt.push(note('bad', 'alert', `<b>Hiánnyal lezárva:</b> ${p.short} tétel, összesen ${p.qty - p.got} db nem került bele.`));
+  if (s === 'open') nt.push(p.got >= p.qty ? note('ok', 'check', '<b>Minden tétel bekerült,</b> a doboz lezárható.')
+    : note('', 'info', `<b>Még ${p.qty - p.got} db hiányzik</b> (${p.n - p.done} tétel).${cl ? ` Foglalta: ${esc(cl)}.` : ''}`));
+  if (!s) { const cv = coverage(c, D.parked); nt.push(cv.full ? note('ok', 'check', '<b>Összegyűlt:</b> minden darabja a félretett polcon van, összerakható.')
+    : cv.have ? note('', 'layers', `A félretett polcon <b>${cv.have}/${cv.total} db</b> már megvan belőle.`) : note('mute', 'info', 'Még nincs felvéve, a polcon sincs belőle semmi.')); }
+  const rows = ls_.slice().sort((x, y) => (gotX(x) >= x.qty) - (gotX(y) >= y.qty)).map(l => {
+    const g = gotX(l), [st, tone] = lineState(l), r = D.lineDone.get(l.id), pk = D.parked.get(l.key) || 0;
+    const hits = SC.filter(x => x.carton === c && x.key === l.key && (x.kind === 'sku' || x.result === 'built'));
+    const other = new Set((D.byKey.get(l.key) || []).filter(y => y.carton !== c).map(y => y.carton)).size;
+    return `<tr><td>${lnk('sku', l.key, esc(l.descr))}<div class="meta"><span class="mono">${esc(l.sku)}</span>${l.mat && l.mat !== l.descr ? ' · ' + esc(l.mat) : ''}</div></td>
+      <td class="n" style="min-width:100px"><b>${g}/${l.qty}</b>${xBar(g, l.qty)}</td><td><span class="tag ${tone}">${st}</span></td>
+      <td>${hits.length ? `<b>${hits.length}×</b><div class="meta">${esc(hits[0].device)} · ${fmtDT(hits[0].ts)}</div>` : '<span class="meta">nem</span>'}${r && r.done_by && g > 0 ? `<div class="meta">jelölte: ${esc(r.done_by)}</div>` : ''}</td>
+      <td class="n">${pk ? `<span class="tag">${pk} db</span>` : '<span class="meta">-</span>'}</td>
+      <td class="n">${other ? lnk('sku', l.key, other + ' doboz') : '<span class="meta">-</span>'}</td></tr>`;
+  }).join('');
+  return `<div class="card ${stI(0)}" style="margin-bottom:var(--s4)">${xHead(idHtml(c), stTag(c) + (cl ? ` <span class="tag warn">foglalta: ${esc(cl)}</span>` : ''),
+      `<button class="btn sm" data-mng="${esc(c)}">${I('gear', 'sm')}Kezelés</button>${lbl}`)}
+    ${facts([
+      ['AWB', lnk('awb', l0.awb, `<span class="mono" style="font-size:14px">${esc(l0.awb)}</span>`), esc(a.mark || '')],
+      ['Felvette', o ? esc(o.opened_by || '-') : '-', o ? fmtDT(o.opened_at) : 'még nincs felvéve'],
+      ['Lezárva', o && o.done_at ? fmtDT(o.done_at) : '-', ''],
+      o && o.place ? ['Hely', esc(o.place), ''] : null,
+      ['Tétel', `${p.done}/${p.n}`, 'kész'],
+      ['Darab', `${p.got}/${p.qty}`, Math.round(p.ratio * 100) + '%'],
+      ['Súly', p.kg.toFixed(1) + ' kg', ''],
+      ['Utolsó esemény', last ? fmtDT(last.ts) : '-', last ? esc(last.device) : '']])}</div>
+    ${notesHtml(nt, 1)}
+    <div class="grid g-x">
+      <div class="card ${stI(2)}"><div class="hd"><h2>Tartalom</h2><span class="meta">${p.n} tétel · ${p.qty} db</span></div>
+        <div class="scroll"><table><thead><tr><th>Termék</th><th class="n">Db</th><th>Állapot</th><th>Belőve</th><th class="n">Polcon</th><th class="n">Más dobozban</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+      ${xLogCard('Napló', log, {prod: 1}, 3)}</div>`;
+}
+
+function xSku(k) {
+  const ls_ = D.byKey.get(k), log = SC.filter(s => s.key === k);
+  if (!ls_) return `<div class="card ${stI(0)}" style="margin-bottom:var(--s4)">${xHead(`<span class="mono">${esc(k)}</span>`, '<span class="tag bad">nincs a goodslistben</span>')}</div>
+    ${notesHtml([note('warn', 'alert', 'Ez a termék kód egyik importált goodslistben sem szerepel.')], 1)}${xLogCard('Napló', log, {carton: 1}, 2)}`;
+  const l0 = ls_[0], skus = [...new Set(ls_.map(l => l.sku))], pk = D.parked.get(k) || 0, pi = D.parkInfo.get(k), hits = log.filter(s => s.kind === 'sku');
+  let qty = 0, got = 0, needOpen = 0, needFree = 0, openN = 0;
+  ls_.forEach(l => { const g = gotX(l), s = cartonStatus(l.carton); qty += l.qty; got += g; if (s === 'open' && g < l.qty) { needOpen += l.qty - g; openN++; } if (!s) needFree += l.qty - g; });
+  const ncs = new Set(ls_.map(l => l.carton)).size, nt = [];
+  if (openN >= 2) nt.push(note('', 'layers', `<b>Többértelmű:</b> ${openN} nyitott dobozba is kell még belőle.`));
+  if (pk > needFree) nt.push(note('warn', 'alert', `<b>Felesleg a polcon:</b> ${pk} db van félretéve, de a fel nem vett dobozokba csak ${needFree} db kell.`));
+  if (!needOpen && !needFree) nt.push(note('ok', 'check', 'Minden dobozba bekerült, ami kellett.'));
+  else if (!needOpen && pk < needFree) nt.push(note('mute', 'info', `Nincs nyitott doboza. A fel nem vett dobozokba még ${needFree} db kell, ebből ${pk} db van a polcon.`));
+  const ord = l => { const s = cartonStatus(l.carton); return s === 'open' ? (gotX(l) < l.qty ? 0 : 3) : !s ? 1 : 2; };
+  const rows = ls_.slice().sort((x, y) => ord(x) - ord(y) || x.carton.localeCompare(y.carton)).map(l => {
+    const g = gotX(l), [st, tone] = lineState(l), n = log.filter(s => s.kind === 'sku' && s.carton === l.carton).length;
+    return `<tr class="clk" ${go('carton', l.carton)}><td>${idHtml(l.carton)}</td><td>${stTag(l.carton)}</td><td class="mono meta">${esc(l.awb)}</td>
+      <td class="n" style="min-width:100px"><b>${g}/${l.qty}</b>${xBar(g, l.qty)}</td><td><span class="tag ${tone}">${st}</span></td><td class="n">${n ? n + '×' : '<span class="meta">-</span>'}</td></tr>`;
+  }).join('');
+  const sub = `<span class="mono">${esc(k)}</span>${skus.some(x => x !== k) ? ' · SKU: <span class="mono">' + esc(skus.join(', ')) + '</span>' : ''}${l0.mat && l0.mat !== l0.descr ? ' · ' + esc(l0.mat) : ''}`;
+  return `<div class="card ${stI(0)}" style="margin-bottom:var(--s4)">${xHead(esc(l0.descr), (openN >= 2 ? '<span class="tag">többértelmű</span>' : '') + (pk ? ` <span class="tag">polcon ${pk} db</span>` : ''), '', sub)}
+    ${facts([
+      ['Goodslistben', qty + ' db', ncs + ' dobozban'],
+      ['Dobozba került', `${got}/${qty} db`, pct(got, qty)],
+      ['Nyitott dobozba kell', needOpen + ' db', openN ? openN + ' dobozba' : ''],
+      ['Fel nem vett dobozba kell', needFree + ' db', ''],
+      ['Félretett polcon', pk + ' db', pi && pk ? fmtDT(pi.ts) + ' · ' + esc(pi.device || '') : ''],
+      ['Belőve', hits.length + '×', hits[0] ? fmtDT(hits[0].ts) + ' · ' + esc(hits[0].device) : 'még nem']])}</div>
+    ${notesHtml(nt, 1)}
+    <div class="grid g-x">
+      <div class="card ${stI(2)}"><div class="hd"><h2>Dobozok</h2><span class="meta">${ncs} doboz</span></div>
+        <div class="scroll"><table><thead><tr><th>Doboz</th><th>Státusz</th><th>AWB</th><th class="n">Db</th><th>Tétel</th><th class="n">Belőve</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+      ${xLogCard('Napló', log, {carton: 1}, 3)}</div>`;
+}
+
+function xAwb(id) {
+  const a = D.awbs.get(id);
+  if (!a) return `<div class="card ${stI(0)}">${xHead(`<span class="mono">${esc(id)}</span>`, '<span class="tag bad">nincs ilyen AWB</span>')}</div>`;
+  const lines = D.lines.filter(l => l.awb === id), cs = [...new Set(lines.map(l => l.carton))], set = new Set(cs);
+  const by = {open: [], done: [], none: []}; cs.forEach(c => by[cartonStatus(c) || 'none'].push(c));
+  let qty = 0, got = 0, kg = 0; lines.forEach(l => { qty += l.qty; got += gotX(l); kg += +l.gw || 0; });
+  const short = lines.filter(l => cartonStatus(l.carton) === 'done' && gotX(l) < l.qty), log = SC.filter(s => s.carton && set.has(s.carton));
+  const dev = [...new Set(log.map(s => s.device).filter(Boolean))], full = by.none.filter(c => coverage(c, D.parked).full), nt = [];
+  if (short.length) nt.push(note('bad', 'alert', `<b>Hiánnyal lezárva:</b> ${new Set(short.map(l => l.carton)).size} doboz, ${short.length} tétel, ${short.reduce((s, l) => s + l.qty - gotX(l), 0)} db.`));
+  if (full.length) nt.push(note('ok', 'layers', `<b>${full.length} fel nem vett doboz összegyűlt</b> a félretett polcon, összerakható.`));
+  if (by.done.length === cs.length) nt.push(note('ok', 'check', 'Minden doboz kész.'));
+  const ord = {open: 0, done: 1, none: 2}, list = (F.xaf ? by[F.xaf] : cs).slice().sort((x, y) => ord[cartonStatus(x) || 'none'] - ord[cartonStatus(y) || 'none'] || x.localeCompare(y));
+  const chips = [['', 'Mind', cs.length], ['open', 'Nyitott', by.open.length], ['done', 'Kész', by.done.length], ['none', 'Nincs felvéve', by.none.length]]
+    .map(([k, n, v]) => `<button class="chip" data-xaf="${k}" aria-pressed="${F.xaf === k}">${n} <b>${v}</b></button>`).join('');
+  const rows = list.map(c => { const o = D.open.get(c), p = cartonSum(c);
+    return `<tr class="clk" ${go('carton', c)}><td>${idHtml(c)}</td><td>${stTag(c)}${claimOf(c) ? ` <span class="tag warn">${esc(claimOf(c))}</span>` : ''}</td><td class="n">${p.done}/${p.n}</td>
+      <td style="min-width:120px"><b>${p.got}/${p.qty} db</b>${xBar(p.got, p.qty)}</td><td>${o ? esc(o.opened_by || '') + `<div class="meta">${fmtDT(o.opened_at)}</div>` : ''}</td></tr>`; }).join('');
+  return `<div class="card ${stI(0)}" style="margin-bottom:var(--s4)">${xHead(`<span class="mono">${esc(id)}</span>`, a.mark ? `<span class="tag">${esc(a.mark)}</span>` : '', '', esc(a.file || ''))}
+    <div style="padding:0 var(--s4) var(--s4)"><div class="seg3" role="img" aria-label="${by.done.length} kész, ${by.open.length} nyitott, ${by.none.length} nincs felvéve"><i style="width:${100 * by.done.length / (cs.length || 1)}%;background:var(--ok-strong)"></i><i style="width:${100 * by.open.length / (cs.length || 1)}%;background:var(--accent)"></i></div></div>
+    ${facts([
+      ['Dobozok', cs.length, `${by.done.length} kész · ${by.open.length} nyitott · ${by.none.length} nincs felvéve`],
+      ['Darab', `${got}/${qty}`, pct(got, qty) + ' bekerült'],
+      ['Tétel', lines.length, ''],
+      ['Súly', kg.toFixed(1) + ' kg', ''],
+      ['Betöltve', fmtDT(a.loaded_at), ''],
+      ['Eszközök', dev.length ? esc(dev.join(', ')) : '-', log[0] ? 'utoljára ' + fmtDT(log[0].ts) : '']])}</div>
+    ${notesHtml(nt, 1)}
+    <div class="grid g-x">
+      <div class="grid" style="gap:var(--s4)">
+        <div class="card ${stI(2)}"><div class="hd"><h2>Dobozok</h2></div><div class="chips" style="padding:var(--s3) var(--s4) 0">${chips}</div>
+          <div class="scroll">${rows ? `<table><thead><tr><th>Doboz</th><th>Státusz</th><th class="n">Tétel</th><th>Darab</th><th>Felvette</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="empty"><b>Nincs ilyen doboz</b></div>'}</div></div>
+        ${short.length ? `<div class="card ${stI(3)}"><div class="hd"><h2>Hiányzó tételek</h2><span class="meta">${short.length} tétel</span></div><div class="scroll"><table><thead><tr><th>Doboz</th><th>Termék</th><th class="n">Hiány</th></tr></thead><tbody>${short.map(l =>
+          `<tr><td>${lnk('carton', l.carton, idHtml(l.carton))}</td><td>${lnk('sku', l.key, esc(l.descr))}<div class="mono meta">${esc(l.sku)}</div></td><td class="n"><b>${l.qty - gotX(l)}</b> / ${l.qty}</td></tr>`).join('')}</tbody></table></div></div>` : ''}
+      </div>
+      ${xLogCard('Napló', log, {prod: 1, carton: 1}, 4)}</div>`;
+}
+
+// ---------- gyorskereso (fejlec) ----------
 $('#gs').onsubmit = e => {
   e.preventDefault(); const v = $('#gq').value.trim(); if (!v) return;
-  const c = classify(v); $('#gq').value = '';
-  if (c.kind === 'carton' && D.byCarton.has(c.carton)) return showCarton(c.carton);
-  if (c.kind === 'sku' && D.byKey.has(c.key)) return showSku(c.key);
-  F.sq = v; location.hash = '#skus'; if (sec === 'skus') render(true);
+  $('#gq').value = ''; $('#gq').blur(); F.xm = '';
+  if (xOpen(v, '')) return;
+  F.xq = v;
+  if (location.hash === '#search') render(true); else location.hash = '#search';
 };
 
 // ---------- inditas ----------
