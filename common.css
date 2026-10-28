@@ -161,3 +161,5 @@ dialog.closing::backdrop{animation:bdOut .2s forwards}
   opacity:0;transform:translate(-50%,24px) scale(.96);pointer-events:none;transition:transform .4s var(--spring),opacity .25s}
 .toast.on{opacity:1;transform:translate(-50%,0) scale(1)}
 @media (prefers-reduced-motion:reduce){.anim .st,.pop,.rg{animation:none}}
+.tag.pct{display:inline-flex;align-items:center;gap:3px;font-weight:800;font-variant-numeric:tabular-nums;font-size:14px;padding:3px 9px}
+.tag.pct svg{width:14px;height:14px}

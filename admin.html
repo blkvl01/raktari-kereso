@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raktári kereső - Admin</title>
-<link rel="stylesheet" href="common.css?v=26">
+<link rel="stylesheet" href="common.css?v=27">
 <style>
 .shell{display:grid;grid-template-columns:240px 1fr;min-height:100dvh}
 aside{background:var(--side);color:var(--side-ink);padding:var(--s4) var(--s3);position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;overflow:auto}
@@ -170,8 +170,8 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/cfb@1.2.2/dist/cfb.min.js" integrity="sha384-peTByNpmIz2Wq5hOZJ3dZmZP4MJ6ZXwF9dZ3R8kW7/C6bMWdHEME3on5mt9DH7d5" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
-<script src="common.js?v=26"></script>
-<script src="import.js?v=26"></script>
+<script src="common.js?v=27"></script>
+<script src="import.js?v=27"></script>
 <script>
 ICON.tag = '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01"/>';
 ICON.back = '<path d="M15 18l-6-6 6-6"/>';
@@ -294,7 +294,7 @@ function attention() {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.10</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.11</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -443,7 +443,7 @@ function vOverview() {
 
   const wipRows = wip.slice(0, 10).map(x => { const r = Math.round(x.p.ratio * 100);
     return `<tr><td>${lnk('carton', x.c, idHtml(x.c))}</td><td style="white-space:nowrap">${esc(x.o.opened_by || '')}<div class="meta">${x.o.opened_at ? ago(tms(x.o.opened_at)) : ''}</div></td>
-      <td style="min-width:130px"><b>${x.p.got}/${x.p.qty} db</b> ${r >= 90 ? `<span class="tag ok">${r}%</span>` : `<span class="meta">${r}%</span>`}<div class="bar"><i class="${r >= 90 ? '' : 'o'}" style="width:${r}%"></i></div></td>
+      <td style="min-width:130px"><b>${x.p.got}/${x.p.qty} db</b> ${pctPill(x.p.ratio)}<div class="bar"><i class="${r >= 90 ? '' : 'o'}" style="width:${r}%"></i></div></td>
       <td class="n"><b>${x.p.qty - x.p.got}</b></td><td class="meta" style="white-space:nowrap">${x.last ? ago(x.last, ' ezelőtt') : ''}</td></tr>`; }).join('');
   const feed = SC.filter(s => s.kind !== 'line').slice(0, 10).map(s => `<tr><td class="mono">${fmtT(s.ts)}</td><td>${esc(s.device)}</td><td class="mono">${esc(s.raw)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton) : ''}</td></tr>`).join('');
 
@@ -585,11 +585,11 @@ function cartonRows() {
 }
 function fillCartons() {
   const cs = cartonRows(), shown = cs.slice(0, 300);
-  setHtml($('#ct'), shown.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th>Foglalta</th><th class="n">Tétel</th><th class="n">Db</th><th>Haladás</th><th>Felvette</th><th>Idő</th></tr></thead><tbody>${shown.map(c => {
+  setHtml($('#ct'), shown.length ? `<table><thead><tr><th>Doboz</th><th>AWB</th><th>Státusz</th><th>Foglalta</th><th class="n">Tétel</th><th class="n">Db</th><th>Töltöttség</th><th>Felvette</th><th>Idő</th></tr></thead><tbody>${shown.map(c => {
     const o = D.open.get(c), p = cartonProg(c), l0 = D.byCarton.get(c)[0];
     return `<tr class="clk" data-c="${esc(c)}"><td>${idHtml(c, 0, 1)}</td><td>${awbChip(l0.awb)}</td>
       <td>${o ? `<span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : 'nyitott'}</span>` : '<span class="tag mute">nincs felvéve</span>'}</td>
-      <td>${claimOf(c) ? esc(claimOf(c)) : ''}</td><td class="n">${p.done}/${p.n}</td><td class="n">${p.qty}</td><td style="min-width:110px"><div class="bar"><i style="width:${Math.round(p.ratio * 100)}%"></i></div></td>
+      <td>${claimOf(c) ? esc(claimOf(c)) : ''}</td><td class="n">${p.done}/${p.n}</td><td class="n">${o ? p.got + '/' : ''}${p.qty}</td><td style="min-width:170px">${o ? `<div style="display:flex;align-items:center;gap:var(--s2)"><div class="bar" style="flex:1"><i style="width:${Math.round(p.ratio * 100)}%"></i></div>${pctPill(p.ratio)}</div>` : '<span class="meta">-</span>'}</td>
       <td>${esc(o && o.opened_by || '')}</td><td class="meta">${o ? fmtDT(o.opened_at) : ''}</td></tr>`;
   }).join('')}</tbody></table>${cs.length > 300 ? `<div class="pg">300 / ${cs.length}</div>` : ''}` : '<div class="empty"><b>Nincs találat</b></div>');
   $('#cc').textContent = cs.length + ' doboz';
@@ -607,8 +607,8 @@ function vCartons() {
   $('#cq').oninput = e => { F.cq = e.target.value.trim().toUpperCase(); fillCartons(); };
   document.querySelectorAll('[data-aw]').forEach(b => b.onclick = () => { F.cawb = b.dataset.aw; vCartons(); });
   $('#ct').onclick = e => { const r = e.target.closest('[data-c]'); if (r) showCarton(r.dataset.c); };
-  $('#ex').onclick = () => csv([['AWB', 'Doboz', 'Státusz', 'Kész tétel', 'Összes tétel', 'Várt db', 'Felvette', 'Felvétel ideje']].concat(cartonRows().map(c => {
-    const o = D.open.get(c), p = cartonProg(c); return [D.byCarton.get(c)[0].awb, c, o ? o.status : 'nincs felvéve', p.done, p.n, p.qty, o && o.opened_by, o && o.opened_at]; })), 'dobozok.csv');
+  $('#ex').onclick = () => csv([['AWB', 'Doboz', 'Státusz', 'Kész tétel', 'Összes tétel', 'Várt db', 'Bent db', 'Töltöttség %', 'Felvette', 'Felvétel ideje']].concat(cartonRows().map(c => {
+    const o = D.open.get(c), p = cartonProg(c); return [D.byCarton.get(c)[0].awb, c, o ? o.status : 'nincs felvéve', p.done, p.n, p.qty, o ? p.got : '', o ? Math.round(p.ratio * 100) : '', o && o.opened_by, o && o.opened_at]; })), 'dobozok.csv');
 }
 function showCarton(c) {
   const o = D.open.get(c), p = cartonProg(c), ls_ = D.byCarton.get(c);

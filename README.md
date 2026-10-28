@@ -30,6 +30,10 @@ Operációs KPI-ok két csoportban:
 
 A „ma” és „7 nap” nézet percenként egyszer hosszabb naplót tölt le; ha a szerver ennél kevesebbet ad vissza, a fül jelzi, hogy a darabszám részleges (a dobozszámok mindig teljesek).
 
+## Dobozok (admin)
+
+A felvett dobozok mellett ugyanaz a %-os töltöttség jelző, mint a PDA-n (90% felett pipa, 75% felett zöld, 65–75% sárga, 65% alatt piros), a Db oszlopban a bent lévő / szükséges darab. A CSV-ben is benne van.
+
 ## Kereső (admin)
 
 Az admin **Kereső** oldalán (és a fejléc gyorskeresőjében) dobozra, SKU-ra (kód, kódrészlet vagy terméknév) és AWB-re (szám, vége vagy jelölés) lehet keresni.

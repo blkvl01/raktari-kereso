@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2342d6">
 <title>Raktári kereső</title>
-<link rel="stylesheet" href="common.css?v=26">
+<link rel="stylesheet" href="common.css?v=27">
 <style>
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
 .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
@@ -102,8 +102,6 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .crow .frac{font-weight:800;font-variant-numeric:tabular-nums;color:var(--mute)}
 .crow .frac.ok{color:var(--ok)}
 .crow .frac{display:inline-flex;align-items:center;gap:4px;min-width:56px;justify-content:flex-end;font-size:13px}
-.tag.pct{display:inline-flex;align-items:center;gap:3px;font-weight:800;font-variant-numeric:tabular-nums;font-size:14px;padding:3px 9px}
-.tag.pct svg{width:14px;height:14px}
 
 nav.tabs{--i:0;position:fixed;left:0;right:0;bottom:0;z-index:10;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(3,1fr);padding:8px 12px;padding-bottom:calc(8px + env(safe-area-inset-bottom))}
 nav.tabs .ind{position:absolute;top:8px;bottom:calc(8px + env(safe-area-inset-bottom));left:12px;width:calc((100% - 24px) / 3);border-radius:var(--r-sm);background:var(--accent);transform:translateX(calc(var(--i) * 100%));transition:transform .5s var(--spring);box-shadow:0 8px 18px -10px var(--accent)}
@@ -172,7 +170,7 @@ nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
 <dialog id="dlg"></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="common.js?v=26"></script>
+<script src="common.js?v=27"></script>
 <script>
 // Folyamat: a kalodabol kivett termeket a Valogatas fulon szkenneled.
 //  - ha egy nyitott dobozba kell: megmutatjuk a dobozt, a dolgozo megadja hany darabot tesz bele, csak ezutan szamolodik be
@@ -640,11 +638,6 @@ function identHtml() {
   const list = cands.length ? `<div class="eyebrow alt-h" style="margin-top:0">${cands.length} lehetséges doboz${cands.length > 1 ? ', szkennelj még terméket' : ''}</div><div class="card">${cands.slice(0, 6).map((c, i) => { const st = cartonStatus(c); return `<div class="crow ${stI(i)}" data-c="${esc(c)}">${idHtml(c)}<span class="tag ${st ? '' : 'mute'}">${st ? 'nyitott' : 'nincs nyitva'}</span><span class="frac">${D.byCarton.get(c).length} tétel</span></div>`; }).join('')}</div>`
     : `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs ilyen doboz</div><div class="hero-note">Törölj egy terméket a listából.</div></section>`;
   return head + list + chips;
-}
-// toltottseg jelzo: 90%+ zold + pipa, 75%+ zold, 65%+ sarga, alatta piros (kb. 80%-nal mar zarhato)
-function pctPill(ratio) {
-  const pct = Math.round(ratio * 100), tone = pct >= 75 ? 'ok' : pct >= 65 ? 'warn' : 'bad';
-  return `<span class="tag pct ${tone}" title="${pct >= 75 ? 'zárható lehet' : 'még töltendő'}">${pct >= 90 ? icS('check') : ''}${pct}%</span>`;
 }
 function cartonsHtml() {
   const msg = cf.msg ? `<div class="msg ${cf.msg.tone}" role="alert" style="margin-bottom:var(--s3)">${cf.msg.html}</div>` : '';
