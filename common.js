@@ -165,6 +165,11 @@ function newBoxCands(key) {
   return [...cs].map(c => coverage(c, pk))
     .sort((a, b) => b.full - a.full || b.ratio - a.ratio || a.total - b.total || a.c.localeCompare(b.c));
 }
+// toltottseg jelzo: 90%+ zold + pipa, 75%+ zold, 65%+ sarga, alatta piros (kb. 80%-nal mar zarhato)
+function pctPill(ratio) {
+  const pct = Math.round(ratio * 100), tone = pct >= 75 ? 'ok' : pct >= 65 ? 'warn' : 'bad';
+  return `<span class="tag pct ${tone}" title="${pct >= 75 ? 'zárható lehet' : 'még töltendő'}">${pct >= 90 ? ic('check').replace('class="i"', 'class="i sm"') : ''}${pct}%</span>`;
+}
 function awbTag(l) { return `<span class="tag mono" title="AWB">${esc(l.awb)}</span>`; }
 // kor alaku haladasjelzo (0..1)
 function ring(ratio, size, label) {
