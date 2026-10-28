@@ -9,10 +9,10 @@ Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
 ## Válogatás a kalodákból (PDA)
 
 1. **Válogatás fül**: szkenneld a kalodából kivett terméket.
-   - **Ide tedd**: egy már nyitott dobozba kell. A doboz utolsó 4 számjegye nagyban látszik, a darab be is számolódik.
+   - **Nyitott dobozba kell**: a szkennelés még nem számolódik be. A program kiírja a dobozt (több doboznál választani lehet), a dolgozó megadja, hány darabot tesz bele, és csak ekkor kerül be. Utána visszavonható.
    - **Nincs nyitott doboza**: a program rákérdez, **Félreteszem** vagy **Új doboz**. Magától nem nyit új dobozt.
      Új doboznál a legjobb jelöltet ajánlja (amelyiket a polc + ez a darab a legjobban lefedi), és a polcról is behúzza, ami belekell.
-     Ha döntés nélkül szkennelnek tovább, az csak rákeresés volt: a termék **nem** kerül a polcra (a naplóban „csak keresés”). Polcra csak a **Félreteszem** gomb tesz.
+     Minden szkennelt terméknek lesz kimenetele, új kódot addig nem lehet szkennelni: **dobozba** (darabszámmal), **Félreteszem**, vagy **Nincs sehova** (nem ment semmit, a naplóban „csak keresés”).
    - **Felesleg**: egyik dobozba sem kell több belőle.
    - Doboz címkét is lehet szkennelni: megnyitja vagy megmutatja a dobozt.
 2. **Félretett fül**: az **összegyűlt** doboz (minden darabja a polcon van) a következő doboz.
