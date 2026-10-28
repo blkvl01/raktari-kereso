@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#2342d6">
 <title>Raktári kereső</title>
-<link rel="stylesheet" href="common.css?v=21">
+<link rel="stylesheet" href="common.css?v=22">
 <style>
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
 .top{position:sticky;top:0;z-index:10;background:color-mix(in srgb,var(--surface) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
@@ -78,8 +78,6 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .idle p{margin:0;color:var(--mute);animation:rise .5s .14s var(--ease-out) both}
 .idle .btn{margin-top:var(--s3);animation:rise .5s .2s var(--ease-out) both}
 
-.hist .row-i{padding:var(--s2) var(--s4);cursor:pointer;font-size:14px;flex-wrap:wrap}
-.hist .row-i:hover{background:var(--accent-soft)}
 .ver{text-align:center;color:var(--mute);font-size:11px;margin:var(--s5) 0 var(--s2);opacity:.7}
 
 .lrow{display:flex;align-items:center;gap:var(--s3);width:100%;padding:var(--s3) var(--s4);border:0;border-bottom:1px solid var(--line-2);background:none;text-align:left;cursor:pointer;min-height:54px;transition:background .15s}
@@ -90,20 +88,7 @@ main{max-width:720px;margin:0 auto;padding:var(--s3)}
 .lrow[aria-pressed=true] .t{opacity:.55}
 .lrow .t{flex:1;min-width:0;transition:opacity .2s}
 .lrow .t small{display:block;color:var(--mute)}
-.contents{max-height:300px;overflow:auto}
 
-/* dobozok: kompakt */
-.tools{display:grid;gap:var(--s2)}
-.swb{display:flex;align-items:center;gap:var(--s3);width:100%;padding:10px var(--s3) 10px var(--s4);border:1px solid var(--line);border-radius:var(--r);background:var(--surface);cursor:pointer;text-align:left;font-weight:700;transition:background .25s,border-color .25s,transform .18s var(--spring)}
-.swb:active{transform:scale(.985)}
-.swb[aria-checked=true]{border-color:var(--accent);background:var(--accent-soft)}
-.swb .t{flex:1}
-.swb .track{width:52px;height:30px;border-radius:999px;background:var(--mute);position:relative;flex:none;transition:background .25s}
-.swb .track::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:999px;background:var(--surface);box-shadow:0 1px 3px rgb(0 0 0 / .3);transition:transform .35s var(--spring),width .2s}
-.swb:active .track::after{width:30px}
-.swb[aria-checked=true] .track{background:var(--accent)}
-.swb[aria-checked=true] .track::after{transform:translateX(22px)}
-.swb[aria-checked=true]:active .track::after{transform:translateX(16px)}
 .msg{display:flex;align-items:center;gap:var(--s2);flex-wrap:wrap;padding:10px var(--s4);border-radius:var(--r-sm);font-weight:650;animation:springIn .35s var(--ease-out)}
 .msg.ok{background:var(--ok-soft);color:var(--ok)}.msg.warn{background:var(--warn-soft);color:var(--warn)}.msg.bad{background:var(--bad-soft);color:var(--bad)}
 .seg{display:flex;gap:6px;margin:var(--s3) 0 var(--s2)}
@@ -153,6 +138,23 @@ nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
 .need small{display:block;color:var(--mute);font-size:12px;font-weight:500}
 .badge{position:absolute;top:4px;left:calc(50% + 6px);min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--bad-strong);color:var(--bad-strong-ink);font-size:11px;font-weight:800;display:grid;place-items:center;line-height:1}
 .badge.pop{animation:badgePop .45s var(--spring)}
+.badge.ok{background:var(--ok-strong);color:var(--ok-strong-ink)}
+.hero-acts{display:flex;gap:var(--s2);margin-top:var(--s3)}
+.hero-acts .hero-btn{margin:0;flex:1;min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2);width:100%;max-width:420px;margin-top:var(--s4);animation:rise .5s .2s var(--ease-out) both}
+.quick button{display:grid;gap:2px;justify-items:center;padding:var(--s3) var(--s2);border:1px solid var(--line);border-radius:var(--r-sm);background:var(--surface);cursor:pointer;font-size:12px;font-weight:700;color:var(--mute)}
+.quick button b{font-size:24px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.quick button.hot{border-color:var(--ok-strong);background:var(--ok-soft)}
+.quick button.hot b{color:var(--ok)}
+.cdc.full{border-color:var(--ok-strong)}
+.cdc.full .cdh .idc{font-size:24px}
+.pk{display:flex;align-items:center;gap:var(--s3);padding:8px var(--s3) 8px var(--s4);border-bottom:1px solid var(--line-2)}
+.pk:last-child{border-bottom:0}
+.pk .t{flex:1;min-width:0}
+.pk .t small{display:block;color:var(--mute)}
+.pk .n{font-weight:800;font-size:18px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.bar2{display:flex;gap:var(--s2);margin-bottom:var(--s3)}
+.bar2 .btn{flex:1}
 </style>
 </head>
 <body>
@@ -167,29 +169,35 @@ nav.tabs button[aria-selected=true] svg{transform:translateY(-1px) scale(1.12)}
 <dialog id="dlg"></dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
-<script src="common.js?v=21"></script>
+<script src="common.js?v=22"></script>
 <script>
-const ORDER = ['scan', 'ident', 'cartons'];
-let view = ORDER.includes(ls.get('rk_view')) ? ls.get('rk_view') : 'scan';
+// Folyamat: a kalodabol kivett termeket a Valogatas fulon szkenneled.
+//  - ha egy nyitott dobozba kell: "Ide tedd" + a doboz utolso 4 szamjegye, a darab be is szamolodik
+//  - ha egyikbe sem: "Tedd felre" a kozos polcra; uj dobozt csak a Felretett ful javaslata alapjan nyitunk,
+//    elsokent azt, amelyiknek minden darabja osszegyult a polcon
+const ORDER = ['sort', 'park', 'cartons'];
+let view = ORDER.includes(ls.get('rk_view')) ? ls.get('rk_view') : 'sort';
 let device = ls.get('rk_device') || '';
 let muted = ls.get('rk_mute') === '1';
-let last = null, loading = true, animNext = false;
-let hist = []; try { hist = JSON.parse(ls.get('rk_hist') || '[]'); } catch (e) {}
-let cf = {st: 'open', q: '', add: false, msg: null};
-let shellView = '';
+let loading = true, animNext = false, shellView = '', HL = 0;
+let SV = {res: null};                                            // valogatas: utolso szkenneles eredmenye
+let PV = {msg: null, exp: {}};                                   // felretett polc
+let cf = {st: 'open', q: '', box: '', ident: false, keys: [], msg: null};   // dobozok
 const app = $('#app');
 
 // ---------- visszajelzes ----------
 let actx;
 function beep(kind) {
-  try { if (navigator.vibrate) navigator.vibrate(kind === 'ok' ? 40 : [80, 60, 80]); } catch (e) {}
+  try { if (navigator.vibrate) navigator.vibrate(kind === 'ok' ? 40 : kind === 'park' ? [40, 60, 40] : [80, 60, 80]); } catch (e) {}
   if (muted) return;
   try {
     actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-    const o = actx.createOscillator(), g = actx.createGain();
-    o.frequency.value = kind === 'ok' ? 880 : 220; o.type = 'sine';
-    g.gain.value = .08; o.connect(g); g.connect(actx.destination);
-    o.start(); o.stop(actx.currentTime + (kind === 'ok' ? .08 : .25));
+    const tones = kind === 'ok' ? [[880, 0, .08]] : kind === 'park' ? [[520, 0, .07], [520, .12, .07]] : [[220, 0, .25]];
+    tones.forEach(([f, at, len]) => {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.frequency.value = f; o.type = 'sine'; g.gain.value = .08; o.connect(g); g.connect(actx.destination);
+      o.start(actx.currentTime + at); o.stop(actx.currentTime + at + len);
+    });
   } catch (e) {}
 }
 
@@ -224,15 +232,6 @@ function call(fn, args) {
 function logScan(kind, raw, key, result, carton) {
   call('rk_log_scan', {p_device: device, p_kind: kind, p_raw: raw, p_key: key || '', p_result: result, p_carton: carton || ''});
 }
-async function setLine(id, done) {
-  const l = D.byId.get(id); if (!l) return;
-  if (done) D.lineDone.set(id, {line_id: id, done_by: device}); else D.lineDone.delete(id);
-  const o = D.open.get(l.carton);
-  if (o) { const p = cartonProg(l.carton); if (done && p.done >= p.n) o.status = 'done'; else if (!done && o.status === 'done') o.status = 'open'; }
-  logScan('line', l.sku, l.key, done ? 'line_done' : 'line_undone', l.carton);
-  animNext = true; update();
-  await call('rk_set_line', {p_line: id, p_done: done, p_device: device});
-}
 async function openCarton(c) {
   if (!D.open.has(c)) D.open.set(c, {carton: c, status: 'open', opened_by: device, opened_at: new Date().toISOString()});
   update();
@@ -243,57 +242,101 @@ async function setDone(c, done) {
   update();
   await call('rk_set_done', {p_carton: c, p_done: done});
 }
-
-// ---------- szkennelt kod ----------
-function pushHist(raw, text, result, carton) {
-  hist.unshift({t: Date.now(), raw, text, carton: carton || '', result}); hist = hist.slice(0, 12); ls.set('rk_hist', JSON.stringify(hist));
+async function setGot(id, n) {
+  const l = D.byId.get(id); if (!l) return;
+  n = Math.max(0, Math.min(l.qty, n));
+  D.lineDone.set(id, {line_id: id, got: n, done_by: device});
+  const o = D.open.get(l.carton), p = cartonProg(l.carton);
+  if (o) { if (p.done >= p.n) o.status = 'done'; else if (o.status === 'done') o.status = 'open'; }
+  animNext = true; update();
+  await call('rk_set_got', {p_line: id, p_got: n, p_device: device});
 }
-async function onScan(raw, replay) {
+async function unopen(c) {
+  const o = D.open.get(c);
+  if (o && o.opened_by !== device) return toast('Csak a felvevő eszköz vonhatja vissza');
+  D.open.delete(c); (D.byCarton.get(c) || []).forEach(l => D.lineDone.delete(l.id));
+  if (SV.res && SV.res.c === c) SV.res = null;
+  animNext = true; update();
+  await call('rk_unopen', {p_carton: c, p_device: device}); toast('Visszavonva');
+}
+async function closeShort(c) {
+  if (!await confirmDlg('Lezárod a dobozt hiánnyal?', 'Lezárás', false)) return;
+  for (const l of D.byCarton.get(c) || []) if (!D.lineDone.has(l.id)) { D.lineDone.set(l.id, {line_id: l.id, got: 0, done_by: device}); call('rk_set_got', {p_line: l.id, p_got: 0, p_device: device}); }
+  const o = D.open.get(c); if (o) o.status = 'done';
+  animNext = true; update(); toast('Lezárva');
+  await call('rk_set_done', {p_carton: c, p_done: true});
+}
+// felretett polc: +1 felretesz, -n levesz
+function park(key, delta) {
+  const n = Math.max(0, (D.parked.get(key) || 0) + delta);
+  if (n) D.parked.set(key, n); else D.parked.delete(key);
+  if (D.parkShared) call('rk_park', {p_key: key, p_delta: delta, p_device: device});
+  else ls.set('rk_parked_local', JSON.stringify([...D.parked]));
+}
+// doboz nyitasa a polcrol: ami a polcon van belole, atkerul; ha minden megvolt, a doboz kesz
+async function fromPark(c) {
+  if (!cartonStatus(c)) await openCarton(c);
+  for (const l of D.byCarton.get(c) || []) {
+    const k = Math.min(D.parked.get(l.key) || 0, l.qty - lineGot(l));
+    if (k > 0) { park(l.key, -k); await setGot(l.id, lineGot(l) + k); }
+  }
+  const done = cartonProg(c).done >= cartonProg(c).n;
+  logScan('park', c, '', done ? 'built' : 'opened', c);
+  if (done) { const o = D.open.get(c); if (o) o.status = 'done'; call('rk_set_done', {p_carton: c, p_done: true}); }
+  PV.msg = {tone: 'ok', html: idHtml(c) + (done ? ' kész, lezárható. Címke: admin felület.' : ' megnyitva, tedd a helyére.')};
+  animNext = true; update();
+}
+
+// ---------- utvonal: termek -> doboz ----------
+// nyitott dobozok, amelyekbe ez a termek meg kell; elol ami hamarabb kesz lesz
+function putTargets(key) {
+  const seen = new Set();
+  return (D.byKey.get(key) || []).filter(l => cartonStatus(l.carton) === 'open' && lineGot(l) < l.qty)
+    .map(l => ({l, c: l.carton, rem: remPieces(l.carton)}))
+    .sort((a, b) => a.rem - b.rem || a.c.localeCompare(b.c))
+    .filter(x => !seen.has(x.c) && seen.add(x.c));
+}
+// ennyi darab kellhet meg ebbol a meg nem nyitott dobozokba
+const freeNeed = key => (D.byKey.get(key) || []).filter(l => !cartonStatus(l.carton)).reduce((a, l) => a + l.qty - lineGot(l), 0);
+const fullBoxes = () => collected().filter(x => x.full);
+const openCount = () => [...D.open.values()].filter(x => x.status === 'open').length;
+
+// ---------- valogatas: szkennelt kod ----------
+async function onScan(raw) {
   raw = raw.trim(); if (!raw) return;
-  const c = classify(raw); animNext = true;
-  if (c.kind === 'badcarton') {
-    last = {t: 'badcarton', raw: c.raw};
-    if (!replay) { logScan('carton', c.raw, '', 'unknown', ''); pushHist(c.raw, 'Érvénytelen azonosító', 'bad'); }
-    beep('bad'); return update();
+  const c = classify(raw); animNext = true; HL = 0; window.scrollTo(0, 0);
+  if (c.kind === 'badcarton') { SV.res = {t: 'err', title: 'Érvénytelen azonosító', raw: c.raw, note: 'RQ-XPW + 10 számjegy'}; logScan('carton', c.raw, '', 'unknown', ''); beep('bad'); return update(); }
+  if (c.kind === 'carton') return scanCarton(c.carton, raw);
+  if (c.kind === 'cands') { SV.res = {t: 'cands', skus: c.skus}; beep('ok'); return update(); }
+  if (c.kind === 'unknown') { SV.res = {t: 'err', title: 'Nincs a goodslistben', raw}; logScan('sku', raw, c.key, 'unknown'); beep('bad'); return update(); }
+  const key = c.key, t = putTargets(key);
+  if (t.length) {
+    const l = t[0].l; SV.res = {t: 'put', id: l.id}; HL = l.id;
+    logScan('sku', raw, key, t.length > 1 ? 'openN' : 'open1', l.carton); beep('ok');
+    return setGot(l.id, lineGot(l) + 1);
   }
-  if (c.kind === 'carton') {
-    if (!D.byCarton.has(c.carton)) {
-      last = {t: 'carton', carton: c.carton, state: 'unknown', raw};
-      if (!replay) { logScan('carton', raw, '', 'unknown', c.carton); pushHist(raw, 'Ismeretlen doboz', 'bad', c.carton); }
-      beep('bad'); return update();
-    }
-    const st = cartonStatus(c.carton);
-    const state = !st ? 'opened' : st === 'done' ? 'done' : 'already';
-    last = {t: 'carton', carton: c.carton, state, raw};
-    if (!replay) {
-      pushHist(raw, state === 'opened' ? 'Felvéve' : state === 'done' ? 'Kész doboz' : 'Már felvéve', state === 'opened' ? 'ok' : 'warn', c.carton);
-      if (state === 'opened') { openCarton(c.carton); } else logScan('carton', raw, '', state, c.carton);
-    }
-    beep(state === 'done' ? 'bad' : 'ok'); return update();
-  }
-  if (c.kind === 'cands') { last = {t: 'cands', c, raw}; beep('ok'); return update(); }
-  if (c.kind === 'unknown') {
-    last = {t: 'unknown', raw}; if (!replay) { logScan('sku', raw, c.key, 'unknown'); pushHist(raw, 'Nincs a goodslistben', 'bad'); }
-    beep('bad'); return update();
-  }
-  const lines = D.byKey.get(c.key);
-  const open = lines.filter(l => cartonStatus(l.carton) === 'open' && !isLineDone(l));
-  const fin = lines.filter(l => isLineDone(l) || cartonStatus(l.carton) === 'done');
-  const res = open.length === 1 ? 'open1' : open.length ? 'openN' : fin.length && lines.some(l => cartonStatus(l.carton) === 'open') ? 'surplus' : 'closed';
-  last = {t: 'sku', key: c.key, raw};
-  if (!replay) {
-    logScan('sku', raw, c.key, res, open[0] && open[0].carton);
-    pushHist(raw, lines[0].descr + (open.length > 1 ? ' (' + open.length + ' doboz)' : ''), open.length ? 'ok' : 'warn', open.length === 1 ? open[0].carton : '');
-  }
-  beep(open.length ? 'ok' : 'bad'); update();
+  if ((D.parked.get(key) || 0) >= freeNeed(key)) { SV.res = {t: 'surplus', key}; logScan('sku', raw, key, 'surplus'); beep('bad'); return update(); }
+  park(key, 1); SV.res = {t: 'park', key}; logScan('sku', raw, key, 'aside'); beep('park'); update();
+}
+function scanCarton(c, raw) {
+  if (!D.byCarton.has(c)) { SV.res = {t: 'err', title: 'Ismeretlen doboz', raw: c}; logScan('carton', raw, '', 'unknown', c); beep('bad'); return update(); }
+  const st = cartonStatus(c), state = !st ? 'opened' : st === 'done' ? 'done' : 'already';
+  SV.res = {t: 'box', c, state};
+  beep(state === 'done' ? 'bad' : 'ok');
+  if (state === 'opened') openCarton(c); else { logScan('carton', raw, '', state, c); update(); }
 }
 
 // ---------- fejlec, navigacio ----------
 const nav = $('#tabs');
-const TABS = [['scan', 'Szkennelés', 'scan'], ['ident', 'Azonosítás', 'target'], ['cartons', 'Dobozok', 'box']];
-nav.insertAdjacentHTML('beforeend', TABS.map(([k, n, i]) => `<button role="tab" data-v="${k}">${ic(i)}${n}${k === 'cartons' ? '<span class="badge" id="bd" hidden></span>' : ''}</button>`).join(''));
+const TABS = [['sort', 'Válogatás', 'scan'], ['park', 'Félretett', 'layers'], ['cartons', 'Dobozok', 'box']];
+nav.insertAdjacentHTML('beforeend', TABS.map(([k, n, i]) => `<button role="tab" data-v="${k}">${ic(i)}${n}<span class="badge" id="bd-${k}" hidden></span></button>`).join(''));
 nav.querySelectorAll('button').forEach(b => b.onclick = () => goView(b.dataset.v));
-let lastBadge = -1;
+const lastBadge = {};
+function badge(k, n, cls) {
+  const bd = $('#bd-' + k); bd.hidden = !n; bd.textContent = n; bd.className = 'badge ' + (cls || '');
+  if (n !== lastBadge[k] && n) { void bd.offsetWidth; bd.classList.add('pop'); }
+  lastBadge[k] = n;
+}
 function renderChrome() {
   $('#dev').textContent = device || 'Név';
   $('#mut').innerHTML = muted ? ic('mute') : ic('vol');
@@ -303,10 +346,8 @@ function renderChrome() {
   $('#sync').innerHTML = (D.online ? ic('wifi') : ic('off') + 'Nincs kapcsolat') + (Q.length ? ` ${Q.length}` : '');
   nav.style.setProperty('--i', ORDER.indexOf(view));
   nav.querySelectorAll('button').forEach(b => b.setAttribute('aria-selected', b.dataset.v === view));
-  const n = [...D.open.values()].filter(x => x.status === 'open').length, bd = $('#bd');
-  bd.hidden = !n; bd.textContent = n;
-  if (n !== lastBadge && n) { bd.classList.remove('pop'); void bd.offsetWidth; bd.classList.add('pop'); }
-  lastBadge = n;
+  badge('park', fullBoxes().length, 'ok');
+  badge('cartons', openCount());
 }
 // nezetvaltas: kifuto + beuszo animacio, az irany a fulek sorrendje szerint
 async function goView(v) {
@@ -314,14 +355,14 @@ async function goView(v) {
   const dir = ORDER.indexOf(v) > ORDER.indexOf(view) ? 'R' : 'L';
   view = v; ls.set('rk_view', v); renderChrome();
   if (!reduceMotion) { app.dataset.leave = dir === 'R' ? 'L' : 'R'; await sleep(110); delete app.dataset.leave; }
-  shellView = ''; cf.add = false; cf.msg = null;
-  app.dataset.enter = dir; update();
+  shellView = ''; PV.msg = null; cf.msg = null;
+  app.dataset.enter = dir; update(); window.scrollTo(0, 0);
   setTimeout(() => { if (app.dataset.enter === dir) delete app.dataset.enter; }, 480);
 }
 function update() {
   renderChrome();
   if (loading) { setHtml(app, '<div class="skel"></div><div class="skel"></div><div class="skel"></div>'); shellView = ''; return; }
-  if (view === 'scan') updateScan(); else if (view === 'ident') updateIdent(); else updateCartons();
+  if (view === 'sort') updateSort(); else if (view === 'park') updatePark(); else updateCartons();
 }
 function flashAnim(el) {
   if (!animNext) return; animNext = false;
@@ -329,330 +370,226 @@ function flashAnim(el) {
   el._h = null;
 }
 const stI = i => `st" style="--i:${Math.min(i, 10)}`;
+const icS = n => ic(n).replace('class="i"', 'class="i sm"');
 
-// ---------- szkennelo nezet ----------
+// ---------- doboz tartalma (valogatas es dobozok ful kozos) ----------
+function lineRow(l, edit) {
+  const g = lineGot(l), full = g >= l.qty;
+  return `<div class="pl ${full ? 'full' : ''} ${HL === l.id ? 'hl' : ''}"><div class="pn"><b>${esc(l.descr)}</b><span class="meta mono">${esc(l.sku.split('-')[0])}</span></div>
+    ${edit ? `<div class="stp"><button class="btn xs" data-gm="${l.id}" aria-label="Kevesebb" ${g ? '' : 'disabled'}>${ic('minus')}</button><span class="qv"><b>${g}</b>/${l.qty}</span><button class="btn xs" data-gp="${l.id}" aria-label="Több" ${full ? 'disabled' : ''}>${ic('plus')}</button>
+    <button class="btn xs ${full ? '' : 'pri'}" data-ga="${l.id}" ${full ? 'disabled' : ''}>Mind</button></div>` : `<span class="stp"><span class="qv"><b>${g}</b>/${l.qty}</span></span>`}</div>`;
+}
+const BOXHEAD = {open: ['info', 'box', 'Nyitott doboz'], done: ['ok', 'check', 'Kész doboz'], none: ['warn', 'alert', 'Nincs megnyitva'],
+  opened: ['ok', 'check', 'Felvéve'], already: ['info', 'box', 'Már nyitva'], donescan: ['warn', 'alert', 'Kész doboz']};
+function boxView(c, headKey) {
+  const st = cartonStatus(c), p = cartonProg(c), pct = Math.round(p.ratio * 100), o = D.open.get(c);
+  const [cls, icn, txt] = BOXHEAD[headKey || (st || 'none')];
+  const ls_ = (D.byCarton.get(c) || []).slice().sort((a, b) => (lineGot(a) >= a.qty) - (lineGot(b) >= b.qty) || a.descr.localeCompare(b.descr));
+  return `<section class="hero ${cls} compact"><div class="hero-top"><span class="hero-ico">${ic(icn)}</span>${txt}<span class="aux">${p.got}/${p.qty} db</span></div>
+      ${idHtml(c, true)}
+      <div class="pbar" role="img" aria-label="${pct}% kész"><i style="width:${pct}%"></i></div>
+      <div class="hchips"><span class="hchip">${p.done}/${p.n} tétel</span><span class="hchip mono">${esc(ls_[0].awb)}</span></div></section>
+    <div class="card" style="margin-top:var(--s3)">${ls_.map(l => lineRow(l, st === 'open')).join('')}</div>
+    <div class="row" style="justify-content:stretch">
+      ${!st ? `<button class="btn pri" style="flex:1" data-bopen="${esc(c)}">Megnyitom</button>` : ''}
+      ${st === 'open' && o && o.opened_by === device && !p.got ? `<button class="btn" data-unopen="${esc(c)}">${ic('undo')}Visszavon</button>` : ''}
+      ${st === 'open' ? `<button class="btn" style="flex:1" data-close="${esc(c)}">Lezárás hiánnyal</button>` : ''}
+      ${st === 'done' ? `<button class="btn" style="flex:1" data-reopen="${esc(c)}">Újranyitás</button>` : ''}</div>`;
+}
+// doboz gombjai; true ha kezelte
+async function boxAct(d) {
+  if (d.gp) { const l = D.byId.get(+d.gp); HL = l.id; await setGot(l.id, lineGot(l) + 1); return true; }
+  if (d.gm) { const l = D.byId.get(+d.gm); HL = l.id; await setGot(l.id, lineGot(l) - 1); return true; }
+  if (d.ga) { const l = D.byId.get(+d.ga); HL = l.id; await setGot(l.id, l.qty); return true; }
+  if (d.bopen) { await openCarton(d.bopen); toast('Felvéve'); return true; }
+  if (d.unopen) { await unopen(d.unopen); return true; }
+  if (d.close) { await closeShort(d.close); return true; }
+  if (d.reopen) { await setDone(d.reopen, false); toast('Újranyitva'); return true; }
+  return false;
+}
+
+// ---------- valogatas nezet ----------
 function idleHtml() {
   if (!D.lines.length) return `<div class="idle"><div class="frame">${ic('layers').replace('class="i"', 'class="i lg"')}</div><h2>Nincs goodslist</h2><p>Importáld az admin felületen</p></div>`;
-  return `<div class="idle"><div class="frame scanning">${ic('scan').replace('class="i"', 'class="i lg" style="width:48px;height:48px"')}</div><h2>Szkenneld a kódot</h2><p>Doboz címke vagy termék</p>
-    <button class="btn" data-goident>Nem olvasható a címke?</button></div>`;
+  const full = fullBoxes().length, parked = [...D.parked.values()].reduce((a, n) => a + n, 0);
+  return `<div class="idle"><div class="frame scanning">${ic('scan').replace('class="i"', 'class="i lg" style="width:48px;height:48px"')}</div><h2>Szkenneld a terméket</h2><p>Megmutatom, melyik dobozba kell. Doboz címkét is szkennelhetsz.</p>
+    <div class="quick"><button data-goto="cartons"><b>${openCount()}</b>nyitott doboz</button><button data-goto="park"><b>${parked}</b>db félretéve</button><button data-goto="park" class="${full ? 'hot' : ''}"><b>${full}</b>összegyűlt</button></div></div>`;
 }
-function skuHtml() {
-  const lines = D.byKey.get(last.key) || [], l0 = lines[0];
-  const targets = lines.filter(l => cartonStatus(l.carton) === 'open' && !isLineDone(l)).sort((a, b) => cartonProg(b.carton).ratio - cartonProg(a.carton).ratio);
-  const fin = lines.filter(l => isLineDone(l) || cartonStatus(l.carton) === 'done');
-  const unopened = lines.filter(l => !cartonStatus(l.carton));
-  const sub = `${l0.mat && l0.mat !== l0.descr ? esc(l0.mat) + ' · ' : ''}<span class="mono">${esc(l0.sku.split('-')[0])}</span>`;
-  const frow = (l, i) => `<div class="row-i dim ${stI(i)}"><div class="rest">${idHtml(l.carton)}<span class="meta">${isLineDone(l) ? 'tétel kész' : 'doboz kész'}</span></div>
-      ${isLineDone(l) ? `<button class="btn xs" data-line="${l.id}" data-v="0">Mégsem</button>` : `<button class="btn xs" data-reopen="${esc(l.carton)}">Újranyit</button>`}</div>`;
-  const orow = (l, i) => `<div class="row-i ${stI(i)}"><div class="rest">${idHtml(l.carton)}${awbTag(l)}</div><button class="btn sm pri" data-open="${esc(l.carton)}">Felvétel</button></div>`;
-  if (targets.length) {
-    const t = targets[0], p = cartonProg(t.carton), n = targets.length, rest = targets.slice(1);
-    return `<section class="hero ok"><div class="hero-top"><span class="hero-ico">${ic('check')}</span>Ide tedd<span class="aux">${n > 1 ? n + ' doboz' : ''}</span></div>
-      ${idHtml(t.carton, true)}
-      <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub">${sub}</div>
-      <div class="hchips"><span class="hchip">${p.done}/${p.n} kész</span><span class="hchip mono">${esc(t.awb)}</span></div>
-      <button class="hero-btn" data-line="${t.id}" data-v="1">Tétel kész</button></section>
-      ${rest.length ? `<div class="eyebrow alt-h">További dobozok</div><div class="card">${rest.map((l, i) => { const pp = cartonProg(l.carton); return `<div class="row-i ${stI(i)}"><div class="rest">${idHtml(l.carton)}<span class="meta">${pp.done}/${pp.n} kész</span></div><button class="btn sm pri" data-line="${l.id}" data-v="1">Kész</button></div>`; }).join('')}</div>` : ''}
-      ${fin.length ? `<div class="eyebrow alt-h">Már kész</div><div class="card">${fin.map(frow).join('')}</div>` : ''}`;
-  }
-  const finOpen = fin.length && lines.some(l => cartonStatus(l.carton) === 'open');
-  return `<section class="hero warn"><div class="hero-top"><span class="hero-ico">${ic('alert')}</span>${finOpen ? 'Felesleg' : 'Nincs nyitott dobozban'}</div>
-    <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub">${sub}</div>
-    ${finOpen ? '<div class="hero-note">Minden nyitott dobozban kész.</div>' : ''}</section>
-    <div class="card" style="margin-top:var(--s3)">${fin.map(frow).join('')}${unopened.map(orow).join('')}</div>`;
+function putHtml(r) {
+  const l = D.byId.get(r.id); if (!l) return idleHtml();
+  const c = l.carton, p = cartonProg(c), done = cartonStatus(c) === 'done', pct = Math.round(p.ratio * 100);
+  const alts = putTargets(l.key).filter(x => x.c !== c).slice(0, 3);
+  return `<section class="hero ok"><div class="hero-top"><span class="hero-ico">${ic('check')}</span>Ide tedd<span class="aux">${lineGot(l)}/${l.qty} db ebből</span></div>
+      ${idHtml(c, true)}
+      <div class="hero-prod">${esc(l.descr)}</div><div class="hero-sub mono">${esc(l.sku.split('-')[0])}</div>
+      <div class="pbar" role="img" aria-label="${pct}% kész"><i style="width:${pct}%"></i></div>
+      <div class="hero-note">${done ? '<b>Utolsó darab: a doboz kész, lezárható.</b>' : `Doboz: ${p.got}/${p.qty} db`}</div>
+      <div class="hero-acts"><button class="hero-btn alt" data-undo>${ic('undo')}Visszavon</button><button class="hero-btn alt" data-showbox="${esc(c)}">${ic('list')}Tartalom</button></div></section>
+    ${alts.length ? `<div class="eyebrow alt-h">Ezekbe is kell</div><div class="card">${alts.map((x, i) => `<div class="row-i ${stI(i)}"><div class="rest">${idHtml(x.c)}<span class="meta">${x.rem} db hiányzik a dobozból</span></div><button class="btn sm" data-move="${x.l.id}">Inkább ide</button></div>`).join('')}</div>` : ''}`;
 }
-function cartonLines(c) {
-  const ls_ = D.byCarton.get(c) || [];
-  return `<div class="contents">${ls_.map((l, i) => `<button class="lrow ${stI(i)}" data-line="${l.id}" data-v="${isLineDone(l) ? 0 : 1}" aria-pressed="${isLineDone(l)}">
-    <span class="box">${isLineDone(l) ? ic('check') : ''}</span><span class="t"><b>${esc(l.descr)}</b><small class="mono">${esc(l.sku.split('-')[0])}</small></span></button>`).join('')}</div>`;
-}
-function cartonCard() {
-  const c = last.carton, st = last.state;
-  if (st === 'unknown') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Ismeretlen doboz</div>${idHtml(c, true)}<button class="hero-btn alt" data-goident>Azonosítás termékekből</button></section>`;
-  const map = {opened: ['ok', 'check', 'Felvéve'], already: ['info', 'info', 'Már felvéve'], done: ['warn', 'alert', 'Kész doboz']};
-  const [cls, icn, txt] = map[st]; const p = cartonProg(c), cur = cartonStatus(c), l0 = (D.byCarton.get(c) || [])[0];
-  return `<section class="hero ${cls}"><div class="hero-top"><span class="hero-ico">${ic(icn)}</span>${txt}</div>
-    ${idHtml(c, true)}
-    <div class="hchips"><span class="hchip">${p.done}/${p.n} kész</span><span class="hchip mono">${esc(l0.awb)}</span></div></section>
-    <div class="card" style="margin-top:var(--s3)">${cartonLines(c)}</div>
-    <div class="row" style="justify-content:stretch">
-      ${st === 'opened' ? `<button class="btn" data-unopen="${esc(c)}">${ic('undo')}Vissza</button>` : ''}
-      ${cur === 'done' ? `<button class="btn pri" style="flex:1" data-reopen="${esc(c)}">Újranyitás</button>` : `<button class="btn pri" style="flex:1" data-cdone="${esc(c)}">Doboz kész</button>`}</div>`;
-}
-function candsHtml() {
-  const c = last.c;
-  return `<div class="card">${c.skus.map((k, i) => { const l = D.byKey.get(k); return `<button class="lrow ${stI(i)}" data-pick="${k}"><span class="t"><b>${esc(l[0].descr)}</b><small class="mono">${esc(k)}</small></span><span class="tag">${l.length} doboz</span></button>`; }).join('')}</div>`;
+function parkResHtml(r) {
+  const l0 = D.byKey.get(r.key)[0], n = D.parked.get(r.key) || 0;
+  const full = fullBoxes().filter(x => D.byCarton.get(x.c).some(l => l.key === r.key));
+  return `<section class="hero warn"><div class="hero-top"><span class="hero-ico">${ic('layers')}</span>Tedd félre<span class="aux">${n} db a polcon</span></div>
+      <div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub mono">${esc(r.key)}</div>
+      <div class="hero-note">Egyik nyitott dobozba sem kell. Ne nyiss neki új dobozt, tedd a félretett polcra.</div>
+      ${n ? `<div class="hero-acts"><button class="hero-btn alt" data-unpark="${r.key}">${ic('undo')}Visszavon</button></div>` : ''}</section>
+    ${full.length ? `<section class="hero ok compact" style="margin-top:var(--s3)"><div class="hero-top"><span class="hero-ico">${ic('check')}</span>Összegyűlt egy doboz</div>${idHtml(full[0].c, true)}
+      <div class="hero-note">Minden darabja a polcon van, ez legyen a következő doboz.</div><button class="hero-btn" data-goto="park">Összerakom</button></section>` : ''}`;
 }
 function resultHtml() {
-  if (!last || !D.lines.length) return idleHtml();
-  if (last.t === 'badcarton') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Érvénytelen azonosító</div><div class="mono" style="margin-top:var(--s3);font-size:20px;word-break:break-all">${esc(last.raw)}</div><div class="hero-note">RQ-XPW + 10 számjegy</div><button class="hero-btn alt" data-goident>Azonosítás termékekből</button></section>`;
-  if (last.t === 'unknown') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs a goodslistben</div><div class="mono" style="margin-top:var(--s3);font-size:20px;word-break:break-all">${esc(last.raw)}</div></section>`;
-  if (last.t === 'carton') return cartonCard();
-  if (last.t === 'cands') return candsHtml();
-  return skuHtml();
+  const r = SV.res;
+  if (!r || !D.lines.length) return idleHtml();
+  if (r.t === 'err') return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>${esc(r.title)}</div><div class="mono" style="margin-top:var(--s3);font-size:20px;word-break:break-all">${esc(r.raw)}</div>${r.note ? `<div class="hero-note">${esc(r.note)}</div>` : ''}</section>`;
+  if (r.t === 'cands') return `<div class="eyebrow alt-h" style="margin-top:0">Melyik termék?</div><div class="card">${r.skus.map((k, i) => { const l = D.byKey.get(k); return `<button class="lrow ${stI(i)}" data-pick="${k}"><span class="t"><b>${esc(l[0].descr)}</b><small class="mono">${esc(k)}</small></span><span class="tag">${l.length} doboz</span></button>`; }).join('')}</div>`;
+  if (r.t === 'surplus') { const l0 = D.byKey.get(r.key)[0]; return `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Felesleg</div><div class="hero-prod">${esc(l0.descr)}</div><div class="hero-sub mono">${esc(r.key)}</div><div class="hero-note">Egyik dobozba sem kell több, a polcon is van már elég. Tedd külön, jelezd.</div></section>`; }
+  if (r.t === 'put') return putHtml(r);
+  if (r.t === 'park') return parkResHtml(r);
+  if (r.t === 'box') return boxView(r.c, r.state === 'done' ? 'donescan' : r.state === 'opened' && cartonStatus(r.c) === 'open' ? 'opened' : r.state === 'already' ? 'already' : null);
+  return idleHtml();
 }
-function histHtml() {
-  if (!hist.length) return '';
-  return `<div class="card hist" style="margin-top:var(--s4)"><div class="hd"><h2>Előzmények</h2></div>${hist.map((h, i) => `<div class="row-i" data-h="${i}"><span class="meta mono">${fmtT(h.t)}</span><span class="rest" style="display:block">${esc(h.text || '')}${h.carton ? ' ' + idHtml(h.carton) : ''}</span><span class="tag ${h.result === 'ok' ? 'ok' : h.result === 'bad' ? 'bad' : 'warn'}">${h.result === 'ok' ? 'ok' : h.result === 'bad' ? 'hiba' : 'figy.'}</span></div>`).join('')}</div>`;
-}
-function updateScan() {
-  if (shellView !== 'scan') {
-    shellView = 'scan';
+function updateSort() {
+  if (shellView !== 'sort') {
+    shellView = 'sort';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
-        <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Szkenneld vagy írd be"></form>
-      <div id="res"></div><div id="hs"></div><div class="ver">v2.1</div>`;
+        <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Termék vagy doboz kódja"></form>
+      <div id="res"></div><div class="ver">v2.2</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();
-    $('#res').onclick = onResClick; $('#hs').onclick = e => { const r = e.target.closest('[data-h]'); if (r) onScan(hist[+r.dataset.h].raw, true); };
+    $('#res').onclick = async e => { await onSortClick(e); if (view === 'sort' && !$('#dlg').open && $('#scan')) $('#scan').focus({preventScroll: true}); };
     animNext = true;
   }
   const res = $('#res'); flashAnim(res);
-  setHtml(res, resultHtml()); setHtml($('#hs'), histHtml());
+  setHtml(res, resultHtml());
   $('#scan').disabled = !D.lines.length;
 }
-function onResClick(e) {
-  const b = e.target.closest('button'); if (!b) return;
-  const d = b.dataset;
-  if (d.line) return setLine(+d.line, d.v === '1');
-  if (d.open) return openCarton(d.open).then(() => toast('Felvéve'));
-  if (d.reopen) return setDone(d.reopen, false).then(() => toast('Újranyitva'));
-  if (d.cdone) return setDone(d.cdone, true).then(() => { toast('Kész'); last = null; animNext = true; update(); });
-  if (d.unopen) return unopen(d.unopen);
+async function onSortClick(e) {
+  const b = e.target.closest('button'); if (!b || b.disabled) return;
+  const d = b.dataset, r = SV.res;
+  if (await boxAct(d)) return;
+  if (d.undo !== undefined && r && r.t === 'put') { const l = D.byId.get(r.id); SV.res = null; toast('Visszavonva'); return setGot(l.id, lineGot(l) - 1); }
+  if (d.unpark) { park(d.unpark, -1); SV.res = null; animNext = true; toast('Visszavonva'); return update(); }
+  if (d.move && r && r.t === 'put') {
+    const from = D.byId.get(r.id), to = D.byId.get(+d.move); SV.res = {t: 'put', id: to.id}; HL = to.id;
+    logScan('sku', to.key, to.key, 'move', to.carton);
+    await setGot(from.id, lineGot(from) - 1); return setGot(to.id, lineGot(to) + 1);
+  }
+  if (d.showbox) { SV.res = {t: 'box', c: d.showbox, state: 'show'}; animNext = true; return update(); }
   if (d.pick) return onScan(d.pick);
-  if (d.goident !== undefined) goView('ident');
-}
-async function unopen(c) {
-  const o = D.open.get(c);
-  if (o && o.opened_by !== device) return toast('Csak a felvevő eszköz vonhatja vissza');
-  D.open.delete(c); (D.byCarton.get(c) || []).forEach(l => D.lineDone.delete(l.id)); last = null; animNext = true; update();
-  await call('rk_unopen', {p_carton: c, p_device: device}); toast('Visszavonva');
+  if (d.goto) return goView(d.goto);
 }
 
-// ---------- azonositas: doboz osszeallitasa a kalodakbol ----------
-// Mindenki a sajat dobozat epiti: a foglalt dobozt mas nem latja es nem szkennelhet bele.
-let WK = {keys: [], msg: null, active: ls.get('rk_active') || '', hl: 0, finished: '', exp: {}, view: 'work'};
-const myBoxes = () => [...D.claims.keys()].filter(c => claimOf(c) === device && cartonStatus(c) !== 'done');
-function activeBox() {
-  const mine = myBoxes(); if (!mine.length) return '';
-  if (!mine.includes(WK.active)) WK.active = mine[0];
-  return WK.active;
+// ---------- felretett polc nezet ----------
+function boxCard(x, i, full) {
+  const open = PV.exp[x.c] !== undefined ? PV.exp[x.c] : i === 0;
+  const rows = full
+    ? D.byCarton.get(x.c).map(l => `<div class="need"><span>${esc(l.descr)}<small class="mono">${esc(l.sku.split('-')[0])}</small></span><b>${l.qty - lineGot(l)} db</b></div>`).join('')
+    : x.miss.map(m => `<div class="need"><span>${esc(keyName(m.k))}<small class="mono">${esc(m.k)}</small></span><b>${m.n} db</b></div>`).join('');
+  return `<div class="card cdc ${full ? 'full' : ''} ${stI(i)}"><div class="cdh"><div class="rest">${idHtml(x.c)}<span class="meta">${full ? `${x.total} db, mind a polcon` : `${x.have}/${x.total} db a polcon`} · ${D.byCarton.get(x.c).length} tétel</span></div>
+      ${full ? '' : `<button class="btn sm" data-build="${esc(x.c)}" data-full="0">Megnyitom</button>`}</div>
+    <button class="cdt" data-exp="${esc(x.c)}" data-i="${i}" aria-expanded="${open}">${full ? 'Ezeket vedd le a polcról' : 'Ezek hiányoznak még'}<span class="chev">${icS('chev')}</span></button>
+    <div class="needs ${open ? 'on' : ''}"><div class="ni">${rows}</div></div>
+    ${full ? `<div class="pad" style="padding:var(--s3) var(--s4)"><button class="btn pri block" data-build="${esc(x.c)}" data-full="1">${ic('check')}Összeraktam</button></div>` : ''}</div>`;
 }
-const remPieces = c => (D.byCarton.get(c) || []).reduce((a, l) => a + (l.qty - lineGot(l)), 0);
-function identCands(keys) {
-  if (!keys.length) return [];
-  let set = null;
-  for (const k of keys) {
-    const cs = new Set((D.byKey.get(k) || []).map(l => l.carton));
-    set = set ? new Set([...set].filter(c => cs.has(c))) : cs;
-  }
-  const ks = new Set(keys); let hidden = 0;
-  const out = [...set].map(c => {
-    const ls_ = D.byCarton.get(c), matched = ls_.filter(l => ks.has(l.key)).length, st = cartonStatus(c), cl = claimOf(c);
-    return {c, n: ls_.length, matched, extra: ls_.length - matched, st, own: cl === device, other: cl && cl !== device, rem: remPieces(c)};
-  }).filter(x => { if (x.st === 'done') return false; if (x.other) { hidden++; return false; } return true; })
-    .sort((a, b) => a.own !== b.own ? (a.own ? -1 : 1) : (a.extra === 0) !== (b.extra === 0) ? (a.extra === 0 ? -1 : 1) : a.n - b.n || a.c.localeCompare(b.c));
-  out.hidden = hidden; return out;
+function parkHtml() {
+  const msg = PV.msg ? `<div class="msg ${PV.msg.tone}" role="status" style="margin-bottom:var(--s3)">${PV.msg.html}</div>` : '';
+  const items = [...D.parked].filter(([k]) => D.byKey.has(k)).sort((a, b) => keyName(a[0]).localeCompare(keyName(b[0]), 'hu'));
+  const local = D.parkShared ? '' : '<div class="msg warn" style="margin-bottom:var(--s3)">A polc csak ezen az eszközön látszik (admin: SQL frissítés kell).</div>';
+  if (!items.length) return msg + local + `<div class="idle"><div class="frame">${ic('layers').replace('class="i"', 'class="i lg"')}</div><h2>Üres a félretett polc</h2><p>Ide kerül, ami egyik nyitott dobozba sem kell</p></div>`;
+  const cs = collected(), full = cs.filter(x => x.full), near = cs.filter(x => !x.full).slice(0, 3);
+  const total = items.reduce((a, x) => a + x[1], 0);
+  return msg + local
+    + (full.length ? `<div class="eyebrow alt-h" style="margin-top:0">Összegyűlt, ez a következő doboz (${full.length})</div>${full.slice(0, 5).map((x, i) => boxCard(x, i, true)).join('')}`
+      : `<div class="msg warn" style="margin-bottom:var(--s2)">Még egy doboz sem gyűlt össze teljesen.</div>`)
+    + (near.length ? `<div class="eyebrow alt-h">Legközelebb áll</div>${near.map((x, i) => boxCard(x, full.length ? i + 1 : i, false)).join('')}` : '')
+    + `<div class="eyebrow alt-h">A polcon (${total} db, ${items.length} termék)</div><div class="card">${items.map(([k, n], i) => `<div class="pk ${stI(i)}"><div class="t"><b>${esc(keyName(k))}</b><small class="mono">${esc(k)}</small></div><span class="n">${n} db</span><button class="btn xs" data-unpark="${k}" aria-label="Levesz egyet">${ic('minus')}</button></div>`).join('')}</div>`;
 }
-async function setGot(id, n) {
-  const l = D.byId.get(id); if (!l) return;
-  n = Math.max(0, Math.min(l.qty, n));
-  D.lineDone.set(id, {line_id: id, got: n, done_by: device});
-  const o = D.open.get(l.carton), p = cartonProg(l.carton);
-  if (o) {
-    if (p.done >= p.n) { o.status = 'done'; D.claims.delete(l.carton); WK.finished = l.carton; beep('ok'); }
-    else if (o.status === 'done') o.status = 'open';
-  }
-  animNext = true; update();
-  await call('rk_set_got', {p_line: id, p_got: n, p_device: device});
-}
-async function claimBox(c) {
-  const keys = [...WK.keys];
-  const had = D.open.has(c);
-  D.claims.set(c, {carton: c, device, ts: new Date().toISOString()});
-  if (!had) D.open.set(c, {carton: c, status: 'open', opened_by: device, opened_at: new Date().toISOString()});
-  WK.active = c; ls.set('rk_active', c); WK.view = 'work'; WK.keys = []; WK.msg = null; WK.finished = ''; animNext = true; update();
-  const r = await call('rk_claim', {p_carton: c, p_device: device});
-  if (r.data && !r.data.ok) {
-    D.claims.delete(c); if (!had) D.open.delete(c);
-    toast(r.data.error === 'taken' ? 'Foglalt: ' + r.data.by : 'Nem foglalható');
-    beep('bad'); await refreshData(false); WK.view = 'find'; WK.keys = keys; update(); return;
-  }
-  for (const k of keys) { const l = (D.byCarton.get(c) || []).find(x => x.key === k); if (l && lineGot(l) < 1) await setGot(l.id, 1); }
-}
-async function releaseBox(c) {
-  D.claims.delete(c); if (WK.active === c) WK.active = '';
-  animNext = true; update();
-  await call('rk_release', {p_carton: c, p_device: device}); toast('Elengedve');
-}
-async function closeShort(c) {
-  if (!await confirmDlg('Lezárod a dobozt hiánnyal?', 'Lezárás', false)) return;
-  for (const l of D.byCarton.get(c) || []) if (!D.lineDone.has(l.id)) { D.lineDone.set(l.id, {line_id: l.id, got: 0, done_by: device}); call('rk_set_got', {p_line: l.id, p_got: 0, p_device: device}); }
-  D.claims.delete(c); const o = D.open.get(c); if (o) o.status = 'done';
-  WK.finished = c; animNext = true; update();
-  await call('rk_set_done', {p_carton: c, p_done: true});
-}
-async function onIdentScan(raw) {
-  raw = raw.trim(); if (!raw) return;
-  const c = classify(raw); animNext = true; WK.finished = '';
-  if (c.kind === 'carton' || c.kind === 'badcarton') { WK.msg = {tone: 'warn', text: 'Ez doboz azonosító. Termék vonalkódot szkenneld.'}; beep('bad'); return updateIdent(); }
-  if (c.kind === 'cands') { WK.msg = {tone: 'warn', text: 'Írd be a teljes termékkódot.'}; beep('bad'); return updateIdent(); }
-  if (c.kind === 'unknown') { WK.msg = {tone: 'bad', text: 'Nincs a goodslistben: ' + raw}; logScan('ident', raw, c.key, 'unknown', ''); beep('bad'); return updateIdent(); }
-  const key = c.key, act = activeBox();
-  if (act && WK.view === 'work') {
-    const ln = (D.byCarton.get(act) || []).filter(l => l.key === key);
-    if (ln.length) {
-      const l = ln.find(x => lineGot(x) < x.qty);
-      if (!l) { WK.msg = {tone: 'warn', text: 'Ebből már minden megvan.'}; beep('bad'); return updateIdent(); }
-      WK.msg = null; WK.hl = l.id; beep('ok'); logScan('pack', raw, key, 'pack', act);
-      return setGot(l.id, lineGot(l) + 1);
-    }
-    WK.view = 'find'; WK.keys = [key]; WK.msg = {tone: 'warn', text: 'Nem az aktív dobozba tartozik.'}; beep('bad');
-    logScan('ident', raw, key, 'ident', ''); return updateIdent();
-  }
-  if (WK.keys.includes(key)) { WK.msg = {tone: 'warn', text: 'Már hozzáadva.'}; beep('bad'); return updateIdent(); }
-  WK.keys.push(key); WK.msg = null; WK.view = 'find';
-  logScan('ident', raw, key, 'ident', ''); beep('ok'); updateIdent();
-}
-const needRows = (c, hlKeys) => (D.byCarton.get(c) || []).filter(l => lineGot(l) < l.qty).map(l =>
-  `<div class="need ${hlKeys.includes(l.key) ? 'is' : ''}"><span>${esc(l.descr)}<small class="mono">${esc(l.sku.split('-')[0])}</small></span><b>${l.qty - lineGot(l)} db</b></div>`).join('');
-function minePanel(act) {
-  const mine = myBoxes().filter(c => c !== act);
-  if (!mine.length) return '';
-  return `<div class="eyebrow alt-h">Saját dobozaim</div><div class="card">${mine.map((c, i) => { const p = cartonProg(c); return `<div class="row-i ${stI(i)}"><div class="rest">${idHtml(c)}<span class="meta">${p.got}/${p.qty} db</span></div><button class="btn sm pri" data-go="${esc(c)}">Folytatom</button></div>`; }).join('')}</div>`;
-}
-function workHtml(act) {
-  const p = cartonProg(act), ls_ = (D.byCarton.get(act) || []).slice().sort((a, b) => (lineGot(a) >= a.qty) - (lineGot(b) >= b.qty) || a.descr.localeCompare(b.descr));
-  const pct = Math.round(p.ratio * 100);
-  return `<section class="hero info compact"><div class="hero-top"><span class="hero-ico">${ic('box')}</span>Építés<span class="aux">${p.done}/${p.n} tétel</span></div>
-      ${idHtml(act, true)}
-      <div class="pbar" role="img" aria-label="${pct}% kész"><i style="width:${pct}%"></i></div>
-      <div class="hchips"><span class="hchip">${p.got}/${p.qty} db</span><span class="hchip mono">${esc((D.byCarton.get(act)[0] || {}).awb || '')}</span></div></section>
-    <div class="card" style="margin-top:var(--s3)">${ls_.map((l, i) => { const g = lineGot(l), full = g >= l.qty;
-      return `<div class="pl ${full ? 'full' : ''} ${WK.hl === l.id ? 'hl' : ''}"><div class="pn"><b>${esc(l.descr)}</b><span class="meta mono">${esc(l.sku.split('-')[0])}</span></div>
-        <div class="stp"><button class="btn xs" data-gm="${l.id}" aria-label="Kevesebb" ${g ? '' : 'disabled'}>${ic('minus')}</button><span class="qv"><b>${g}</b>/${l.qty}</span><button class="btn xs" data-gp="${l.id}" aria-label="Több" ${full ? 'disabled' : ''}>${ic('plus')}</button>
-        <button class="btn xs ${full ? '' : 'pri'}" data-ga="${l.id}" ${full ? 'disabled' : ''}>Mind</button></div></div>`; }).join('')}</div>
-    <div class="row" style="justify-content:stretch;margin-top:var(--s3)"><button class="btn" data-rel="${esc(act)}">Elengedem</button><button class="btn" style="flex:1" data-short="${esc(act)}">Lezárás hiánnyal</button></div>
-    ${minePanel(act)}`;
-}
-function candCard(x, i, keys) {
-  const open = WK.exp[x.c] !== undefined ? WK.exp[x.c] : i === 0;
-  return `<div class="card cdc ${x.own ? 'own' : ''} ${stI(i)}"><div class="cdh"><div class="rest">${idHtml(x.c)}<span class="meta">${x.n} tétel · ${x.rem} db hátra${x.own ? ' · saját' : ''}</span></div>
-      <button class="btn sm pri" data-build="${esc(x.c)}">Építem</button></div>
-    <button class="cdt" data-exp="${esc(x.c)}" aria-expanded="${open}">${open ? 'Mi kell még' : 'Mi kell még'}<span class="chev">${ic('chev').replace('class="i"', 'class="i sm"')}</span></button>
-    <div class="needs ${open ? 'on' : ''}"><div class="ni">${needRows(x.c, keys)}</div></div></div>`;
-}
-function identHtml() {
-  const act = activeBox(), msg = WK.msg ? `<div class="msg ${WK.msg.tone}" role="alert" style="margin-bottom:var(--s3)">${esc(WK.msg.text)}</div>` : '';
-  if (WK.finished) {
-    const f = WK.finished, p = cartonProg(f);
-    return `<section class="hero ok"><div class="hero-top"><span class="hero-ico">${ic('check')}</span>Doboz kész</div>${idHtml(f, true)}
-      <div class="hchips"><span class="hchip">${p.got}/${p.qty} db</span></div><button class="hero-btn" data-next>Következő doboz</button></section>${minePanel(act)}`;
-  }
-  if (act && WK.view === 'work') return msg + workHtml(act);
-  const keys = WK.keys.filter(k => D.byKey.has(k));
-  const back = act ? `<button class="btn" style="margin-bottom:var(--s3);width:100%" data-back>${ic('undo')}Vissza az aktív dobozhoz</button>` : '';
-  if (!keys.length) return msg + `<div class="idle"><div class="frame scanning">${ic('target').replace('class="i"', 'class="i lg" style="width:48px;height:48px"')}</div><h2>Doboz építése</h2><p>Szkenneld a terméket</p></div>${minePanel(act)}`;
-  const cands = identCands(keys);
-  const chips = `<div class="eyebrow alt-h">Termékek (${keys.length})</div><div class="card">${keys.map((k, i) => `<div class="row-i ${stI(i)}" style="padding:var(--s2) var(--s4)"><div class="rest"><b>${esc(D.byKey.get(k)[0].descr)}</b><span class="meta mono">${esc(k)}</span></div><button class="btn xs" data-rmk="${k}" aria-label="Törlés">${ic('x').replace('class="i"', 'class="i sm"')}</button></div>`).join('')}</div>
-    <div class="row" style="margin:var(--s3) 0 0;justify-content:flex-start"><button class="btn sm" data-iclear>${ic('trash').replace('class="i"', 'class="i sm"')}Újrakezdés</button></div>`;
-  let body;
-  if (!cands.length) {
-    const alts = keys.length > 1 ? keys.map(k => ({k, n: identCands(keys.filter(x => x !== k)).length})).filter(a => a.n > 0).sort((a, b) => a.n - b.n).slice(0, 3) : [];
-    body = `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs szabad doboz</div>${cands.hidden ? `<div class="hero-note">${cands.hidden} foglalt</div>` : ''}</section>
-      ${alts.length ? `<div class="eyebrow alt-h">Ha kihagyod</div><div class="card">${alts.map((a, i) => `<div class="row-i ${stI(i)}"><div class="rest"><b>${esc(D.byKey.get(a.k)[0].descr)}</b><span class="meta"><span class="mono">${esc(a.k)}</span> · ${a.n} doboz marad</span></div><button class="btn sm" data-rmk="${a.k}">Kihagyom</button></div>`).join('')}</div>` : ''}`;
-  } else {
-    body = `<div class="eyebrow alt-h" style="margin-top:0">${cands.length} doboz${cands.hidden ? ` · ${cands.hidden} foglalt rejtve` : ''}</div>${cands.slice(0, 10).map((x, i) => candCard(x, i, keys)).join('')}${cands.length > 10 ? `<div class="meta" style="margin:var(--s2)">10 a ${cands.length}-ból. Szkennelj további terméket.</div>` : ''}`;
-  }
-  return msg + back + body + chips;
-}
-function updateIdent() {
-  if (shellView !== 'ident') {
-    shellView = 'ident';
-    app.innerHTML = `<form class="scan" id="xf" autocomplete="off"><span class="lead">${ic('target')}</span>
-        <input id="xin" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Termék kódja" placeholder="Szkenneld a terméket"></form>
-      <div id="xr" style="margin-top:var(--s3)"></div>`;
-    const inp = $('#xin');
-    $('#xf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onIdentScan(v); };
-    inp.focus();
-    $('#xr').onclick = async e => {
+function updatePark() {
+  if (shellView !== 'park') {
+    shellView = 'park';
+    app.innerHTML = `<div id="pr"></div>`;
+    $('#pr').onclick = async e => {
       const b = e.target.closest('button'); if (!b || b.disabled) return; const d = b.dataset;
-      if (d.gp) { const l = D.byId.get(+d.gp); WK.hl = l.id; return setGot(l.id, lineGot(l) + 1); }
-      if (d.gm) { const l = D.byId.get(+d.gm); WK.hl = l.id; return setGot(l.id, lineGot(l) - 1); }
-      if (d.ga) { const l = D.byId.get(+d.ga); WK.hl = l.id; return setGot(l.id, l.qty); }
-      if (d.build) return claimBox(d.build);
-      if (d.go) { WK.active = d.go; ls.set('rk_active', d.go); WK.view = 'work'; WK.finished = ''; animNext = true; return updateIdent(); }
-      if (d.rel) return releaseBox(d.rel);
-      if (d.short) return closeShort(d.short);
-      if (d.next !== undefined) { WK.finished = ''; WK.view = activeBox() ? 'work' : 'find'; WK.keys = []; animNext = true; return updateIdent(); }
-      if (d.back !== undefined) { WK.view = 'work'; WK.keys = []; WK.msg = null; animNext = true; return updateIdent(); }
-      if (d.exp) { const c = d.exp, cur = WK.exp[c] !== undefined ? WK.exp[c] : (identCands(WK.keys)[0] || {}).c === c; WK.exp[c] = !cur; return updateIdent(); }
-      if (d.rmk) { WK.keys = WK.keys.filter(k => k !== d.rmk); WK.msg = null; animNext = true; return updateIdent(); }
-      if (d.iclear !== undefined) { WK.keys = []; WK.msg = null; animNext = true; return updateIdent(); }
+      if (d.build) {
+        if (d.full !== '1') { const x = collected().find(y => y.c === d.build); if (!await confirmDlg(`Megnyitod? Még ${x ? x.total - x.have : '?'} db hiányzik, csak ha van szabad hely.`, 'Megnyitom', false)) return; }
+        return fromPark(d.build);
+      }
+      if (d.exp) { const c = d.exp, cur = PV.exp[c] !== undefined ? PV.exp[c] : d.i === '0'; PV.exp[c] = !cur; return updatePark(); }
+      if (d.unpark) { park(d.unpark, -1); PV.msg = null; return update(); }
     };
     animNext = true;
   }
-  const r = $('#xr'); flashAnim(r); setHtml(r, identHtml());
+  const r = $('#pr'); flashAnim(r); setHtml(r, parkHtml());
 }
 
 // ---------- dobozok nezet ----------
-async function addCarton(raw) {
-  const c = classify(raw);
-  if (c.kind !== 'carton') { cf.msg = {tone: 'bad', html: 'Érvénytelen azonosító'}; logScan('carton', raw, '', 'unknown', ''); beep('bad'); return updateCartons(); }
-  if (!D.byCarton.has(c.carton)) { cf.msg = {tone: 'bad', html: idHtml(c.carton) + ' nincs a goodslistben'}; logScan('carton', raw, '', 'unknown', c.carton); beep('bad'); return updateCartons(); }
-  const st = cartonStatus(c.carton);
-  if (st) { cf.msg = {tone: 'warn', html: idHtml(c.carton) + (st === 'done' ? ' kész' : ' már felvéve')}; logScan('carton', raw, '', st === 'done' ? 'done' : 'already', c.carton); beep('bad'); return updateCartons(); }
-  cf.msg = {tone: 'ok', html: idHtml(c.carton) + ' felvéve'};
-  beep('ok'); pushHist(raw, 'Felvéve', 'ok', c.carton);
-  await openCarton(c.carton);
+// azonositas: nem olvashato cimkeju doboz a benne levo termekekbol
+function identCands(keys) {
+  let set = null;
+  for (const k of keys) { const cs = new Set((D.byKey.get(k) || []).map(l => l.carton)); set = set ? new Set([...set].filter(c => cs.has(c))) : cs; }
+  return [...(set || [])].filter(c => cartonStatus(c) !== 'done').sort((a, b) => D.byCarton.get(a).length - D.byCarton.get(b).length || a.localeCompare(b));
+}
+function onCartonsSubmit(raw) {
+  raw = raw.trim(); if (!raw) return;
+  const c = classify(raw); animNext = true;
+  if (c.kind === 'carton') {
+    if (!D.byCarton.has(c.carton)) { cf.msg = {tone: 'bad', html: idHtml(c.carton) + ' nincs a goodslistben'}; beep('bad'); return updateCartons(); }
+    cf.box = c.carton; cf.msg = null; cf.q = ''; $('#cq').value = ''; beep('ok'); return updateCartons();
+  }
+  if (!cf.ident) return;
+  if (c.kind !== 'sku') { cf.msg = {tone: 'bad', html: c.kind === 'cands' ? 'Írd be a teljes termékkódot.' : 'Nincs a goodslistben: ' + esc(raw)}; beep('bad'); return updateCartons(); }
+  $('#cq').value = '';
+  if (cf.keys.includes(c.key)) { cf.msg = {tone: 'warn', html: 'Már hozzáadva.'}; beep('bad'); return updateCartons(); }
+  cf.keys.push(c.key); cf.msg = null; cf.box = ''; logScan('ident', raw, c.key, 'ident', ''); beep('ok'); updateCartons();
+}
+function identHtml() {
+  const keys = cf.keys, cands = keys.length ? identCands(keys) : [];
+  const head = `<div class="bar2"><button class="btn" data-iexit>${ic('undo')}Kilépés</button>${keys.length ? `<button class="btn" data-iclear>${ic('trash')}Újrakezdés</button>` : ''}</div>`;
+  if (!keys.length) return head + `<div class="idle"><div class="frame scanning">${ic('target').replace('class="i"', 'class="i lg" style="width:48px;height:48px"')}</div><h2>Nem olvasható a címke?</h2><p>Szkennelj termékeket a dobozból, megkeresem melyik doboz</p></div>`;
+  const chips = `<div class="eyebrow alt-h">Termékek (${keys.length})</div><div class="card">${keys.map((k, i) => `<div class="pk ${stI(i)}"><div class="t"><b>${esc(keyName(k))}</b><small class="mono">${esc(k)}</small></div><button class="btn xs" data-rmk="${k}" aria-label="Törlés">${icS('x')}</button></div>`).join('')}</div>`;
+  const list = cands.length ? `<div class="eyebrow alt-h" style="margin-top:0">${cands.length} lehetséges doboz${cands.length > 1 ? ', szkennelj még terméket' : ''}</div><div class="card">${cands.slice(0, 6).map((c, i) => { const st = cartonStatus(c); return `<div class="crow ${stI(i)}" data-c="${esc(c)}">${idHtml(c)}<span class="tag ${st ? '' : 'mute'}">${st ? 'nyitott' : 'nincs nyitva'}</span><span class="frac">${D.byCarton.get(c).length} tétel</span></div>`; }).join('')}</div>`
+    : `<section class="hero bad"><div class="hero-top"><span class="hero-ico">${ic('x')}</span>Nincs ilyen doboz</div><div class="hero-note">Törölj egy terméket a listából.</div></section>`;
+  return head + list + chips;
+}
+function cartonsHtml() {
+  const msg = cf.msg ? `<div class="msg ${cf.msg.tone}" role="alert" style="margin-bottom:var(--s3)">${cf.msg.html}</div>` : '';
+  if (cf.box) return msg + `<button class="btn block" style="margin-bottom:var(--s3)" data-back>${ic('undo')}${cf.ident ? 'Vissza az azonosításhoz' : 'Vissza a listához'}</button>` + boxView(cf.box);
+  if (cf.ident) return msg + identHtml();
+  const all = [...D.open.values()], cnt = {open: all.filter(x => x.status === 'open').length, done: all.filter(x => x.status === 'done').length, all: all.length};
+  const q = cf.q.replace(/\D/g, '');
+  // sorrend: utolso 4 szamjegy szerint, ahogy a polcon allnak
+  const rows = all.filter(r => (cf.st === 'all' || r.status === cf.st) && (!q || r.carton.replace(/\D/g, '').includes(q)))
+    .sort((a, b) => a.carton.slice(-4).localeCompare(b.carton.slice(-4)) || a.carton.localeCompare(b.carton));
+  return msg + `<div class="bar2"><button class="btn" data-ident>${ic('target')}Címke nem olvasható</button></div>
+    <div class="seg">${[['open', 'Nyitott'], ['done', 'Kész'], ['all', 'Mind']].map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${cf.st === k}">${n}<span class="n">${cnt[k]}</span></button>`).join('')}</div>
+    <div class="card">${rows.length ? rows.map((r, i) => { const p = cartonProg(r.carton), dn = r.status === 'done';
+      return `<div class="crow ${stI(i)}" data-c="${esc(r.carton)}">${ring(p.ratio, 34, p.got + '/' + p.qty + ' db')}${idHtml(r.carton)}<span class="frac ${dn ? 'ok' : ''}">${dn ? icS('check') : p.got + '/' + p.qty}</span></div>`; }).join('')
+      : `<div class="empty"><b>${q ? 'Nincs találat' : 'Nincs doboz'}</b></div>`}</div>`;
 }
 function updateCartons() {
   if (shellView !== 'cartons') {
     shellView = 'cartons';
-    app.innerHTML = `<div class="tools">
-        <button class="swb" id="sw" role="switch" aria-checked="false"><span class="t">Hiányos doboz hozzáadása</span><span class="track"></span></button>
-        <form class="scan sm" id="af" autocomplete="off"><span class="lead">${ic('search')}</span>
-          <input id="cq" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Doboz azonosító"><button class="btn pri sm addb" id="addb" type="submit" hidden>Hozzáad</button></form>
-        <div id="am" role="status" aria-live="polite"></div></div>
-      <div class="seg" id="fl"></div>
-      <div class="card" id="cl"></div>`;
-    $('#sw').onclick = () => { cf.add = !cf.add; cf.msg = null; cf.q = ''; $('#cq').value = ''; updateCartons(); $('#cq').focus(); };
-    $('#af').onsubmit = e => { e.preventDefault(); const v = $('#cq').value; $('#cq').value = ''; if (cf.add && v.trim()) addCarton(v); };
-    $('#cq').oninput = e => { if (!cf.add) { cf.q = e.target.value.toUpperCase().replace(/\s/g, ''); fillCartons(); } };
-    $('#cl').onclick = e => { const r = e.target.closest('[data-c]'); if (r) showCarton(r.dataset.c); };
+    app.innerHTML = `<form class="scan sm" id="af" autocomplete="off"><span class="lead">${ic('search')}</span>
+        <input id="cq" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Keresés"></form>
+      <div id="cr" style="margin-top:var(--s3)"></div>`;
+    $('#af').onsubmit = e => { e.preventDefault(); onCartonsSubmit($('#cq').value); };
+    $('#cq').oninput = e => { if (!cf.ident) { cf.q = e.target.value.toUpperCase(); if (!cf.box) updateCartons(); } };
+    $('#cr').onclick = async e => {
+      const r = e.target.closest('[data-c]'); if (r) { cf.box = r.dataset.c; cf.msg = null; animNext = true; window.scrollTo(0, 0); return updateCartons(); }
+      const b = e.target.closest('button'); if (!b || b.disabled) return; const d = b.dataset;
+      if (await boxAct(d)) return;
+      if (d.back !== undefined) { cf.box = ''; cf.msg = null; animNext = true; return updateCartons(); }
+      if (d.f) { cf.st = d.f; animNext = true; return updateCartons(); }
+      if (d.ident !== undefined) { cf.ident = true; cf.keys = []; cf.msg = null; cf.q = ''; $('#cq').value = ''; animNext = true; updateCartons(); return $('#cq').focus(); }
+      if (d.iexit !== undefined) { cf.ident = false; cf.keys = []; cf.msg = null; animNext = true; return updateCartons(); }
+      if (d.iclear !== undefined) { cf.keys = []; cf.msg = null; animNext = true; return updateCartons(); }
+      if (d.rmk) { cf.keys = cf.keys.filter(k => k !== d.rmk); animNext = true; return updateCartons(); }
+    };
     animNext = true;
   }
-  const on = cf.add, cq = $('#cq');
-  $('#sw').setAttribute('aria-checked', on);
-  cq.placeholder = on ? 'RQ-XPW...' : 'Keresés';
-  $('#af').classList.toggle('has-btn', on); $('#addb').hidden = !on;
-  setHtml($('#am'), on && cf.msg ? `<div class="msg ${cf.msg.tone}">${cf.msg.html}</div>` : '', true);
-  const all = [...D.open.values()], cnt = {own: all.filter(x => x.status === 'open' && claimOf(x.carton) === device).length, open: all.filter(x => x.status === 'open').length, done: all.filter(x => x.status === 'done').length, all: all.length};
-  setHtml($('#fl'), [['own', 'Saját'], ['open', 'Nyitott'], ['done', 'Kész'], ['all', 'Mind']].map(([k, n]) => `<button class="chip" data-f="${k}" aria-pressed="${cf.st === k}">${n}<span class="n">${cnt[k]}</span></button>`).join(''));
-  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { cf.st = b.dataset.f; animNext = true; updateCartons(); });
-  fillCartons();
-}
-function fillCartons() {
-  const q = cf.add ? '' : cf.q, el = $('#cl'); flashAnim(el);
-  const rows = [...D.open.values()].filter(r => (cf.st === 'all' || (cf.st === 'own' ? r.status === 'open' && claimOf(r.carton) === device : r.status === cf.st)) && (!q || r.carton.includes(q)))
-    .sort((a, b) => cartonProg(b.carton).ratio - cartonProg(a.carton).ratio || a.carton.localeCompare(b.carton));
-  setHtml(el, rows.length ? rows.map((r, i) => {
-    const p = cartonProg(r.carton), dn = r.status === 'done';
-    return `<div class="crow ${stI(i)}" data-c="${esc(r.carton)}">${ring(p.ratio, 34, p.done + '/' + p.n)}${idHtml(r.carton)}${claimOf(r.carton) ? `<span class="tag ${claimOf(r.carton) === device ? '' : 'mute'}">${claimOf(r.carton) === device ? 'saját' : esc(claimOf(r.carton))}</span>` : ''}<span class="frac ${dn ? 'ok' : ''}">${dn ? ic('check').replace('class="i"', 'class="i sm"') : p.done + '/' + p.n}</span></div>`;
-  }).join('') : `<div class="empty"><b>${q ? 'Nincs találat' : 'Nincs doboz'}</b></div>`);
-}
-function showCarton(c) {
-  const o = D.open.get(c); if (!o) return;
-  const p = cartonProg(c);
-  const d = dialog(`<div style="margin-bottom:var(--s3);display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap"><span style="font-size:20px">${idHtml(c)}</span><span class="tag ${o.status === 'done' ? 'ok' : ''}">${o.status === 'done' ? 'kész' : p.done + '/' + p.n}</span></div>
-    <div class="card">${cartonLines(c)}</div>
-    <div class="row"><button class="btn" id="cx">Bezár</button>
-      ${o.status === 'done' ? '<button class="btn" id="cr">Újranyitás</button>' : '<button class="btn pri" id="cd">Doboz kész</button>'}</div>`);
-  d.querySelectorAll('[data-line]').forEach(b => b.onclick = async () => { await setLine(+b.dataset.line, b.dataset.v === '1'); if (D.open.has(c)) showCarton(c); });
-  d.querySelector('#cx').onclick = () => d.close();
-  const cr = d.querySelector('#cr'), cd = d.querySelector('#cd');
-  if (cr) cr.onclick = async () => { await setDone(c, false); showCarton(c); };
-  if (cd) cd.onclick = async () => { d.close(); await setDone(c, true); toast('Kész'); };
+  $('#cq').placeholder = cf.ident ? 'Szkenneld a terméket' : 'Doboz keresése vagy szkennelése';
+  const el = $('#cr'); flashAnim(el); setHtml(el, cartonsHtml());
 }
 
 // ---------- eszkoz ----------
