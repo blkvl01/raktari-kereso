@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Raktári kereső - Admin</title>
-<link rel="stylesheet" href="common.css?v=26">
+<link rel="stylesheet" href="common.css?v=27">
 <style>
 .shell{display:grid;grid-template-columns:240px 1fr;min-height:100dvh}
 aside{background:var(--side);color:var(--side-ink);padding:var(--s4) var(--s3);position:sticky;top:0;height:100dvh;display:flex;flex-direction:column;overflow:auto}
@@ -162,7 +162,7 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
   <div>
     <header class="top">
       <h1 id="ttl"></h1>
-      <form class="gsearch" id="gs" autocomplete="off"><span class="lead"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><input id="gq" placeholder="Doboz, SKU vagy AWB" aria-label="Gyorskereső"></form>
+      <form class="gsearch" id="gs" autocomplete="off"><span class="lead"><svg class="i sm" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg></span><input id="gq" title="Több keresés: soronként beillesztve, vagy ; jellel elválasztva" data-multi placeholder="Doboz, SKU vagy AWB" aria-label="Gyorskereső"></form>
       <span class="sync" id="sync" role="status" aria-live="polite"></span>
       <button class="btn sm" id="rf" aria-label="Frissítés"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></button>
     </header>
@@ -175,8 +175,8 @@ textarea.inp{min-height:90px;font-family:ui-monospace,Consolas,monospace}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js" integrity="sha384-GFr3yTh5lJznCbZfpTtXnwboFsxqtTQoeTZCRHhE0579KrRmlCzen5AA8ohaB5ug" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/cfb@1.2.2/dist/cfb.min.js" integrity="sha384-peTByNpmIz2Wq5hOZJ3dZmZP4MJ6ZXwF9dZ3R8kW7/C6bMWdHEME3on5mt9DH7d5" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js" integrity="sha384-Kk5SjBOKprEnGfyBWfD2zROFd1Cu8kwOXxG2GIhYPcoDL2rBJS9P8Ud1ZMy4412a" crossorigin="anonymous"></script>
-<script src="common.js?v=26"></script>
-<script src="import.js?v=26"></script>
+<script src="common.js?v=27"></script>
+<script src="import.js?v=27"></script>
 <script>
 ICON.tag = '<path d="M20.6 13.4l-7.2 7.2a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8zM7.5 7.5h.01"/>';
 ICON.back = '<path d="M15 18l-6-6 6-6"/>';
@@ -315,7 +315,7 @@ function areaChart(vals, labels) {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.6</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.7</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -494,7 +494,7 @@ document.addEventListener('click', e => { if (e.target.closest('#more')) { IM.st
 function cartonRows() {
   let cs = [...D.byCarton.keys()];
   if (F.cawb) cs = cs.filter(c => D.byCarton.get(c)[0].awb === F.cawb);
-  if (F.cq) cs = cs.filter(c => c.includes(F.cq));
+  const qs = multiTerms(F.cq); if (qs.length) cs = cs.filter(c => qs.some(q => c.includes(q)));
   const m = {felvett: c => cartonStatus(c), nyitott: c => cartonStatus(c) === 'open', kesz: c => cartonStatus(c) === 'done', nincs: c => !cartonStatus(c), mind: () => true}[F.cst];
   return cs.filter(m).sort((a, b) => cartonProg(b).ratio - cartonProg(a).ratio || a.localeCompare(b));
 }
@@ -512,7 +512,7 @@ function fillCartons() {
 function vCartons() {
   M.innerHTML = `<div class="tools">
     ${[['felvett', 'Felvett'], ['nyitott', 'Nyitott'], ['kesz', 'Kész'], ['nincs', 'Nincs felvéve'], ['mind', 'Mind']].map(([k, n]) => `<button class="chip" data-st="${k}" aria-pressed="${F.cst === k}">${n}</button>`).join('')}
-    <input class="inp" id="cq" placeholder="Doboz" value="${esc(F.cq)}" aria-label="Keresés">
+    <input class="inp" id="cq" placeholder="Doboz" value="${esc(F.cq)}" aria-label="Keresés" title="Több keresés: soronként beillesztve, vagy ; jellel elválasztva" data-multi>
     <button class="chip" data-aw="" aria-pressed="${!F.cawb}">Minden AWB</button>${[...D.awbs.values()].map(a => `<button class="chip mono" data-aw="${esc(a.id)}" aria-pressed="${F.cawb === a.id}">${esc(a.id.slice(-8))}</button>`).join('')}
     <span class="meta" id="cc"></span>
     <button class="btn sm" id="ex" style="margin-left:auto">${I('dl')}CSV</button></div>
@@ -603,12 +603,12 @@ function skuTable(rows) {
   }).join('')}</tbody></table>`;
 }
 function vSkus() {
-  M.innerHTML = `<div class="tools"><input class="inp" id="sq" placeholder="SKU vagy terméknév" value="${esc(F.sq)}" aria-label="SKU keresés" style="width:360px"><span class="meta" id="sc"></span></div>
+  M.innerHTML = `<div class="tools"><input class="inp" id="sq" placeholder="SKU vagy terméknév" value="${esc(F.sq)}" aria-label="SKU keresés" style="width:360px" title="Több keresés: soronként beillesztve, vagy ; jellel elválasztva" data-multi><span class="meta" id="sc"></span></div>
     <div class="grid g-2"><div class="card"><div class="hd"><h2 id="sh"></h2></div><div class="scroll" id="sr"></div></div>
     <div class="card"><div class="hd"><h2>Többértelmű SKU</h2></div><div class="scroll">${(() => { const a = ambiguous(); return a.length ? skuTable(a.map(x => x.key)) : '<div class="empty"><b>Nincs</b></div>'; })()}</div></div></div>`;
   const fill = () => {
-    const q = F.sq.trim().toLowerCase(); let keys = [...D.byKey.keys()];
-    if (q) keys = keys.filter(k => (/\d/.test(q) && k.includes(q.replace(/\D/g, ''))) || D.byKey.get(k)[0].descr.toLowerCase().includes(q) || (D.byKey.get(k)[0].mat || '').toLowerCase().includes(q));
+    const qs = multiTerms(F.sq.toLowerCase()), q = qs.length; let keys = [...D.byKey.keys()];
+    if (q) keys = keys.filter(k => qs.some(q => (/\d/.test(q) && k.includes(q.replace(/\D/g, ''))) || D.byKey.get(k)[0].descr.toLowerCase().includes(q) || (D.byKey.get(k)[0].mat || '').toLowerCase().includes(q)));
     else keys = keys.sort((a, b) => D.byKey.get(b).length - D.byKey.get(a).length);
     $('#sh').textContent = q ? 'Találatok' : 'Leggyakoribb';
     $('#sc').textContent = q ? keys.length + ' találat' : '';
@@ -657,8 +657,8 @@ const awbCell = s => `<span class="awbs">${scanAwbs(s).map(awbChip).join('')}</s
 function vLog() {
   const LG = {hit: s => s.result === 'open1' || s.result === 'openN', miss: s => s.result === 'closed' || s.result === 'surplus', unknown: s => s.result === 'unknown', carton: s => s.kind === 'carton', line: s => s.kind === 'line', park: s => s.kind === 'park' || s.result === 'aside', ident: s => s.kind === 'ident'};
   const flt = () => SC.filter(s => (!F.lres || LG[F.lres](s)) && (!F.lawbf || scanAwbs(s).includes(F.lawbf))
-    && (!F.lq || (s.raw || '').includes(F.lq) || (s.device || '').toLowerCase().includes(F.lq.toLowerCase()) || (s.carton || '').includes(F.lq) || scanAwbs(s).some(a => a.toLowerCase().includes(F.lq.toLowerCase()))));
-  M.innerHTML = `<div class="tools"><input class="inp" id="lq" placeholder="Kód, eszköz, doboz, AWB" value="${esc(F.lq)}" aria-label="Szűrés">
+    && (!F.lq || multiTerms(F.lq).some(q => (s.raw || '').includes(q) || (s.device || '').toLowerCase().includes(q.toLowerCase()) || (s.carton || '').includes(q) || scanAwbs(s).some(a => a.toLowerCase().includes(q.toLowerCase())))));
+  M.innerHTML = `<div class="tools"><input class="inp" id="lq" placeholder="Kód, eszköz, doboz, AWB" value="${esc(F.lq)}" aria-label="Szűrés" title="Több keresés: soronként beillesztve, vagy ; jellel elválasztva" data-multi>
     <select class="inp" id="la" aria-label="AWB" style="width:auto"><option value="">Minden AWB</option>${[...D.awbs.keys()].sort().map(a => `<option value="${esc(a)}" ${F.lawbf === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>
     ${[['', 'Mind'], ['hit', 'Találat'], ['miss', 'Nincs nyitott'], ['unknown', 'Ismeretlen'], ['carton', 'Dobozok'], ['line', 'Tételek'], ['park', 'Polc'], ['ident', 'Azonosítás']].map(([k, n]) => `<button class="chip" data-lr="${k}" aria-pressed="${F.lres === k}">${n}</button>`).join('')}
     <span class="meta" id="lc"></span><button class="btn sm" id="ex" style="margin-left:auto">${I('dl')}CSV</button></div>
@@ -864,10 +864,24 @@ function xFind(q, mode) {
   r.n = r.carton.length + r.sku.length + r.awb.length;
   return r;
 }
+// tobb tag: tagonkent kereses, az eredmenyek unioja; pontos talalatnal csak az az egy elem kerul be. miss: a talalat nelkuli tagok
+function xFindMulti(q, mode) {
+  const terms = multiTerms(q); if (terms.length < 2) return xFind(q, mode);
+  const r = {carton: [], sku: [], awb: [], exact: null, u: '', n: 0, miss: [], multi: terms.length};
+  terms.forEach(t => {
+    const x = xFind(t, mode);
+    if (!x.n) { r.miss.push(t); return; }
+    const pick = x.exact ? {carton: [], sku: [], awb: [], [x.exact.t]: [x.exact.id]} : x;
+    ['carton', 'sku', 'awb'].forEach(k => pick[k].forEach(id => { if (!r[k].includes(id)) r[k].push(id); }));
+  });
+  r.n = r.carton.length + r.sku.length + r.awb.length;
+  return r;
+}
 const xTarget = r => r.exact || (r.n === 1 ? (r.carton.length ? {t: 'carton', id: r.carton[0]} : r.sku.length ? {t: 'sku', id: r.sku[0]} : {t: 'awb', id: r.awb[0]}) : null);
 // Enter: egyertelmu talalat megnyitasa. Ha a keresesnek egyetlen talalata volt, a mezo kiurul, hogy a Vissza ne ugyanezt mutassa ujra;
 // tobb talalatnal megmarad, a Vissza a listara ter vissza.
 function xOpen(q, mode) {
+  if (multiTerms(q).length > 1) return false;
   const r = xFind(q, mode), t = xTarget(r);
   if (!t) return false;
   F.xq = r.n === 1 ? '' : q; xGo(t.t, t.id); return true;
@@ -875,7 +889,7 @@ function xOpen(q, mode) {
 
 function vSearch() {
   M.innerHTML = `<form class="card xsrch" id="xf" autocomplete="off" style="margin-bottom:var(--s4)">
-    <div class="xin-wrap"><span class="lead">${I('search')}</span><input id="xq" class="inp" value="${esc(F.xq)}" placeholder="Doboz, SKU, terméknév vagy AWB" aria-label="Keresés" enterkeyhint="search" spellcheck="false"></div>
+    <div class="xin-wrap"><span class="lead">${I('search')}</span><input id="xq" class="inp" value="${esc(F.xq)}" placeholder="Doboz, SKU, terméknév vagy AWB" aria-label="Keresés" enterkeyhint="search" spellcheck="false" title="Több keresés: soronként beillesztve, vagy ; jellel elválasztva" data-multi></div>
     <div class="chips" role="group" aria-label="Mire keres">${XMODES.map(([k, n]) => `<button type="button" class="chip" data-xm="${k}" aria-pressed="${F.xm === k}">${n}</button>`).join('')}</div></form>
     <div id="xr"></div>`;
   const inp = $('#xq');
@@ -911,8 +925,9 @@ function xStart() {
 function xList() {
   const q = F.xq.trim();
   if (q.replace(/\s+/g, '').length < 3) return xStart();
-  const r = xFind(q, F.xm);
+  const r = xFindMulti(q, F.xm);
   if (r.exact && r.n === 1) return xDetail(r.exact);
+  const missCard = r.miss && r.miss.length ? `<div class="card ${stI(1)}" style="margin-bottom:var(--s4)"><div class="pad"><b>${r.multi - r.miss.length}/${r.multi} keresésnek van találata.</b> Nincs találat: <span class="mono">${esc(r.miss.join(', '))}</span></div></div>` : '';
   if (!r.n) {
     const log = r.u.length >= 4 ? SC.filter(s => (s.raw || '').toUpperCase().includes(r.u)) : [];
     return `<div class="card ${stI(1)}" style="margin-bottom:var(--s4)"><div class="empty"><b>Nincs találat</b>Sem a goodslistben, sem az AWB-k között nem szerepel</div></div>`
@@ -920,7 +935,7 @@ function xList() {
   }
   const grp = (title, n, head, rows, i) => `<div class="card ${stI(i)}" style="margin-bottom:var(--s4)"><div class="hd"><h2>${title}</h2><span class="meta">${n > XLIM ? `${XLIM} / ${n}` : n}</span></div>
     <div class="scroll" style="max-height:440px"><table><thead><tr>${head}</tr></thead><tbody>${rows}</tbody></table></div></div>`;
-  let out = '', i = 1;
+  let out = missCard, i = 2;
   if (r.carton.length) out += grp('Dobozok', r.carton.length, '<th>Doboz</th><th>Státusz</th><th>AWB</th><th class="n">Tétel</th><th>Darab</th>', r.carton.slice(0, XLIM).map(c => {
     const p = cartonSum(c), l0 = (D.byCarton.get(c) || [])[0];
     return `<tr class="clk" ${go('carton', c)}><td>${idHtml(c, 0, 1)}</td><td>${stTag(c)}${claimOf(c) ? ` <span class="tag warn">${esc(claimOf(c))}</span>` : ''}</td><td>${l0 ? awbChip(l0.awb) : ''}</td>

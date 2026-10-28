@@ -215,6 +215,19 @@ function classify(raw) {
   return {kind: 'unknown', raw: raw.trim(), key};
 }
 
+// ---------- tobb kereses egyszerre ----------
+// A keresomezok (data-multi) soronkent beillesztett listat is elfogadnak: a sima beviteli mezo kiszedne a sortoreseket,
+// ezert beillesztesnel a sorok "; "-vel fuzodnek ossze. Kezzel ; vagy , jellel lehet tobbet beirni.
+const multiTerms = q => String(q || '').split(/[\r\n\t;,]+/).map(s => s.trim()).filter(Boolean);
+document.addEventListener('paste', e => {
+  const t = e.target; if (!(t instanceof HTMLInputElement) || !('multi' in t.dataset)) return;
+  const s = (e.clipboardData || window.clipboardData).getData('text'); if (!/[\r\n\t]/.test(s.trim())) return;
+  e.preventDefault();
+  const a = t.selectionStart ?? t.value.length, b = t.selectionEnd ?? a, pre = t.value.slice(0, a), post = t.value.slice(b);
+  t.value = pre + (pre.trim() && !/[;,]\s*$/.test(pre) ? '; ' : '') + multiTerms(s).join('; ') + post;
+  t.dispatchEvent(new Event('input', {bubbles: true}));
+});
+
 // ---------- kozos UI ----------
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
