@@ -208,7 +208,7 @@ const M = $('#main');
 
 const RES = {open1: ['találat, 1 doboz', 'ok'], openN: ['találat, több doboz', 'ok'], closed: ['nincs nyitott dobozban', 'warn'], surplus: ['felesleg', 'warn'],
   unknown: ['ismeretlen', 'bad'], opened: ['felvéve', 'ok'], already: ['már felvéve', 'mute'], done: ['kész doboz', 'warn'],
-  qty: ['darabszám', 'ok'], line_done: ['tétel kész', 'ok'], line_undone: ['tétel visszavonva', 'mute'], ident: ['azonosításhoz', 'mute'], ident_pick: ['azonosítva', 'ok'], pack: ['csomagolva', 'ok'], aside: ['félretéve', 'warn'], newbox: ['új doboz nyitva', 'ok'], move: ['áttéve', 'mute'], built: ['összerakva a polcról', 'ok']};
+  qty: ['darabszám', 'ok'], line_done: ['tétel kész', 'ok'], line_undone: ['tétel visszavonva', 'mute'], ident: ['azonosításhoz', 'mute'], ident_pick: ['azonosítva', 'ok'], pack: ['csomagolva', 'ok'], aside: ['félretéve', 'warn'], lookup: ['nincs sehova (csak keresés)', 'mute'], newbox: ['új doboz nyitva', 'ok'], move: ['áttéve', 'mute'], built: ['összerakva a polcról', 'ok']};
 const resTag = r => { const x = RES[r] || [r, 'mute']; return `<span class="tag ${x[1]}">${esc(x[0])}</span>`; };
 const pct = (a, b) => b ? Math.round(100 * a / b) + '%' : '0%';
 const I = (n, c) => ic(n).replace('class="i"', `class="i ${c || ''}"`);
@@ -318,7 +318,7 @@ function areaChart(vals, labels) {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.6</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.8</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
