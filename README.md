@@ -3,7 +3,6 @@
 - `index.html`: PDA felület
 - `admin.html`: admin felület (kóddal védett): félretett polc, címkenyomtatás
 - `sql/`: adatbázis frissítések, a Supabase SQL Editorban kell egyszer lefuttatni
-- `fonts/`: IBM Plex Sans és IBM Plex Mono (SIL Open Font License, `fonts/OFL.txt`), a felület saját tárhelyről tölti, ezért offline is ugyanúgy néz ki
 
 Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
 

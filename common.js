@@ -171,6 +171,15 @@ function pctPill(ratio) {
   return `<span class="tag pct ${tone}" title="${pct >= 75 ? 'zárható lehet' : 'még töltendő'}">${pct >= 90 ? ic('check').replace('class="i"', 'class="i sm"') : ''}${pct}%</span>`;
 }
 function awbTag(l) { return `<span class="tag mono" title="AWB">${esc(l.awb)}</span>`; }
+// kor alaku haladasjelzo (0..1)
+function ring(ratio, size, label) {
+  const w = 6, r = (size - w) / 2, c = 2 * Math.PI * r, done = ratio >= 1;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" role="img" aria-label="${esc(label || Math.round(ratio * 100) + '% kész')}" style="flex:none">
+    <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/>
+    <circle class="rg" style="--c:${c}" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${done ? 'var(--ok-strong)' : 'var(--accent)'}" stroke-width="${w}" stroke-linecap="round"
+      stroke-dasharray="${c * Math.min(1, ratio)} ${c}" transform="rotate(-90 ${size / 2} ${size / 2})"/></svg>`;
+}
+
 // ---------- szkennelt kod ertelmezese ----------
 // Doboz azonosito: pontosan RQ-XPW + 10 szamjegy (mint a goodslistben). Mas formatumot nem fogadunk el dobozkent.
 const CARTON_RE = /^RQ-XPW\d{10}$/;
@@ -243,8 +252,12 @@ function toast(t) {
 }
 // ugyanaz a HTML nem rajzolodik ujra: nincs villogas, nincs ismetelt animacio
 function setHtml(el, html, force) { if (!force && el._h === html) return false; el.innerHTML = html; el._h = html; return true; }
-// szamok kiirasa (nincs szamlalo-animacio)
-function countUp(el, to) { el.textContent = to; el.dataset.from = to; }
+// szamok szamlalo-animacioja
+function countUp(el, to, ms) {
+  const from = +el.dataset.from || 0; if (reduceMotion || from === to) { el.textContent = to; el.dataset.from = to; return; }
+  const t0 = performance.now(); ms = ms || 700;
+  (function f(t) { const k = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - k, 3); el.textContent = Math.round(from + (to - from) * e); if (k < 1) requestAnimationFrame(f); else el.dataset.from = to; })(t0);
+}
 function csv(rows, name) {
   const t = '\ufeff' + rows.map(r => r.map(x => `"${String(x ?? '').replace(/"/g, '""')}"`).join(';')).join('\r\n');
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([t], {type: 'text/csv'})); a.download = name; a.click();
