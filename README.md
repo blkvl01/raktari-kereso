@@ -21,6 +21,17 @@ Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
    Az admin Félretett oldalán kód + darabszám megadásával is lehet polcra tenni. Ugyanitt a napló alapján azok a termékek is látszanak, amelyeket nyitott doboz nélkül szkenneltek, de nincsenek a polcon; egy gombbal felvehetők.
 3. **Dobozok fül**: a dobozok az utolsó 4 számjegy szerint sorban, ahogy a polcon állnak. Itt van a nem olvasható címkéjű doboz azonosítása is.
 
+## Kereső (admin)
+
+Az admin **Kereső** oldalán (és a fejléc gyorskeresőjében) dobozra, SKU-ra (kód, kódrészlet vagy terméknév) és AWB-re (szám, vége vagy jelölés) lehet keresni.
+Pontos találatnál azonnal a részletek látszanak, több találatnál típusonként csoportosított lista.
+
+- **Doboz**: státusz, AWB, ki vette fel és mikor, lezárás ideje, tartalom tételenként (mennyi került bele, belőtték-e, ki jelölte, van-e a polcon, milyen más dobozba kell még), hiányok, polc-lefedettség, napló.
+- **SKU**: mennyi van a goodslistben, mennyi került dobozba, mennyi kell még nyitott és fel nem vett dobozba, polc, belövések, dobozonkénti bontás.
+- **AWB**: dobozok állapota (szűrhető), darab, súly, eszközök, hiánnyal lezárt tételek, összegyűlt dobozok, napló.
+
+Minden doboz, termék és AWB kattintható, a böngésző Vissza gombja is működik.
+
 ## Frissítés v2.2-re
 
 Futtasd le egyszer a `sql/v2.2_felretett_polc.sql` fájlt a Supabase SQL Editorban.
