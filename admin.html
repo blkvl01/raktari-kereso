@@ -654,25 +654,76 @@ function scanAwbs(s) {
   return ls_ ? [...new Set(ls_.map(l => l.awb))].sort() : [];
 }
 const awbCell = s => `<span class="awbs">${scanAwbs(s).map(awbChip).join('')}</span>`;
+// ---------- naplo: mozgasok idovonalon vagy dobozonkent ----------
+// az esemenyhez tartozo tetel (doboz + termek) aktualis allapota: hany db van bent a goodslist szerintihez kepest
+function logLine(s) {
+  const ls_ = s.carton ? D.byCarton.get(s.carton) : null; if (!ls_) return null;
+  return ls_.find(l => l.id === s.raw) || ls_.find(l => s.key && l.key === s.key) || null;
+}
+// mennyiseg-cella: az esemeny valtozasa (+1 db) es a tetel jelenlegi allapota
+function logQty(s) {
+  const l = logLine(s), d = {open1: '+1 db', openN: '+1 db', aside: '+1 db a polcra', move: '1 db áthelyezve', built: 'összerakva'}[s.result];
+  const st = l ? (() => { const g = gotX(l); return `<b>${g}/${l.qty} db</b> bent${xBar(g, l.qty)}${g < l.qty ? `<div class="meta">hiányzik: ${l.qty - g} db</div>` : ''}`; })() : '';
+  return (d ? `<div><span class="tag ${s.result === 'aside' ? 'warn' : 'ok'}">${d}</span></div>` : '') + st;
+}
+function logRow(s) {
+  const prod = s.key && D.byKey.has(s.key) ? lnk('sku', s.key, esc(keyName(s.key))) + `<div class="mono meta">${esc(s.key)}</div>` : s.kind === 'carton' ? '' : `<span class="mono meta">${esc(s.raw || '')}</span>`;
+  return `<tr><td style="white-space:nowrap"><span class="mono">${fmtT(s.ts)}</span><div class="meta">${esc(s.device)}</div></td>
+    <td>${resTag(s.result)}<div class="meta">${esc(KIND_HU[s.kind] || s.kind || '')}</div></td>
+    <td>${prod}</td><td>${s.carton ? lnk('carton', s.carton, idHtml(s.carton, 0, 1)) + `<div>${awbCell(s)}</div>` : ''}</td>
+    <td style="min-width:120px">${logQty(s)}</td></tr>`;
+}
+function logTimeline(r) {
+  const days = new Map();
+  r.slice(0, 400).forEach(s => { const d = new Date(s.ts).toLocaleDateString('hu', {year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'}); if (!days.has(d)) days.set(d, []); days.get(d).push(s); });
+  return [...days].map(([d, rows], i) => `<div class="card ${stI(i)}" style="margin-bottom:var(--s4)"><div class="hd"><h2>${esc(d)}</h2><span class="meta">${rows.length} mozgás</span></div>
+    <div class="scroll" style="max-height:none"><table><thead><tr><th>Idő, eszköz</th><th>Esemény</th><th>Termék</th><th>Doboz</th><th>Mennyiség</th></tr></thead><tbody>${rows.map(logRow).join('')}</tbody></table></div></div>`).join('')
+    + (r.length > 400 ? `<div class="pg">400 / ${r.length}</div>` : '');
+}
+function logByCarton(r) {
+  const m = new Map();
+  r.filter(s => s.carton && D.byCarton.has(s.carton)).forEach(s => { if (!m.has(s.carton)) m.set(s.carton, []); m.get(s.carton).push(s); });
+  if (!m.size) return '<div class="card"><div class="empty"><b>Nincs doboz mozgás</b></div></div>';
+  return [...m].slice(0, 60).map(([c, ev], i) => {
+    const p = cartonProg(c), s = cartonStatus(c), last = ev[0];
+    const keys = [...new Set(ev.map(e => e.key).filter(Boolean))];
+    const rows = keys.map(k => { const e = ev.filter(x => x.key === k), l = D.byCarton.get(c).find(x => x.key === k), g = l ? gotX(l) : 0;
+      return `<tr><td>${lnk('sku', k, esc(keyName(k)))}<div class="mono meta">${esc(k)}</div></td><td class="n">${e.filter(x => x.result === 'open1' || x.result === 'openN').length || '<span class="meta">-</span>'}</td>
+        <td style="min-width:130px">${l ? `<b>${g}/${l.qty} db</b>${xBar(g, l.qty)}` : '<span class="meta">nincs a dobozban</span>'}</td><td class="meta">${esc(e[0].device)}<br>${fmtDT(e[0].ts)}</td></tr>`; }).join('');
+    return `<div class="card ${stI(i)}" style="margin-bottom:var(--s4)"><div class="hd"><h2>${lnk('carton', c, idHtml(c))}</h2>
+      <span class="meta">${stTag(c)} · ${p.got}/${p.qty} db · ${ev.length} mozgás · utoljára ${fmtDT(last.ts)} (${esc(last.device)})</span></div>
+      <div style="padding:0 var(--s4)">${xBar(p.got, p.qty)}</div>
+      <div class="scroll" style="max-height:none">${rows ? `<table><thead><tr><th>Termék</th><th class="n">Beszkennelve</th><th>Bent / szükséges</th><th>Utolsó mozgás</th></tr></thead><tbody>${rows}</tbody></table>` : '<div class="empty">Csak doboz-esemény</div>'}</div></div>`; }).join('');
+}
 function vLog() {
   const LG = {hit: s => s.result === 'open1' || s.result === 'openN', miss: s => s.result === 'closed' || s.result === 'surplus', unknown: s => s.result === 'unknown', carton: s => s.kind === 'carton', line: s => s.kind === 'line', park: s => s.kind === 'park' || s.result === 'aside', ident: s => s.kind === 'ident'};
   const flt = () => SC.filter(s => (!F.lres || LG[F.lres](s)) && (!F.lawbf || scanAwbs(s).includes(F.lawbf))
-    && (!F.lq || (s.raw || '').includes(F.lq) || (s.device || '').toLowerCase().includes(F.lq.toLowerCase()) || (s.carton || '').includes(F.lq) || scanAwbs(s).some(a => a.toLowerCase().includes(F.lq.toLowerCase()))));
-  M.innerHTML = `<div class="tools"><input class="inp" id="lq" placeholder="Kód, eszköz, doboz, AWB" value="${esc(F.lq)}" aria-label="Szűrés">
+    && (!F.lq || (s.raw || '').includes(F.lq) || (s.device || '').toLowerCase().includes(F.lq.toLowerCase()) || (s.carton || '').includes(F.lq) || (s.key && keyName(s.key).toLowerCase().includes(F.lq.toLowerCase())) || scanAwbs(s).some(a => a.toLowerCase().includes(F.lq.toLowerCase()))));
+  const view = F.lview || 'ido';
+  M.innerHTML = `<div id="lk" class="card" style="margin-bottom:var(--s4)"></div>
+    <div class="tools"><input class="inp" id="lq" placeholder="Kód, termék, eszköz, doboz, AWB" value="${esc(F.lq)}" aria-label="Szűrés">
     <select class="inp" id="la" aria-label="AWB" style="width:auto"><option value="">Minden AWB</option>${[...D.awbs.keys()].sort().map(a => `<option value="${esc(a)}" ${F.lawbf === a ? 'selected' : ''}>${esc(a)}</option>`).join('')}</select>
+    ${[['ido', 'Idővonal'], ['doboz', 'Dobozonként']].map(([k, n]) => `<button class="chip" data-lv="${k}" aria-pressed="${view === k}">${n}</button>`).join('')}<span style="width:8px"></span>
     ${[['', 'Mind'], ['hit', 'Találat'], ['miss', 'Nincs nyitott'], ['unknown', 'Ismeretlen'], ['carton', 'Dobozok'], ['line', 'Tételek'], ['park', 'Polc'], ['ident', 'Azonosítás']].map(([k, n]) => `<button class="chip" data-lr="${k}" aria-pressed="${F.lres === k}">${n}</button>`).join('')}
     <span class="meta" id="lc"></span><button class="btn sm" id="ex" style="margin-left:auto">${I('dl')}CSV</button></div>
-    <div class="card"><div class="scroll" style="max-height:none" id="lt"></div></div>`;
+    <div id="lt"></div>`;
   const fill = () => {
-    const r = flt();
+    const r = flt(), now = Date.now(), day = new Date().toDateString();
     $('#lc').textContent = r.length + ' bejegyzés';
-    setHtml($('#lt'), r.length ? `<table><thead><tr><th>Idő</th><th>Eszköz</th><th>Típus</th><th>Kód</th><th>AWB</th><th>Eredmény</th><th>Doboz</th></tr></thead><tbody>${r.slice(0, 500).map(s => `<tr><td class="mono">${fmtDT(s.ts)}</td><td>${esc(s.device)}</td><td>${esc(s.kind)}</td><td class="mono">${esc(s.raw)}</td><td>${awbCell(s)}</td><td>${resTag(s.result)}</td><td>${s.carton ? idHtml(s.carton, 0, 1) : ''}</td></tr>`).join('')}</tbody></table>` : '<div class="empty"><b>Nincs bejegyzés</b></div>');
+    const fact = (t, v, sub) => `<div><span>${t}</span><b style="font-size:22px">${v}</b>${sub ? `<div class="meta">${sub}</div>` : ''}</div>`;
+    $('#lk').innerHTML = `<div class="facts">${fact('Mozgás', r.length, 'a szűrés szerint')}
+      ${fact('Ma beszkennelt db', r.filter(s => LG.hit(s) && new Date(s.ts).toDateString() === day).length, 'találat, +1 db / szkennelés')}
+      ${fact('Érintett doboz', new Set(r.map(s => s.carton).filter(Boolean)).size)}
+      ${fact('Aktív eszköz', new Set(r.filter(s => now - new Date(s.ts) < 5 * 60e3).map(s => s.device)).size, 'az elmúlt 5 percben')}
+      ${fact('Eltérés', r.filter(s => LG.miss(s) || LG.unknown(s)).length, 'nincs nyitott / ismeretlen')}</div>`;
+    setHtml($('#lt'), r.length ? (view === 'doboz' ? logByCarton(r) : logTimeline(r)) : '<div class="card"><div class="empty"><b>Nincs bejegyzés</b></div></div>');
   };
   fill();
   $('#lq').oninput = e => { F.lq = e.target.value.trim(); fill(); };
   $('#la').onchange = e => { F.lawbf = e.target.value; fill(); };
   document.querySelectorAll('[data-lr]').forEach(b => b.onclick = () => { F.lres = b.dataset.lr; vLog(); });
-  $('#ex').onclick = () => csv([['Idő', 'Eszköz', 'Típus', 'Kód', 'SKU kulcs', 'AWB', 'Eredmény', 'Doboz']].concat(flt().map(s => [s.ts, s.device, s.kind, s.raw, s.key, scanAwbs(s).join(', '), s.result, s.carton])), 'naplo.csv');
+  document.querySelectorAll('[data-lv]').forEach(b => b.onclick = () => { F.lview = b.dataset.lv; vLog(); });
+  $('#ex').onclick = () => csv([['Idő', 'Eszköz', 'Típus', 'Kód', 'SKU kulcs', 'Termék', 'AWB', 'Eredmény', 'Doboz', 'Bent', 'Szükséges']].concat(flt().map(s => { const l = logLine(s); return [s.ts, s.device, s.kind, s.raw, s.key, s.key ? keyName(s.key) : '', scanAwbs(s).join(', '), s.result, s.carton, l ? gotX(l) : '', l ? l.qty : '']; })), 'naplo.csv');
 }
 function vDevices() {
   const dv = devStats(), now = Date.now();
