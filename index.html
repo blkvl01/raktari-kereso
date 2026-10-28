@@ -545,7 +545,7 @@ function updateSort() {
     shellView = 'sort';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
         <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Termék vagy doboz kódja"></form>
-      <div id="res"></div><div class="ver">v2.15</div>`;
+      <div id="res"></div><div class="ver">v2.16</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();
