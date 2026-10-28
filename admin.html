@@ -305,7 +305,7 @@ function attention() {
 // ---------- menu, megjelenites ----------
 function buildNav() {
   $('#nav').innerHTML = `<div class="brand"><span class="logo">${I('scan', 'lg')}</span><b>Raktári kereső</b></div>
-    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.15</div>`;
+    <div class="links"><span class="navind"></span>${SECS.map(([k, n, i]) => `<a href="#${k}" data-s="${k}">${ic(i)}${n}<span class="cnt" hidden></span></a>`).join('')}</div><div class="foot">v2.16</div>`;
 }
 function renderNav() {
   const a = attention(), o = overall(), cnt = {cartons: o.open + o.done, parked: collected().filter(x => x.full).length + orphans().length, diffs: a.unk + a.closed + a.ucart + a.amb};
@@ -612,6 +612,19 @@ function fillCartons() {
   }).join('')}</tbody></table>${cs.length > 300 ? `<div class="pg">300 / ${cs.length}</div>` : ''}` : '<div class="empty"><b>Nincs találat</b></div>');
   $('#cc').textContent = cs.length + ' doboz';
 }
+// CSV: ugyanaz a tartalom, sorrend es felirat, mint a Dobozok tablazatban (a jelenlegi szuressel). A "/" koruli szokoz azert kell,
+// hogy az Excel az "5 / 5"-ot ne alakitsa datumma. A toltottseg savja szoveges: 10 mezo + % (90% folott pipaval).
+function cartonCsvRows() {
+  const lp = lastPacks();
+  return [['Doboz', 'AWB', 'Státusz', 'Foglalta', 'Tétel', 'Db', 'Töltöttség', 'Felvette', 'Megnyitva', 'Utoljára bepakolva']].concat(cartonRows().map(c => {
+    const o = D.open.get(c), p = cartonProg(c), l0 = D.byCarton.get(c)[0], x = lp.get(c), pct = Math.round(p.ratio * 100), f = Math.min(10, Math.round(p.ratio * 10));
+    return [c, 'AWB ' + awbInfo(l0.awb).s, o ? (o.status === 'done' ? 'kész' : 'nyitott') : 'nincs felvéve', claimOf(c) || '',
+      `${p.done} / ${p.n}`, `${o ? p.got + ' / ' : ''}${p.qty}`,
+      o ? `${'█'.repeat(f)}${'░'.repeat(10 - f)} ${pct >= 90 ? '✓ ' : ''}${pct}%` : '-',
+      o && o.opened_by || '', o ? fmtDT(o.opened_at) : '',
+      x ? fmtDT(x.t) + (x.dev !== (o && o.opened_by) ? ' · ' + x.dev : '') : o ? '–' : ''];
+  }));
+}
 function vCartons() {
   M.innerHTML = `<div class="tools">
     ${[['felvett', 'Felvett'], ['nyitott', 'Nyitott'], ['kesz', 'Kész'], ['nincs', 'Nincs felvéve'], ['mind', 'Mind']].map(([k, n]) => `<button class="chip" data-st="${k}" aria-pressed="${F.cst === k}">${n}</button>`).join('')}
@@ -625,8 +638,7 @@ function vCartons() {
   $('#cq').oninput = e => { F.cq = e.target.value.trim().toUpperCase(); fillCartons(); };
   $('#caw').onchange = e => { F.cawb = e.target.value; fillCartons(); };
   $('#ct').onclick = e => { const r = e.target.closest('[data-c]'); if (r) showCarton(r.dataset.c); };
-  $('#ex').onclick = () => csv([['AWB', 'Doboz', 'Státusz', 'Kész tétel', 'Összes tétel', 'Várt db', 'Bent db', 'Töltöttség %', 'Felvette', 'Megnyitva', 'Utoljára bepakolva', 'Bepakolta']].concat((lp => cartonRows().map(c => {
-    const o = D.open.get(c), p = cartonProg(c), x = lp.get(c) || {}; return [D.byCarton.get(c)[0].awb, c, o ? o.status : 'nincs felvéve', p.done, p.n, p.qty, o ? p.got : '', o ? Math.round(p.ratio * 100) : '', o && o.opened_by, o && o.opened_at, x.t || '', x.dev || '']; }))(lastPacks())), 'dobozok.csv');
+  $('#ex').onclick = () => csv(cartonCsvRows(), 'dobozok.csv');
 }
 function showCarton(c) {
   const o = D.open.get(c), p = cartonProg(c), ls_ = D.byCarton.get(c);

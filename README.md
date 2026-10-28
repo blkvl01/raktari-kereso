@@ -32,7 +32,7 @@ A „ma” és „7 nap” nézet percenként egyszer hosszabb naplót tölt le;
 
 ## Dobozok (admin)
 
-A felvett dobozok mellett ugyanaz a %-os töltöttség jelző, mint a PDA-n (90% felett pipa, 75% felett zöld, 65–75% sárga, 65% alatt piros), a Db oszlopban a bent lévő / szükséges darab. Látszik, mikor nyitották meg a dobozt, és mikor raktak bele utoljára (ha másik eszköz, annak a neve is). A CSV-ben is benne van.
+A felvett dobozok mellett ugyanaz a %-os töltöttség jelző, mint a PDA-n (90% felett pipa, 75% felett zöld, 65–75% sárga, 65% alatt piros), a Db oszlopban a bent lévő / szükséges darab. Látszik, mikor nyitották meg a dobozt, és mikor raktak bele utoljára (ha másik eszköz, annak a neve is). A CSV export ugyanazokat az oszlopokat, feliratokat és értékeket tartalmazza, mint az oldalon látható tábla (a jelenlegi szűréssel): a töltöttség szöveges sávval és %-kal, a tétel és darab „5 / 5” alakban, a dátumok az oldalon látott formában.
 
 ## Kereső (admin)
 
