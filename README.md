@@ -14,6 +14,7 @@ Az adatok a Supabase adatbázisban vannak, a repó csak a programot tartalmazza.
      Új doboznál a legjobb jelöltet ajánlja (amelyiket a polc + ez a darab a legjobban lefedi), és a polcról is behúzza, ami belekell.
      Minden szkennelt terméknek lesz kimenetele, új kódot addig nem lehet szkennelni: **dobozba** (darabszámmal), **Félreteszem**, vagy **Nincs sehova** (nem ment semmit, a naplóban „csak keresés”).
    - **Felesleg**: egyik dobozba sem kell több belőle.
+   - Ha a termék még **nem nyitott dobozba** is kell (akár másik AWB-be), a nyitott dobozt választó és a „Ide tedd” képernyőn kiírja: „Még kell: N db” az AWB-k jelölésével (amit a félretett polc már nem fed le). Így nem marad ki a másik AWB.
    - Doboz címkét is lehet szkennelni: megnyitja vagy megmutatja a dobozt.
 2. **Félretett fül**: az **összegyűlt** doboz (minden darabja a polcon van) a következő doboz.
    Az „Összeraktam” gombbal a darabok a dobozba kerülnek, a doboz kész. Alatta a legközelebb álló dobozok és a polc tartalma.

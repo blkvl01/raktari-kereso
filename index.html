@@ -339,6 +339,11 @@ function putTargets(key) {
 }
 // ennyi darab kellhet meg ebbol a meg nem nyitott dobozokba
 const freeNeed = key => (D.byKey.get(key) || []).filter(l => !cartonStatus(l.carton)).reduce((a, l) => a + l.qty - lineGot(l), 0);
+// figyelmeztetes: a termek nem nyitott dobozokba (masik AWB-be is) meg kell, amit a polc nem fed le
+function laterHtml(key) {
+  const n = freeNeed(key) - (D.parked.get(key) || 0);
+  return n > 0 ? `<div class="hero-note"><b>Még kell: ${n} db</b> nem nyitott dobozba ${keyAwbChips(key)}</div>` : '';
+}
 const fullBoxes = () => collected().filter(x => x.full);
 const openCount = () => [...D.open.values()].filter(x => x.status === 'open').length;
 
@@ -484,6 +489,7 @@ function putHtml(r) {
       <div class="pbar" role="img" aria-label="${pct}% kész"><i style="width:${pct}%"></i></div>
       <div class="hero-note">${done ? '<b>Doboz kész</b>' : `${p.got}/${p.qty} db`}</div>
       ${r.pulled && r.pulled.length ? `<div class="hero-note"><b>Polcról is:</b> ${esc(r.pulled.join(', '))}</div>` : ''}
+      ${laterHtml(l.key)}
       <div class="hero-acts"><button class="hero-btn alt" data-undo>${ic('undo')}Visszavon</button><button class="hero-btn alt" data-showbox="${esc(c)}">${ic('list')}Tartalom</button></div></section>
     ${alts.length ? `<div class="eyebrow alt-h">Ezekbe is kell</div><div class="card">${alts.map((x, i) => `<div class="row-i ${stI(i)}"><div class="rest">${idHtml(x.c)}</div><button class="btn sm" data-move="${x.l.id}">Inkább ide</button></div>`).join('')}</div>` : ''}`;
 }
@@ -498,6 +504,7 @@ function pendHtml(r) {
         <label class="qi"><input id="pn" type="number" inputmode="numeric" min="1" max="${rem}" value="${r.n}" aria-label="Darabszám"><small>/${rem}</small></label>
         <button type="button" class="btn" data-qp aria-label="Több">${ic('plus')}</button></div>
         <button class="hero-btn">${ic('check')}Betesz</button></form>
+      ${laterHtml(r.key)}
       <div class="hero-acts"><button class="hero-btn alt" data-askpark>${ic('layers')}Félreteszem</button><button class="hero-btn alt" data-nowhere>${ic('x')}Nincs sehova</button></div></section>`;
 }
 // nincs nyitott doboza: rakerdezes
@@ -545,7 +552,7 @@ function updateSort() {
     shellView = 'sort';
     app.innerHTML = `<form class="scan" id="sf" autocomplete="off"><span class="lead">${ic('scan')}</span>
         <input id="scan" enterkeyhint="done" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Kód" placeholder="Termék vagy doboz kódja"></form>
-      <div id="res"></div><div class="ver">v2.16</div>`;
+      <div id="res"></div><div class="ver">v2.17</div>`;
     const inp = $('#scan');
     $('#sf').onsubmit = e => { e.preventDefault(); const v = inp.value; inp.value = ''; onScan(v); };
     inp.focus();
